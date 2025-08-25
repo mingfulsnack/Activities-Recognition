@@ -4,6 +4,7 @@ Tính toán calories, steps, heart rate và các metrics sức khỏe khác
 """
 
 import random
+import numpy as np
 
 class HealthMetricsCalculator:
     """Tính toán các health metrics dựa trên activity và context"""
@@ -36,10 +37,11 @@ class HealthMetricsCalculator:
         
         # For very short durations (samples), calculate proportionally but add minimum base
         if duration_hours < 0.1:  # Less than 6 minutes
-            # Add a base calorie burn even for short samples
-            base_sample_calories = 1.0  # Minimum per sample
+            # Scale calories appropriately for samples (30-second intervals)
+            # Normal BMR ~75 cal/hour = 1.25 cal/minute = 0.625 cal per 30-second sample
             proportional_calories = base_calories_per_hour * duration_hours * stress_modifier
-            total_calories = base_sample_calories + proportional_calories
+            # Minimum calories per sample should be reasonable
+            total_calories = max(0.5, proportional_calories)  # At least 0.5 cal per sample
         else:
             # Duration modifier với diminishing returns cho high-intensity activities
             if activity == 'Jogging' and duration_hours > 1:
@@ -53,20 +55,21 @@ class HealthMetricsCalculator:
         # Add some realistic variation
         variation = random.uniform(0.9, 1.1)
         
-        return max(1, int(total_calories * variation))  # Minimum 1 calorie per sample
+        return max(0.5, round(total_calories * variation, 1))  # Minimum 0.5 calorie per sample
 
     def calculate_hourly_steps(self, activity, duration_hours, energy_level=0.7):
         """
         Tính step count theo giờ dựa trên activity (cho sample nhỏ)
         """
-        # Steps per hour by activity - including Upstairs/Downstairs
+        # REALISTIC Steps per hour by activity  
+        # TARGET: 8,000-15,000 steps total per day
         activity_steps_per_hour = {
-            'Sitting': 30,       # Very minimal movement per hour
-            'Standing': 150,     # Small movements per hour  
-            'Walking': 4000,     # Normal walking pace per hour
-            'Jogging': 7500,     # Running pace per hour
-            'Upstairs': 5500,    # Climbing stairs - more effort than walking
-            'Downstairs': 4800   # Going downstairs - less effort than upstairs but more than walking
+            'Sitting': 2,        # Almost no movement per hour
+            'Standing': 10,      # Very small movements per hour  
+            'Walking': 1500,     # Conservative walking pace (was 2000)
+            'Jogging': 4800,     # Conservative running pace (was 6000)
+            'Upstairs': 400,     # Short climbing bursts (was 800)
+            'Downstairs': 300    # Short descending bursts (was 600)
         }
         
         base_steps_per_hour = activity_steps_per_hour.get(activity, 100)
@@ -137,3 +140,157 @@ class HealthMetricsCalculator:
         reaction_time = max(250, min(650, base_reaction + reaction_variation))
         
         return round(reaction_time, 1)
+
+    def calculate_mood_score(self, base_mood_factor, hour, activity, location, stress_level):
+        """
+        Tính mood score với gradual intra-day variation
+        """
+        # Base mood from daily context
+        daily_base_mood = 5 + base_mood_factor * 3
+        
+        # NATURAL DAILY MOOD RHYTHM 
+        # Morning: neutral → lunch: peak → afternoon: dip → evening: recovery
+        if hour < 7:
+            time_mood_effect = -0.5  # Early morning grogginess
+        elif hour < 12:
+            time_mood_effect = (hour - 7) * 0.2  # Gradual improvement
+        elif hour < 14:
+            time_mood_effect = 1.0  # Peak mood around lunch
+        elif hour < 16:
+            time_mood_effect = 1.0 - (hour - 14) * 0.5  # Afternoon dip
+        elif hour < 19:
+            time_mood_effect = 0.0 + (hour - 16) * 0.3  # Evening recovery
+        elif hour < 22:
+            time_mood_effect = 0.9  # Good evening mood
+        else:
+            time_mood_effect = 0.9 - (hour - 22) * 0.3  # Late night decline
+        
+        # ACTIVITY MOOD EFFECTS
+        activity_mood_effects = {
+            'Jogging': 1.2,      # Exercise improves mood
+            'Walking': 0.5,      # Light activity is good
+            'Standing': 0.1,     # Neutral
+            'Sitting': -0.2,     # Sedentary can lower mood
+            'Upstairs': 0.3,     # Small accomplishment feeling
+            'Downstairs': 0.1    # Neutral
+        }
+        
+        activity_effect = activity_mood_effects.get(activity, 0)
+        
+        # LOCATION MOOD EFFECTS
+        location_mood_effects = {
+            'outdoor': 0.8,      # Nature/fresh air boost
+            'gym': 0.6,          # Accomplishment from exercise
+            'social': 1.0,       # Social interaction boost  
+            'home': 0.3,         # Comfort but neutral
+            'work': -0.3,        # Work stress
+            'commute': -0.5      # Transportation stress
+        }
+        
+        location_effect = location_mood_effects.get(location, 0)
+        
+        # STRESS IMPACT ON MOOD
+        stress_effect = -(stress_level - 4) * 0.3  # Higher stress → lower mood
+        
+        # COMBINE ALL EFFECTS with realistic constraints
+        final_mood = daily_base_mood + time_mood_effect + activity_effect + location_effect + stress_effect
+        
+        # Add small random variation (much smaller than before)
+        final_mood += random.uniform(-0.1, 0.1)
+        
+        # Ensure mood stays in realistic range [1-10]
+        final_mood = max(1, min(10, final_mood))
+        
+        return round(final_mood, 1)
+
+    def calculate_realistic_stress_level(self, base_stress, hour, activity, location, 
+                                       heart_rate, sleep_quality, work_intensity, 
+                                       previous_stress_levels=None):
+        """
+        Tính stress level realistic cho stress prediction modeling
+        """
+        # DAILY STRESS RHYTHM - office worker pattern
+        if hour < 7:
+            time_stress_modifier = -1.0  # Early morning calm
+        elif hour < 9:
+            time_stress_modifier = 0.5   # Getting ready stress
+        elif hour < 12:
+            time_stress_modifier = 1.0   # Work morning pressure
+        elif hour < 13:
+            time_stress_modifier = 0.0   # Lunch break relief
+        elif hour < 17:
+            time_stress_modifier = 1.5   # Afternoon work peak stress
+        elif hour < 18:
+            time_stress_modifier = 0.8   # End of work transition
+        elif hour < 20:
+            time_stress_modifier = -0.5  # Evening relaxation
+        else:
+            time_stress_modifier = -0.8  # Night calm
+        
+        # ACTIVITY-BASED STRESS
+        activity_stress = {
+            'Sitting': 0.2,      # Sedentary can increase stress
+            'Standing': 0.1,     # Neutral
+            'Walking': -0.3,     # Light exercise reduces stress
+            'Jogging': -0.8,     # Exercise significantly reduces stress
+            'Upstairs': 0.4,     # Physical exertion increases momentary stress
+            'Downstairs': 0.2    # Less stressful than upstairs
+        }.get(activity, 0)
+        
+        # LOCATION-BASED STRESS
+        location_stress = {
+            'work': 1.5,         # Work environment stress
+            'commute': 1.0,      # Transportation stress
+            'home': -0.5,        # Home comfort reduces stress
+            'outdoor': -0.7,     # Nature reduces stress
+            'gym': -0.3,         # Exercise environment moderately good
+            'social': -0.4       # Social support reduces stress
+        }.get(location, 0)
+        
+        # WORK INTENSITY MODIFIER
+        work_stress_modifier = {
+            'low': -0.5,
+            'normal': 0,
+            'high': 1.5,
+            'none': -1.0  # Weekend/no work
+        }.get(work_intensity, 0)
+        
+        # PHYSIOLOGICAL INDICATORS
+        # Heart rate correlation with stress
+        if heart_rate > 85:
+            hr_stress = 1.0
+        elif heart_rate > 75:
+            hr_stress = 0.5
+        elif heart_rate < 60:
+            hr_stress = -0.3
+        else:
+            hr_stress = 0
+        
+        # Sleep quality impact
+        sleep_stress = (1 - sleep_quality) * 2  # Poor sleep -> high stress
+        
+        # STRESS MOMENTUM - stress tends to persist
+        momentum_effect = 0
+        if previous_stress_levels and len(previous_stress_levels) > 0:
+            recent_avg = np.mean(previous_stress_levels[-3:])  # Last 3 samples
+            momentum_effect = (recent_avg - 4) * 0.3  # Trend continuation
+        
+        # COMBINE ALL FACTORS
+        calculated_stress = (
+            base_stress +
+            time_stress_modifier +
+            activity_stress +
+            location_stress +
+            work_stress_modifier +
+            hr_stress +
+            sleep_stress +
+            momentum_effect
+        )
+        
+        # Add small realistic variation
+        calculated_stress += random.uniform(-0.2, 0.2)
+        
+        # Ensure stress level stays in realistic range [1-9]
+        calculated_stress = max(1, min(9, calculated_stress))
+        
+        return round(calculated_stress, 1)

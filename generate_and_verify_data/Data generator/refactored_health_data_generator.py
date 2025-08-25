@@ -198,9 +198,18 @@ class RefactoredHealthDataGenerator:
             
             print(f"    📋 Generated {len(schedule)} activity segments for improved HAR compatibility")
             
-            # CUMULATIVE TRACKING cho mỗi ngày
-            daily_cumulative_calories = 0
-            daily_cumulative_steps = 0
+            # CUMULATIVE TRACKING - Continue from previous day
+            if day_num == 0:
+                daily_cumulative_calories = 0
+                daily_cumulative_steps = 0
+            else:
+                # Get last values from previous day
+                if len(all_data) > 0:
+                    daily_cumulative_calories = all_data[-1]['Calories'] 
+                    daily_cumulative_steps = all_data[-1]['Step_Count']
+                else:
+                    daily_cumulative_calories = 0
+                    daily_cumulative_steps = 0
             
             for slot in schedule:
                 duration = slot['time_end'] - slot['time_start']
@@ -215,18 +224,35 @@ class RefactoredHealthDataGenerator:
                 )
                 
                 for i, accel in enumerate(accelerometer_data):
-                    # Calculate exact timestamp
-                    hours = slot['time_start'] + (i / len(accelerometer_data)) * duration
-                    minutes = int((hours % 1) * 60)
-                    seconds = int(((hours % 1) * 60 % 1) * 60) + accel['time_offset']
-                    
-                    if hours >= 24:
-                        sample_datetime = current_date + timedelta(days=1, hours=hours-24, minutes=minutes, seconds=seconds)
+                    # CONSISTENT TIMESTAMP: Ensure proper 30-second intervals
+                    if len(accelerometer_data) > 1:
+                        # Calculate exact time within slot with consistent intervals
+                        time_fraction = i / (len(accelerometer_data) - 1) if len(accelerometer_data) > 1 else 0
+                        hours = slot['time_start'] + time_fraction * duration
                     else:
-                        sample_datetime = current_date + timedelta(hours=hours, minutes=minutes, seconds=seconds)
+                        hours = slot['time_start']
                     
-                    # Current stress level with slot modifier
-                    current_stress = max(1, min(10, base_metrics['Stress_Level'] + slot['stress_modifier']))
+                    # Handle day boundary properly
+                    if hours >= 24:
+                        sample_datetime = current_date + timedelta(days=1, hours=hours-24)
+                    else:
+                        sample_datetime = current_date + timedelta(hours=hours)
+                    
+                    # Add small random variation (max ±2 seconds) for realism
+                    seconds_offset = random.uniform(-2, 2)
+                    sample_datetime += timedelta(seconds=seconds_offset)
+                    
+                    # REALISTIC STRESS CALCULATION for prediction modeling
+                    previous_stress_levels = []
+                    if len(all_data) > 0:
+                        # Get last few stress levels for momentum calculation
+                        previous_stress_levels = [d['Stress_Level'] for d in all_data[-10:]]
+                    
+                    current_stress = self.metrics_calculator.calculate_realistic_stress_level(
+                        base_metrics['Stress_Level'], hours, slot['activity'], slot['location'],
+                        base_metrics['Heart_Rate_Baseline'], base_metrics['Sleep_Quality'],
+                        day_context['work_intensity'], previous_stress_levels
+                    )
                     
                     # UPDATE BEHAVIORAL STATE
                     current_data = {'stress_level': current_stress}
@@ -241,6 +267,12 @@ class RefactoredHealthDataGenerator:
                     current_hr = self.metrics_calculator.calculate_heart_rate(
                         slot['activity'], current_stress, 
                         base_metrics['Heart_Rate_Baseline'], base_metrics['Energy_Level']
+                    )
+                    
+                    # REALISTIC MOOD SCORE với intra-day variation
+                    mood_score = self.metrics_calculator.calculate_mood_score(
+                        day_context['mood_factor'], hours, slot['activity'], 
+                        slot['location'], current_stress
                     )
                     
                     # REALISTIC CALORIES AND STEPS TRACKING
@@ -275,8 +307,18 @@ class RefactoredHealthDataGenerator:
                         'gym': random.uniform(45, 75)
                     }.get(slot['location'], 45)
                     
+                    # STABLE WEATHER PER DAY với gradual changes
                     daily_weather = self.schedule_generator.get_daily_noise_factor(current_date)['weather_mood']
-                    weather_condition = max(0, min(10, 5.5 + daily_weather * 12 + random.uniform(-1.2, 1.2)))
+                    # Base weather for the day (stable)
+                    daily_base_weather = 5.5 + daily_weather * 3  # Reduced variation
+                    
+                    # Gradual intra-day changes (morning cool, noon hot, evening cool)
+                    time_of_day_effect = 0.5 * np.sin((hours - 6) * np.pi / 12)  # -0.5 to +0.5
+                    
+                    # Small random variation (much smaller than before)
+                    weather_condition = max(0, min(10, 
+                        daily_base_weather + time_of_day_effect + random.uniform(-0.3, 0.3)
+                    ))
                     
                     # FORCE ACTIVITY CONSISTENCY for better HAR accuracy
                     consistent_activity = slot['activity']  # Use planned activity consistently
@@ -303,7 +345,7 @@ class RefactoredHealthDataGenerator:
                         'Reaction_Time': base_metrics['Reaction_Time'],
                         'Sleep_Quality': base_metrics['Sleep_Quality'],
                         'Energy_Level': base_metrics['Energy_Level'],
-                        'Mood_Score': base_metrics['Mood_Score'],
+                        'Mood_Score': mood_score,
                         'Exercise_Minutes': base_metrics['Exercise_Minutes'],
                         'Social_Interaction': base_metrics['Social_Interaction'],
                         
@@ -317,7 +359,7 @@ class RefactoredHealthDataGenerator:
         
         # Create DataFrame and save
         df = pd.DataFrame(all_data)
-        filename = f'data/refactored_health_data_{days}days.csv'
+        filename = f'data/realistic_location_health_data_{days}days.csv'
         df.to_csv(filename, index=False)
         
         print(f"\n🎉 === REFACTORED DATASET SUMMARY ===")
