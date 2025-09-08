@@ -359,7 +359,7 @@ class RefactoredHealthDataGenerator:
         
         # Create DataFrame and save
         df = pd.DataFrame(all_data)
-        filename = f'data/realistic_location_health_data_{days}days.csv'
+        filename = f'data/improved_accelerometer_health_data_{days}days.csv'
         df.to_csv(filename, index=False)
         
         print(f"\n🎉 === REFACTORED DATASET SUMMARY ===")

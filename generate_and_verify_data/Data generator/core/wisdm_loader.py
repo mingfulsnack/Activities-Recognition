@@ -97,37 +97,37 @@ class WisdmDataLoader:
         """
         import numpy as np
         
-        # More accurate physics-based patterns based on WISDM analysis
+         # IMPROVED patterns based on real WISDM analysis
         patterns = {
-            'Sitting': {
-                'x_base': 0, 'x_var': 0.8, 
-                'y_base': 0, 'y_var': 0.8,
-                'z_base': 9.8, 'z_var': 0.5
-            },
-            'Standing': {
-                'x_base': 0, 'x_var': 1.5,
-                'y_base': 0, 'y_var': 1.0,
-                'z_base': 9.5, 'z_var': 1.0
-            },
-            'Walking': {
-                'x_base': 0, 'x_var': 4.0,
-                'y_base': 10, 'y_var': 5.0,
-                'z_base': 1, 'z_var': 3.0
+            'Downstairs': {
+                'x_base': 0.472, 'x_var': 4.956, 
+                'y_base': 8.600, 'y_var': 4.905,
+                'z_base': 0.684, 'z_var': 3.707
             },
             'Jogging': {
-                'x_base': 0, 'x_var': 6.0,
-                'y_base': 12, 'y_var': 8.0,
-                'z_base': 2, 'z_var': 4.0
+                'x_base': -0.219, 'x_var': 9.168, 
+                'y_base': 5.434, 'y_var': 9.217,
+                'z_base': -0.150, 'z_var': 5.847
+            },
+            'Sitting': {
+                'x_base': 1.856, 'x_var': 4.759, 
+                'y_base': 1.853, 'y_var': 3.258,
+                'z_base': 6.560, 'z_var': 3.736
+            },
+            'Standing': {
+                'x_base': -1.178, 'x_var': 3.235, 
+                'y_base': 8.987, 'y_var': 1.265,
+                'z_base': 0.580, 'z_var': 1.377
             },
             'Upstairs': {
-                'x_base': 0, 'x_var': 4.5,
-                'y_base': 8, 'y_var': 4.0,
-                'z_base': 1, 'z_var': 3.5
+                'x_base': 0.381, 'x_var': 5.495, 
+                'y_base': 8.112, 'y_var': 4.891,
+                'z_base': 0.324, 'z_var': 3.568
             },
-            'Downstairs': {
-                'x_base': 0, 'x_var': 4.0,
-                'y_base': 8, 'y_var': 4.0,
-                'z_base': 1, 'z_var': 3.0
+            'Walking': {
+                'x_base': 1.546, 'x_var': 5.826, 
+                'y_base': 8.695, 'y_var': 5.022,
+                'z_base': -0.112, 'z_var': 4.019
             }
         }
         
