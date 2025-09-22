@@ -240,7 +240,7 @@ def main():
     print("🔍 === HAR MODEL VALIDATION FOR GENERATED ACCELEROMETER DATA ===")
     
     # Load generated dataset
-    data_path = 'data/improved_accelerometer_health_data_30days.csv'
+    data_path = 'data/quota_balanced_health_data_30days.csv'
     print(f"📂 Loading data from: {data_path}")
     
     try:

@@ -110,6 +110,17 @@ class DailyScheduleGenerator:
             wake_up = random.uniform(6.5, 8.0)   # Weekday dậy sớm
             sleep_time = random.uniform(22.5, 23.5)  # Ngủ sớm hơn
         
+        # DAILY ACTIVITY QUOTAS for 85-95% HAR accuracy
+        target_quotas = {
+            'Sitting': 4.8,      # Max 4.8h (was 8.3h)
+            'Walking': 4.0,      # Min 4.0h (was 4.5h) 
+            'Standing': 3.2,     # Min 3.2h (was 2.1h)
+            'Jogging': 1.6,      # Min 1.6h (was 0.6h)
+            'Upstairs': 1.3,     # Min 1.3h (was 0.2h)
+            'Downstairs': 1.1    # Min 1.1h (was 0.2h)
+        }
+        daily_quotas = {activity: 0.0 for activity in target_quotas.keys()}
+        
         day_context = {
             'sleep_quality': max(0.25, min(1.0, 0.8 + daily_noise['sleep_quality'])),
             'energy_level': max(0.2, min(1.0, 0.7 + daily_noise['energy'] + event_modifier * 0.3)),
@@ -121,7 +132,9 @@ class DailyScheduleGenerator:
             'exercise_intensity': random.uniform(0.4, 1.2) if day_of_week in self.daily_patterns['exercise_days'] else 0,
             'life_event': life_event,
             'activity_diversity_factor': random.uniform(0.6, 1.4),  # Yếu tố đa dạng hoạt động
-            'restlessness': random.uniform(0.3, 1.2)  # Mức độ không thể ngồi yên
+            'restlessness': random.uniform(0.3, 1.2),  # Mức độ không thể ngồi yên
+            'target_quotas': target_quotas,
+            'daily_quotas': daily_quotas
         }
         
         schedule = []
@@ -132,24 +145,12 @@ class DailyScheduleGenerator:
         
         # ENHANCED: Generate more diverse and realistic schedule
         while current_time < sleep_time - 0.5:
-            # ANTI-SITTING LOGIC: Force activity breaks if sitting too long
-            if previous_activity == 'Sitting' and sitting_accumulation > continuous_sitting_limit:
-                # Force a movement activity
-                movement_activities = ['Standing', 'Walking', 'Upstairs', 'Downstairs']
-                # Only allow jogging during appropriate times
-                if (day_context['exercise_intensity'] > 0 and random.random() < 0.2 and
-                    ((6 <= current_time <= 8) or (17 <= current_time <= 19)) and
-                    (is_weekend or not (9 <= current_time <= 17))):  # Not during work hours
-                    movement_activities.append('Jogging')
-                
-                activity = random.choice(movement_activities)
-                sitting_accumulation = 0  # Reset sitting counter
-                continuous_sitting_limit = random.uniform(45, 90)  # New limit for next sitting session
-            else:
-                # CONTEXTUAL ACTIVITY SELECTION with enhanced diversity
-                activity = self._choose_enhanced_contextual_activity(
-                    current_time, is_weekend, day_context, previous_activity
-                )
+            # QUOTA-AWARE ACTIVITY SELECTION for balanced distribution
+            remaining_time = sleep_time - current_time
+            activity = self._choose_quota_aware_activity(
+                current_time, is_weekend, day_context, previous_activity, 
+                sitting_accumulation, continuous_sitting_limit, remaining_time
+            )
             
             # FINAL JOGGING RESTRICTION CHECK
             if activity == 'Jogging':
@@ -172,6 +173,9 @@ class DailyScheduleGenerator:
                 sitting_accumulation += duration_minutes
             else:
                 sitting_accumulation = 0
+                
+            # UPDATE DAILY QUOTAS
+            day_context['daily_quotas'][activity] += duration_minutes / 60.0  # Convert to hours
             
             # Determine location and stress
             location = self._determine_enhanced_location(activity, current_time, is_weekend, day_context)
@@ -410,50 +414,177 @@ class DailyScheduleGenerator:
         
         return chosen_activity
 
+    def _choose_quota_aware_activity(self, current_time, is_weekend, day_context, previous_activity, 
+                                   sitting_accumulation, continuous_sitting_limit, remaining_time):
+        """
+        QUOTA-AWARE ACTIVITY SELECTION for balanced HAR distribution
+        Prioritizes activities that need quota fulfillment
+        """
+        target_quotas = day_context['target_quotas']
+        daily_quotas = day_context['daily_quotas']
+        
+        # 1. ANTI-SITTING LOGIC: Force breaks if sitting too long
+        if previous_activity == 'Sitting' and sitting_accumulation > continuous_sitting_limit:
+            movement_activities = ['Walking', 'Standing', 'Upstairs', 'Downstairs']
+            
+            # Prioritize activities that need quota
+            quota_needed = []
+            for activity in movement_activities:
+                if daily_quotas[activity] < target_quotas[activity]:
+                    quota_needed.append(activity)
+            
+            if quota_needed:
+                # Choose from activities that need quota
+                if 'Jogging' in target_quotas and daily_quotas['Jogging'] < target_quotas['Jogging']:
+                    # Allow jogging during appropriate times
+                    if ((6 <= current_time <= 8) or (17 <= current_time <= 19)) and \
+                       (is_weekend or not (9 <= current_time <= 17)):
+                        quota_needed.append('Jogging')
+                
+                activity = random.choice(quota_needed)
+            else:
+                activity = random.choice(movement_activities)
+            
+            return activity
+        
+        # 2. QUOTA PRIORITY SYSTEM
+        priorities = []
+        
+        # Check quota urgency (how far behind we are)
+        for activity, target in target_quotas.items():
+            current = daily_quotas[activity]
+            deficit = target - current
+            
+            if deficit > 0:
+                # Calculate urgency based on deficit and remaining time
+                urgency = deficit / remaining_time if remaining_time > 0 else deficit * 10
+                priorities.append((activity, urgency, deficit))
+        
+        # Sort by urgency (highest first)
+        priorities.sort(key=lambda x: x[1], reverse=True)
+        
+        # 3. SITTING LIMITATION: Don't exceed sitting quota
+        sitting_quota_left = target_quotas['Sitting'] - daily_quotas['Sitting']
+        
+        # 4. CONTEXTUAL FILTERING
+        hour = current_time
+        available_activities = []
+        
+        # Time-based availability
+        if is_weekend:
+            if 6 <= hour <= 9:
+                base_activities = ['Sitting', 'Walking', 'Standing']
+                if daily_quotas['Jogging'] < target_quotas['Jogging']:
+                    base_activities.append('Jogging')
+            elif 9 <= hour <= 18:
+                base_activities = ['Sitting', 'Walking', 'Standing', 'Upstairs', 'Downstairs']
+                if 12 <= hour <= 16:  # Afternoon exercise
+                    base_activities.append('Jogging')
+            else:
+                base_activities = ['Sitting', 'Walking', 'Standing']
+        else:  # Weekday
+            if 6 <= hour <= 8:
+                base_activities = ['Sitting', 'Walking', 'Standing']
+                if daily_quotas['Jogging'] < target_quotas['Jogging']:
+                    base_activities.append('Jogging')
+            elif 8 <= hour <= 9:  # Commute
+                base_activities = ['Walking', 'Standing', 'Upstairs', 'Downstairs']
+            elif 9 <= hour <= 17:  # Work
+                base_activities = ['Sitting', 'Walking', 'Standing', 'Upstairs', 'Downstairs']
+            elif 17 <= hour <= 19:  # After work
+                base_activities = ['Walking', 'Standing', 'Upstairs', 'Downstairs']
+                if daily_quotas['Jogging'] < target_quotas['Jogging']:
+                    base_activities.append('Jogging')
+            else:  # Evening
+                base_activities = ['Sitting', 'Walking', 'Standing']
+        
+        # 5. QUOTA-BASED SELECTION
+        candidate_scores = {}
+        
+        for activity in base_activities:
+            score = 1.0  # Base score
+            
+            # Quota priority bonus
+            for act, urgency, deficit in priorities:
+                if act == activity and deficit > 0:
+                    score += urgency * 10  # High bonus for urgent activities
+                    break
+            
+            # Sitting limitation penalty
+            if activity == 'Sitting':
+                if sitting_quota_left <= 0.5:  # Less than 30 minutes left
+                    score *= 0.1  # Heavy penalty
+                elif daily_quotas['Sitting'] > target_quotas['Sitting'] * 0.8:  # Near quota
+                    score *= 0.3  # Moderate penalty
+            
+            # Context bonuses
+            if activity == previous_activity and previous_activity != 'Sitting':
+                score *= 0.7  # Slight penalty for repetition (except sitting)
+            
+            # Time-appropriate bonuses
+            if activity == 'Jogging' and ((6 <= hour <= 8) or (17 <= hour <= 19)):
+                score *= 1.5
+            elif activity in ['Upstairs', 'Downstairs'] and 9 <= hour <= 17:
+                score *= 1.3  # Work stairs
+            
+            candidate_scores[activity] = score
+        
+        # 6. WEIGHTED SELECTION
+        activities = list(candidate_scores.keys())
+        weights = list(candidate_scores.values())
+        
+        if sum(weights) == 0:
+            return 'Sitting'  # Fallback
+        
+        weights = [w/sum(weights) for w in weights]
+        chosen = np.random.choice(activities, p=weights)
+        
+        return chosen
+
     def _get_enhanced_activity_duration(self, activity, current_time, is_weekend, day_context, previous_activity):
         """
         Enhanced duration calculation với realistic variations và context awareness
         """
         hour = current_time
         
-        # BASE DURATIONS với realistic ranges
+        # ENHANCED DURATIONS for HAR quotas and better segment generation
         base_durations = {
             'Sitting': {
-                'work_hours': (20, 60),      # 20-60 min during work
-                'evening': (30, 90),         # 30-90 min in evening
-                'weekend': (25, 75),         # 25-75 min on weekend
-                'default': (15, 45)
+                'work_hours': (15, 40),      # 15-40 min (REDUCED from 20-60)
+                'evening': (20, 50),         # 20-50 min (REDUCED from 30-90) 
+                'weekend': (15, 40),         # 15-40 min (REDUCED from 25-75)
+                'default': (10, 30)          # 10-30 min (REDUCED from 15-45)
             },
             'Standing': {
-                'work_hours': (5, 25),       # 5-25 min during work
-                'meeting': (10, 45),         # 10-45 min for meetings
-                'break': (3, 15),            # 3-15 min for breaks
-                'exercise': (5, 20),         # 5-20 min exercise standing
-                'default': (5, 20)
+                'work_hours': (10, 35),      # 10-35 min (INCREASED from 5-25)
+                'meeting': (15, 60),         # 15-60 min (INCREASED from 10-45)
+                'break': (8, 20),            # 8-20 min (INCREASED from 3-15)
+                'exercise': (10, 30),        # 10-30 min (INCREASED from 5-20)
+                'default': (10, 25)          # 10-25 min (INCREASED from 5-20)
             },
             'Walking': {
-                'commute': (15, 45),         # 15-45 min commuting
-                'lunch': (20, 60),           # 20-60 min lunch walk
-                'exercise': (30, 90),        # 30-90 min exercise walk
-                'casual': (10, 30),          # 10-30 min casual walk
-                'default': (15, 35)
+                'commute': (20, 60),         # 20-60 min (INCREASED from 15-45)
+                'lunch': (25, 75),           # 25-75 min (INCREASED from 20-60)
+                'exercise': (40, 120),       # 40-120 min (INCREASED from 30-90)
+                'casual': (15, 45),          # 15-45 min (INCREASED from 10-30)
+                'default': (20, 50)          # 20-50 min (INCREASED from 15-35)
             },
             'Jogging': {
-                'morning': (20, 60),         # 20-60 min morning jog
-                'evening': (25, 75),         # 25-75 min evening jog
-                'weekend': (30, 120),        # 30-120 min weekend jog
-                'default': (20, 45)
+                'morning': (30, 75),         # 30-75 min (INCREASED from 20-60)
+                'evening': (35, 90),         # 35-90 min (INCREASED from 25-75)
+                'weekend': (40, 150),        # 40-150 min (INCREASED from 30-120)
+                'default': (30, 60)          # 30-60 min (INCREASED from 20-45)
             },
             'Upstairs': {
-                'single_trip': (1, 3),       # 1-3 min single trip
-                'multiple_trips': (3, 10),   # 3-10 min multiple trips
-                'exercise': (5, 15),         # 5-15 min stair exercise
-                'default': (2, 8)
+                'single_trip': (5, 12),      # 5-12 min (MAJOR INCREASE from 1-3)
+                'multiple_trips': (8, 20),   # 8-20 min (INCREASED from 3-10)
+                'exercise': (15, 35),        # 15-35 min (INCREASED from 5-15)
+                'default': (8, 18)           # 8-18 min (MAJOR INCREASE from 2-8)
             },
             'Downstairs': {
-                'single_trip': (1, 3),       # 1-3 min single trip
-                'multiple_trips': (3, 10),   # 3-10 min multiple trips
-                'default': (2, 6)
+                'single_trip': (5, 12),      # 5-12 min (MAJOR INCREASE from 1-3)
+                'multiple_trips': (8, 20),   # 8-20 min (INCREASED from 3-10)
+                'default': (8, 15)           # 8-15 min (MAJOR INCREASE from 2-6)
             }
         }
         
