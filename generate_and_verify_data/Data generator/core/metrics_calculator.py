@@ -5,12 +5,14 @@ Tính toán calories, steps, heart rate và các metrics sức khỏe khác
 
 import random
 import numpy as np
+from .context_stress_modifier import ContextStressModifier
 
 class HealthMetricsCalculator:
     """Tính toán các health metrics dựa trên activity và context"""
     
     def __init__(self, user_profile):
         self.user_profile = user_profile
+        self.context_modifier = ContextStressModifier()
 
     def calculate_hourly_calories(self, activity, duration_hours, stress_level, base_metabolic_rate=None):
         """
@@ -205,11 +207,13 @@ class HealthMetricsCalculator:
 
     def calculate_realistic_stress_level(self, base_stress, hour, activity, location, 
                                        heart_rate, sleep_quality, work_intensity, 
-                                       previous_stress_levels=None):
+                                       previous_stress_levels=None, sleep_duration=7.0,
+                                       is_weekend=False):
         """
-        Tính stress level realistic cho stress prediction modeling
+        Tính stress level realistic với context-aware variations
+        Đảm bảo cùng activity nhưng khác context → stress khác
         """
-        # DAILY STRESS RHYTHM - office worker pattern
+        # DAILY STRESS RHYTHM - office worker pattern (base)
         if hour < 7:
             time_stress_modifier = -1.0  # Early morning calm
         elif hour < 9:
@@ -227,7 +231,7 @@ class HealthMetricsCalculator:
         else:
             time_stress_modifier = -0.8  # Night calm
         
-        # ACTIVITY-BASED STRESS
+        # ACTIVITY-BASED STRESS (base - will be modified by context)
         activity_stress = {
             'Sitting': 0.2,      # Sedentary can increase stress
             'Standing': 0.1,     # Neutral
@@ -237,7 +241,7 @@ class HealthMetricsCalculator:
             'Downstairs': 0.2    # Less stressful than upstairs
         }.get(activity, 0)
         
-        # LOCATION-BASED STRESS
+        # LOCATION-BASED STRESS (base)
         location_stress = {
             'work': 1.5,         # Work environment stress
             'commute': 1.0,      # Transportation stress
@@ -275,8 +279,8 @@ class HealthMetricsCalculator:
             recent_avg = np.mean(previous_stress_levels[-3:])  # Last 3 samples
             momentum_effect = (recent_avg - 4) * 0.3  # Trend continuation
         
-        # COMBINE ALL FACTORS
-        calculated_stress = (
+        # COMBINE BASE FACTORS
+        base_calculated_stress = (
             base_stress +
             time_stress_modifier +
             activity_stress +
@@ -288,9 +292,21 @@ class HealthMetricsCalculator:
         )
         
         # Add small realistic variation
-        calculated_stress += random.uniform(-0.2, 0.2)
+        base_calculated_stress += random.uniform(-0.2, 0.2)
+        
+        # APPLY CONTEXT-AWARE VARIATIONS
+        # This creates variations where same activity + different context = different stress
+        final_stress = self.context_modifier.apply_context_variations(
+            base_stress=base_calculated_stress,
+            activity=activity,
+            location=location,
+            hour=hour,
+            work_intensity=work_intensity,
+            is_weekend=is_weekend,
+            sleep_duration=sleep_duration
+        )
         
         # Ensure stress level stays in realistic range [1-9]
-        calculated_stress = max(1, min(9, calculated_stress))
+        final_stress = max(1, min(9, final_stress))
         
-        return round(calculated_stress, 1)
+        return round(final_stress, 1)

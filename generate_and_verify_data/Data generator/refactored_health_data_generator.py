@@ -166,9 +166,9 @@ class RefactoredHealthDataGenerator:
         
         return data
 
-    def generate_enhanced_dataset(self, start_date_str="2024-01-01", days=30):
+    def generate_enhanced_dataset(self, start_date_str="2024-01-01", days=30, filename=None):
         """
-        Tạo dataset với SEQUENTIAL BEHAVIORAL DATA để hỗ trợ LSTM
+        Tạo dataset với SEQUENTIAL BEHAVIORAL DATA và context-aware stress
         """
         print(f"🚀 Tạo REFACTORED HEALTH DATASET từ {start_date_str} trong {days} ngày...")
         print("🧠 Với support cho LSTM sequences: Screen Time, Phone Usage, Social Interaction")
@@ -242,16 +242,21 @@ class RefactoredHealthDataGenerator:
                     seconds_offset = random.uniform(-2, 2)
                     sample_datetime += timedelta(seconds=seconds_offset)
                     
-                    # REALISTIC STRESS CALCULATION for prediction modeling
+                    # REALISTIC STRESS CALCULATION with context-aware variations
                     previous_stress_levels = []
                     if len(all_data) > 0:
                         # Get last few stress levels for momentum calculation
                         previous_stress_levels = [d['Stress_Level'] for d in all_data[-10:]]
                     
+                    # Add is_weekend and sleep_duration for context-stress variations
+                    is_weekend = current_date.weekday() >= 5
+                    
                     current_stress = self.metrics_calculator.calculate_realistic_stress_level(
                         base_metrics['Stress_Level'], hours, slot['activity'], slot['location'],
                         base_metrics['Heart_Rate_Baseline'], base_metrics['Sleep_Quality'],
-                        day_context['work_intensity'], previous_stress_levels
+                        day_context['work_intensity'], previous_stress_levels,
+                        sleep_duration=base_metrics['Sleep_Duration'],
+                        is_weekend=is_weekend
                     )
                     
                     # UPDATE BEHAVIORAL STATE
@@ -359,8 +364,8 @@ class RefactoredHealthDataGenerator:
         
         # Create DataFrame and save
         df = pd.DataFrame(all_data)
-        filename = f'data/quota_balanced_health_data_{days}days.csv'
-        df.to_csv(filename, index=False)
+        output_filename = filename if filename else f'data/quota_balanced_health_data_{days}days.csv'
+        df.to_csv(output_filename, index=False)
         
         print(f"\n🎉 === REFACTORED DATASET SUMMARY ===")
         print(f"📈 Tổng số records: {len(df):,}")
@@ -424,20 +429,20 @@ class RefactoredHealthDataGenerator:
 
 
 if __name__ == "__main__":
-    print("=== REFACTORED HEALTH DATASET GENERATOR ===")
-    print("🔧 Modular architecture với 6 core modules")
-    print("🎯 Improved maintainability và extensibility")
+    print("=== REFACTORED HEALTH DATASET GENERATOR V2 ===")
+    print("🔧 Modular architecture with context-aware stress")
+    print("🎯 Improved maintainability and extensibility")
     print("🧠 Enhanced LSTM sequence modeling")
     
     generator = RefactoredHealthDataGenerator()
     
-    print("\nBắt đầu tạo refactored dataset...")
-    df = generator.generate_enhanced_dataset("2024-01-01", 30)
+    print("\nBắt đầu tạo refactored dataset v2...")
+    df = generator.generate_enhanced_dataset("2024-01-01", 30, filename='data/quota_balanced_health_data_30days_v2.csv')
     
-    print("\n📋 === SAMPLE REFACTORED DATA ===")
+    print("\n📋 === SAMPLE REFACTORED DATA V2 ===")
     # Show key improvements in sample
-    sample_cols = ['Timestamp', 'Activity', 'Calories', 'Step_Count', 'Accelerometer_X', 'Accelerometer_Y', 'Accelerometer_Z']
-    sample_data = df[sample_cols].head(10)
+    sample_cols = ['Timestamp', 'Activity', 'Stress_Level', 'Location']
+    sample_data = df[sample_cols].head(20)
     print(sample_data)
     
     print(f"\n🎯 Refactored Dataset ready với improved architecture!")
