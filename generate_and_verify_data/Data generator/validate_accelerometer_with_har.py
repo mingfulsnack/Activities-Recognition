@@ -239,9 +239,11 @@ def main():
     """Main validation function"""
     print("🔍 === HAR MODEL VALIDATION FOR GENERATED ACCELEROMETER DATA ===")
     
-    # Load generated dataset
-    data_path = 'data/quota_balanced_health_data_30days.csv'
+    # Load generated dataset - USE 23-FIELD VERSION (has accelerometer + optimized features)
+    data_path = 'data/optimized_health_data_23features.csv'
     print(f"📂 Loading data from: {data_path}")
+    print(f"ℹ️  Using 23-field dataset (Accelerometer X,Y,Z + 20 optimized features)")
+    print(f"ℹ️  This is the RECOMMENDED dataset for research")
     
     try:
         df = pd.read_csv(data_path)
