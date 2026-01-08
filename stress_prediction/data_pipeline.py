@@ -46,15 +46,15 @@ class StressDataPipeline:
             DataFrame with loaded data
         """
         print(f"Loading data from {data_file}...")
-        df = pd.read_csv(data_file)
-        print(f"Loaded {len(df)} samples with {len(df.columns)} columns")
+        self.df = pd.read_csv(data_file)
+        print(f"Loaded {len(self.df)} samples with {len(self.df.columns)} columns")
         
         # Verify all required columns exist
-        missing_cols = set(self.feature_columns + [self.target_column]) - set(df.columns)
+        missing_cols = set(self.feature_columns + [self.target_column]) - set(self.df.columns)
         if missing_cols:
             raise ValueError(f"Missing columns in data: {missing_cols}")
         
-        return df
+        return self.df
     
     def preprocess_features(self, df, fit=True):
         """
