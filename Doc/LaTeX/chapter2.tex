@@ -1,0 +1,434 @@
+% ============================================================
+% CHƯƠNG 2: CƠ SỞ LÝ THUYẾT
+% ============================================================
+
+\chapter{Cơ sở lý thuyết}
+\label{chap:theory}
+
+\section{Mạng nơ ron nhân tạo}
+\label{sec:ann}
+Mạng nơ ron hay mạng nơ ron nhân tạo là một trong những công nghệ cốt lõi trong học sâu. Cái tên mạng nơ ron được lấy cảm hứng từ bộ não của con người, mô phỏng cách mà các nơ ron sinh học truyền tín hiệu tới nhau. Mạng nơ-ron là một hệ thống các nút kết nối với nhau, qua đó xử lý và truyền tải thông tin để giải quyết các bài toán phức tạp như nhận dạng hình ảnh, xử lý ngôn ngữ tự nhiên, và nhiều ứng dụng khác. Mạng nơ ron bao gồm các lớp chứa các nút, bao gồm ba loại lớp là lớp đầu vào, lớp ẩn, lớp đầu ra như trong hình:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chapter2/figs/no-ron.png}
+    \caption{Hình minh hoạ về mạng nơ ron nhân tạo}
+    \label{fig:no-ron}
+\end{figure}
+
+Các nơ ron tại một lớp khác lớp đầu vào thực hiện tổng hợp các đầu ra của các nơ ron của lớp trước đó thành đầu vào của lớp đứng sau hoặc đầu ra của mạng nơ ron. Mỗi nơ ron sẽ có liên kết tới các nơ ron của lớp trước đó bởi các trọng số. Quá trình tổng hợp của các tế bào của một lớp được biểu diễn bởi công thức: 
+\begin{equation}
+    z = Wx+b
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $x \in R^{d}$ là véc tơ biểu diễn các đầu ra của lớp trước
+    \item $W \in R^{d' \times d}$ là ma trận trọng số của lớp hiện tại
+    \item $b \in R^{d'}$ là véc tơ độ lệch
+\end{itemize}
+
+Tuy nhiên, nếu công thức của mạng nơ ron chỉ như vậy thì khi thêm nhiều lớp nơ ron nhân tạo vào mô hình sẽ không có tác dụng vì mạng nơ ron nhiều lớp như vậy cũng sẽ chỉ giống như mạng nơ ron bao gồm một lớp bởi vì đó chỉ là một phép toán tuyến tính và các phép toán tuyến tính có thể được tổng hợp thành một phép toán tuyến tính bởi tính chất phân phối của phép nhân ma trận. Vì vậy, trước khi truyền trạng thái ẩn cho lớp tiếp theo, trạng thái ấn sẽ được đưa qua một hàm kích hoạt phi tuyến để  tránh vấn đề nêu trên và mô hình cũng sẽ mô hình hóa được các quan hệ phức tạp hơn và công thức của mạng nơ ron nhân tạo trở thành như sau:
+\begin{equation}
+    z^l = W^l \alpha^{l-1} + b^l
+\end{equation}
+\begin{equation}
+    a^l = f(z^l)
+\end{equation}
+Trong đó: 
+\begin{itemize}
+    \item $f$ là hàm kích hoạt phi tuyến
+    \item $\alpha^l$ là véc tơ đầu ra của lớp thứ $l$
+    \item $z^l$ là véc tơ trung gian của lớp thứ l
+\end{itemize}
+Một số hàm kích hoạt phi tuyến thông dụng có thể kể đến là sigmoid, tanh, ReLU, LeakyReLU.
+
+% ============================================================
+
+\section{RNN, LSTM, Bi-LSTM, GRU}
+\label{sec:rnn_family}
+
+\subsection{RNN}
+\label{subsec:rnn}
+Mạng nơ ron hồi quy (RNN) là một loại mạng nơ ron được thiết kế đặc biệt để xử lý dữ liệu chuỗi hoặc chuỗi thời gian. Lý do là các mạng nơ ron nhân tạo thông thường chỉ có khả năng xử lý các đầu vào dưới dạng véc tơ có kích thước cố định, trong khi dữ liệu chuỗi thường có độ dài thay đổi. Mạng nơ ron RNN đã được áp dụng trong nhiều lĩnh vực quan trọng như dịch máy tự động, xử lý ngôn ngữ tự nhiên, nhận diện giọng nói, dự đoán biến động thị trường chứng khoán và nhiều ứng dụng khác. Điểm nổi bật của RNN nằm ở cơ chế bộ nhớ: mạng tiếp nhận thông tin từ đầu vào hiện tại và liên tục cập nhật và lưu trữ tất cả thông tin vào một véc tơ duy nhất. Véc tơ này đóng vai trò như một bộ nhớ, chứa toàn bộ thông tin quan trọng của chuỗi dữ liệu, giúp mạng học và xử lý ngữ cảnh trong dữ liệu một cách hiệu quả. Hình \ref{fig:rnn} biểu diễn kiến trúc của mô hình mạng nơ ron hồi quy:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chapter2/figs/rnn.png}
+    \caption{Hình minh họa mô hình mạng nơ ron hồi quy RNN \citep{7965918}}
+    \label{fig:rnn}
+\end{figure}
+
+Dữ liệu đầu vào của mô hình là:
+\begin{equation}
+    X = {x^{(1)}, x^{(2)}, \dots, x^{(n)}}    
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $n$ là độ dài của chuỗi
+    \item Tại vị trí thứ $t$, đầu ra của RNN sẽ được tính toán từ đầu vào của thời điểm $t$, $x^{(t)}$ và trạng thái của bộ nhớ của thời điểm trước đó $h^{(t-1)}$
+\end{itemize}
+
+Công thức của mô hình RNN được mô tả bằng các công thức sau:
+\begin{equation}
+    h^{(t)} = tanh(Ux^{(t)} + Wh^{(t-1)}+b)
+\end{equation}
+\begin{equation}
+    o^{(t)} = Vh^{(t)}+b_{o}
+\end{equation}
+
+Có nhiều cách để sử dụng các véc tơ đầu ra tại từng thời điểm trong mạng nơ ron hồi quy RNN. Ví dụ, trong các bài toán như sinh văn bản hoặc dịch máy tự động, vector đầu ra tại thời điểm cuối cùng thường được dùng để biểu diễn toàn bộ chuỗi đầu vào, từ đó tạo ra chuỗi dự đoán. Ngược lại, trong các bài toán nhận diện thực thể, các véc tơ đầu ra tại từng thời điểm được sử dụng để gán nhãn cho từng từ, xác định thuộc loại nào trong các nhãn B, I, O.
+
+Tuy nhiên, mô hình mạng nơ ron hồi quy RNN truyền thống gặp phải một số vấn đề như tiêu biến đạo hàm (vanishing gradient) và bùng nổ đạo hàm (exploding gradient) khi xử lý các chuỗi đầu vào có độ dài lớn \cite{bengio1994learning}. Những vấn đề này khiến RNN khó ghi nhớ thông tin ở xa trong chuỗi, dẫn đến việc thông tin này bị lãng quên hoặc chỉ đóng góp rất ít, thậm chí không đóng góp vào quá trình dự đoán.
+
+Để khắc phục những hạn chế trên, kiến trúc mạng nơ ron LSTM (Long Short-Term Memory) đã được đề xuất như một giải pháp hiệu quả \cite{hochreiter1997lstm}. LSTM giúp RNN có khả năng ghi nhớ thông tin ở xa và cải thiện hiệu suất khi làm việc với các chuỗi dữ liệu dài.
+
+\subsection{LSTM}
+\label{subsec:lstm}
+Kiến trúc mạng nơ ron LSTM được thiết kế với các cổng đặc biệt, giúp mô hình tự học cách ghi nhớ hoặc loại bỏ các thông tin cần thiết cho từng nhiệm vụ cụ thể. Các cổng này bao gồm: \textbf{cổng quên}, \textbf{cổng đầu vào} và \textbf{cổng đầu ra}, mỗi cổng đảm nhận một vai trò riêng trong việc kiểm soát luồng thông tin bên trong mạng.
+
+Nhờ sự phối hợp của các cổng này, mạng nơ ron LSTM có khả năng xử lý và lưu giữ thông tin quan trọng từ dữ liệu đầu vào, đồng thời loại bỏ những thông tin không cần thiết, đảm bảo hiệu suất cao trong các bài toán liên quan đến chuỗi dữ liệu dài. Cấu trúc và hoạt động của LSTM thường được minh họa trực quan qua các sơ đồ biểu diễn \ref{fig:lstm}:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chapter2/figs/lstm.png}
+    \caption{Hình minh họa mô hình mạng LSTM trong \citep{Mu2020HourlyAD}}
+    \label{fig:lstm}
+\end{figure}
+
+Thành phần đầu tiên của mô hình mạng nơ ron LSTM là \textbf{cổng quên (Forget Gate)} được sử dụng để loại bỏ các thông tin không còn cần thiết đối với nhiệm vụ hiện tại của mô hình. Cổng này sử dụng vector đầu vào $x_t$ và trạng thái ấn trước đó là $h_{t-1}$ để tính toán véc tơ $f_t$, từ đó biểu diễn mức độ quan trọng của từ nơ ron trong trạng thái bộ nhớ trươc đó $S_{t-1}$. Thông qua công quên, mô hình mạng nơ ron LSTM quyết định giữa lại hoặc bỏ các thông tin từ trạng thái bộ nhớ cũ. Công thức tính $f_t$ của công quên được biểu diễn như sau:
+
+\begin{equation}
+    f_{t}=\sigma(U_{f}x_{t}+V_{f}h_{t-1}+b_f)
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $\sigma$ là hàm kích hoạt sigmoid, dùng để đưa $f_{t}$ về khoảng giá trị $[0, 1]$. Mỗi phần từ của $f_t$ đại diện cho mức độ quan trọng của từng nơ ron trong $S_{t-1}$. Nếu giá trị gần $1$, thông tin tương ứng sẽ được giữ lại, ngược lại nếu giá trị gần $0$ thông tin tương ứng sẽ bị loại bỏ
+    \item $U_{f}$, $V_{f}$ là các ma trận trọng số tương ứng với véc tơ đầu vào $x_t$ và trạng thái ẩn $h_{t-1}$. Chúng học được thông qua quá trình huấn luyện, giúp mô hình tối ưu hóa việc xác định thông tin cần giữ hoặc bỏ.
+    \item $b_f$ là véc tơ độ lệch (bias), giúp tăng tính linh hoạt cho quá trình học
+\end{itemize}
+
+Tóm lại, cổng quên giúp mô hình mạng nơ ron LSTM lựa chọn thông tin nào cần bỏ qua, từ đó làm giảm độ phức tạp và tập trung hơn vào các thông tin hữu ích cho nhiệm vụ hiện tại.
+
+Tiếp theo, \textbf{cổng đầu vào (Input Gate)} được sử dụng để chọn lọc và tiếp thu thông tin từ vector đầu vào $x_{t}$ và trạng thái ẩn ở vị trí $h_{t-1}$. Cổng này quyết định thông tin nào từ đầu vào sẽ được thêm vào trạng thái bộ nhớ hiện tại. Tương tự như cổng quên, cổng đầu vào cũng sử dụng các ma trận trọng số $U_{i}$, $V_{i}$ và véc tơ độ lệch $b_i$ để học cách xử lý dữ liệu đầu vào. Công thức tính toán cổng đầu vào được biểu diễn như sau:
+
+\begin{equation}
+    i_{t}=\sigma(U_{i}x_{t}+V_{i}h_{t-1}+b_{i})
+\end{equation} 
+Trong đó:
+\begin{itemize}
+    \item $\sigma$ là hàm tuyến tính sigmoid để đưa $i_{t}$ về khoảng $[0, 1]$ để biểu diễn độ quan trọng của các thông tin của đầu vào tại thời điểm hiện tại và từ đó mô hình sẽ tiếp thu các thông tin quan trọng cho nhiệm vụ của mô hình.
+    \item $U_{i}$, $V_{i}$ là các ma trận trọng số tương ứng với véc tơ đầu vào $x_t$ và trạng thái ẩn $h_{t-1}$. Chúng học được thông qua quá trình huấn luyện, giúp mô hình tối ưu hóa việc xác định thông tin cần giữ hoặc bỏ.
+    \item $b_i$ là véc tơ độ lệch (bias), giúp tăng tính linh hoạt cho quá trình học
+\end{itemize}
+
+Ngoài ra, để trích xuất thông tin từ đầu vào $x_t$ và trạng thái ẩn $h_{t-1}$, mô hình mạng nơ ron LSTM sử dụng một hàm tính toán:
+\begin{equation}
+    g_{t}=tanh(U_{c}x_{t}+V_{c}h_{t-1}+b_{c})
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $U_{c}$, $V_{c}$, $b_{c}$ là các ma trận trọng số và véc tơ độ lệch của mô hình để tính toán thông tin mô hình sẽ tiếp thu khi đầu vào là $x_{t}$ và trạng thái ẩn vị trí trước đó là $h_{t-1}$
+    \item $b_c$ là vector độ lệch, giúp tăng tính linh hoạt của mô hình
+    \item $tanh$ là hàm kích hoạt đưa các giá trị của $g_t$ về khoảng $[-1,1]$ từ đó biểu diễn thông tin cần thêm vào trạng thái bộ nhớ
+\end{itemize}
+Kết hợp hai công thức trên, cổng đầu vào quyết định mức độ tiếp thu thông tin mới từ đầu vào hiện tại, đóng vai trò quan trọng trong việc cập nhật trạng thái bộ nhớ của mô hình.
+
+Trạng thái bộ nhớ tại thời điểm $t$ được tính toán bằng cách kết hợp thông tin từ cổng quên $f_{t}$ và cổng đầu vào $i_{t}$. Cổng quên quyết định loại bỏ các thông tin không còn cần thiết từ trạng thái bộ nhớ trước đó ($S_{t-1}$), trong khi cổng đầu vào xác định những thông tin quan trọng tại thời điểm hiện tại sẽ được cập nhật vào trạng thái bộ nhớ. Quá trình này được mô tả bởi công thức sau:
+\begin{equation}
+    S_{t}=f_{t} \bigodot S_{t-1} + i_{t} \bigodot g_{t}
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $S_t$ là trạng thái bộ nhớ tại thời điểm $t$
+    \item $S_{t-1}$ là trạng thái bộ nhớ tại thời điểm trước đó $t-1$
+    \item $f_t$ là véc tơ của công quên, xác định mức độ duy trì thông tin từ $S_{t-1}$
+    \item $i_t$ véc tơ của công đầu vào, xác định mức độ tiếp thu thông tin mới
+    \item $g_t$ thông tin mới được trích xuất từ $x_t$ và $h_{t-1}$ bằng công thức đã nêu trước đó
+    \item $\bigodot$ phép nhân từng phần tử (Hadamard product), đảm bảo mỗi thành phần được điều chỉnh độc lập theo độ quan trọng tương ứng
+\end{itemize}
+
+Công thức trên cho thấy cách LSTM sử dụng linh hoạt cả thông tin quá khứ và thông tin mới, giúp mô hình duy trì và cập nhật trạng thái bộ nhớ một cách hiệu quả.
+
+\textbf{Cổng đầu ra (Output Gate)} là thành phần cuối cùng trong kiến trúc LSTM, có vai trò chắt lọc thông tin từ trạng thái bộ nhớ tại thời điểm hiện tại $S_t$ để tạo ra trạng thái ẩn $h_t$. Tương tự như các cổng khác, cổng đầu ra sử dụng các ma trận trọng số $U_o$ và $V_o$ và vector độ lệch $b_o$ để học cách xử lý dữ liệu. Quá trình tính toán được mô tả qua hai công thức sau:
+\begin{equation}
+    o_{t} = \sigma (U_{o}x_{t}+V_{o}h_{t-1}+b_{o})
+\end{equation}
+\begin{equation}
+    h_{t} = o_{t} \bigodot tanh(S_{t})
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $o_t$ véc tơ của cổng đầu ra, xác định mức độ thông tin từ $S_t$ được truyền sang trạng thái ẩn $h_t$
+    \item $h_t$ trạng thái ẩn tại thời điểm $t$, biểu diễn thông tin quan trọng được mô hình mạng nơ ron LSTM cung cấp cho bước tiếp theo hoặc đầu ra cuối cùng
+    \item $\sigma$ hàm kích hoạt sigmoid đưa $o_t$ về khoảng $[0,1]$
+    \item $tanh$ hàm kích hoạt, điều chỉnh trạng thái bộ nhớ $S_t$ về khoảng $[-1,1]$.
+    \item $\bigodot$ phép nhân từng phần tử (Hadamard product), đảm bảo mỗi thành phần được điều chỉnh độc lập theo độ quan trọng tương ứng
+\end{itemize}
+
+\subsection{Bidirectional LSTM (Bi-LSTM)}
+\label{subsec:bilstm}
+
+Mạng LSTM tiêu chuẩn xử lý chuỗi đầu vào theo một chiều duy nhất — từ trái sang phải (theo thứ tự thời gian). Điều này có nghĩa là tại thời điểm $t$, trạng thái ẩn $h_t$ chỉ chứa thông tin từ các bước trước đó ($x^{(1)}, x^{(2)}, \dots, x^{(t)}$). Tuy nhiên, trong nhiều bài toán thực tế — đặc biệt là phân tích chuỗi thời gian cảm biến — ngữ cảnh từ các bước \textit{sau} thời điểm $t$ cũng có thể cung cấp thông tin hữu ích cho dự đoán.
+
+Kiến trúc Bidirectional LSTM (Bi-LSTM) \cite{schuster1997bidirectional} giải quyết hạn chế này bằng cách sử dụng \textbf{hai lớp LSTM song song}:
+\begin{itemize}
+    \item \textbf{Forward LSTM} ($\overrightarrow{\text{LSTM}}$): xử lý chuỗi theo chiều thuận — từ $x^{(1)}$ đến $x^{(n)}$, tạo ra chuỗi trạng thái ẩn $\overrightarrow{h_1}, \overrightarrow{h_2}, \dots, \overrightarrow{h_n}$.
+    \item \textbf{Backward LSTM} ($\overleftarrow{\text{LSTM}}$): xử lý chuỗi theo chiều ngược — từ $x^{(n)}$ đến $x^{(1)}$, tạo ra chuỗi trạng thái ẩn $\overleftarrow{h_n}, \overleftarrow{h_{n-1}}, \dots, \overleftarrow{h_1}$.
+\end{itemize}
+
+Tại mỗi thời điểm $t$, đầu ra của Bi-LSTM được tạo bằng cách nối (concatenate) hai trạng thái ẩn:
+\begin{equation}
+    h_t = [\overrightarrow{h_t} \; ; \; \overleftarrow{h_t}]
+\end{equation}
+
+Trong đó $[\ ;\ ]$ ký hiệu phép nối vector. Nếu mỗi LSTM có $d$ units, thì $h_t \in \mathbb{R}^{2d}$. Nhờ cơ chế hai chiều, tại mỗi thời điểm, mô hình có thể đồng thời tận dụng thông tin từ \textit{quá khứ} (forward) và \textit{tương lai} (backward), cung cấp biểu diễn ngữ cảnh phong phú hơn so với LSTM đơn chiều.
+
+\textbf{Stacked Bi-LSTM.} Để học các đặc trưng ở nhiều mức trừu tượng khác nhau, nhiều lớp Bi-LSTM có thể được xếp chồng lên nhau (stacking). Trong kiến trúc Stacked Bi-LSTM, đầu ra $h_t^{(l)}$ của lớp thứ $l$ trở thành đầu vào cho lớp thứ $l+1$:
+\begin{equation}
+    h_t^{(l)} = \text{Bi-LSTM}^{(l)}(h_t^{(l-1)})
+\end{equation}
+với $h_t^{(0)} = x_t$ là đầu vào gốc. Lớp Bi-LSTM đầu tiên học các đặc trưng cấp thấp (biến động tức thời, xu hướng ngắn hạn), trong khi các lớp cao hơn tổng hợp thành các đặc trưng trừu tượng hơn (mẫu hành vi dài hạn, tương tác giữa các đặc trưng).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{chapter2/figs/bilstm.png}
+    \caption{Kiến trúc Stacked Bidirectional LSTM với 2 lớp Bi-LSTM}
+    \label{fig:bilstm}
+\end{figure}
+
+Trong khóa luận này, mô hình đề xuất sử dụng kiến trúc Stacked Bi-LSTM gồm 2 lớp Bi-LSTM nối tiếp, tiếp nối bởi lớp Dense để dự đoán mức stress liên tục. Kiến trúc này cho phép mô hình vừa nắm bắt các phụ thuộc thời gian hai chiều, vừa học được biểu diễn đặc trưng phức tạp nhờ cấu trúc nhiều lớp.
+
+\subsection{GRU (Gated Recurrent Unit)}
+\label{subsec:gru}
+
+Gated Recurrent Unit (GRU) là một biến thể đơn giản hơn của LSTM, được đề xuất bởi Cho et al. \cite{cho2014learning}. Thay vì sử dụng ba cổng và trạng thái bộ nhớ riêng biệt $S_t$ như LSTM, GRU chỉ sử dụng \textbf{hai cổng} — \textbf{cổng cập nhật} (update gate) và \textbf{cổng đặt lại} (reset gate) — và hợp nhất trạng thái bộ nhớ với trạng thái ẩn thành một vector duy nhất $h_t$.
+
+\textbf{Cổng đặt lại (Reset Gate)} quyết định mức độ bỏ qua trạng thái ẩn trước đó khi tính toán trạng thái ứng viên mới:
+\begin{equation}
+    r_t = \sigma(W_r x_t + U_r h_{t-1} + b_r)
+\end{equation}
+
+\textbf{Cổng cập nhật (Update Gate)} kiểm soát tỷ lệ giữ lại thông tin cũ và tiếp nhận thông tin mới — đóng vai trò tương đương kết hợp cổng quên và cổng đầu vào trong LSTM:
+\begin{equation}
+    z_t = \sigma(W_z x_t + U_z h_{t-1} + b_z)
+\end{equation}
+
+\textbf{Trạng thái ẩn ứng viên} được tính dựa trên đầu vào hiện tại và phần trạng thái ẩn trước đó được lọc bởi cổng đặt lại:
+\begin{equation}
+    \tilde{h}_t = tanh(W_h x_t + U_h (r_t \bigodot h_{t-1}) + b_h)
+\end{equation}
+
+\textbf{Trạng thái ẩn cuối cùng} là tổ hợp tuyến tính giữa trạng thái cũ và trạng thái ứng viên, được điều khiển bởi cổng cập nhật:
+\begin{equation}
+    h_t = (1 - z_t) \bigodot h_{t-1} + z_t \bigodot \tilde{h}_t
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $r_t$ là vector cổng đặt lại, $z_t$ là vector cổng cập nhật, cả hai đều thuộc $[0, 1]$
+    \item $\tilde{h}_t$ là trạng thái ẩn ứng viên
+    \item $W_r, W_z, W_h$ và $U_r, U_z, U_h$ là các ma trận trọng số; $b_r, b_z, b_h$ là các vector độ lệch
+    \item $\bigodot$ là phép nhân từng phần tử (Hadamard product)
+\end{itemize}
+
+So với LSTM, GRU có ít tham số hơn (2 cổng thay vì 3, không có trạng thái bộ nhớ riêng biệt), do đó huấn luyện nhanh hơn và ít tốn bộ nhớ hơn. Nghiên cứu thực nghiệm cho thấy hiệu năng của GRU và LSTM thường tương đương trên nhiều bài toán, tuy nhiên LSTM có xu hướng vượt trội hơn trên các chuỗi dữ liệu rất dài nhờ cơ chế bộ nhớ phức tạp hơn \cite{chung2014empirical}. Trong khóa luận này, Stacked Bi-GRU được sử dụng như một trong các kiến trúc so sánh với mô hình Stacked Bi-LSTM đề xuất.
+
+% ============================================================
+
+\section{Nhận dạng hoạt động con người (HAR)}
+\label{sec:har}
+
+\subsection{Khái niệm và ứng dụng}
+
+Nhận dạng hoạt động con người (Human Activity Recognition — HAR) là bài toán tự động xác định loại hoạt động mà một người đang thực hiện dựa trên dữ liệu thu thập từ cảm biến. Các nguồn dữ liệu phổ biến bao gồm cảm biến quán tính (gia tốc kế, con quay hồi chuyển) được tích hợp trong smartphone hoặc thiết bị đeo, và dữ liệu thị giác từ camera.
+
+HAR có ứng dụng rộng rãi trong nhiều lĩnh vực: theo dõi sức khỏe người cao tuổi (phát hiện ngã), hỗ trợ phục hồi chức năng, theo dõi hoạt động thể thao, hệ thống nhà thông minh, và đặc biệt — trong bối cảnh khóa luận này — cung cấp thông tin ngữ cảnh hoạt động cho hệ thống dự đoán stress.
+
+\subsection{Tập dữ liệu WISDM v1.1}
+
+Tập dữ liệu WISDM (Wireless Sensor Data Mining) v1.1 \cite{kwapisz2010activity} là một trong những tập dữ liệu chuẩn trong lĩnh vực HAR, được thu thập từ gia tốc kế của smartphone. Các đặc điểm chính:
+
+\begin{itemize}
+    \item \textbf{Quy mô:} 1.098.207 bản ghi từ 36 người dùng
+    \item \textbf{Tần số lấy mẫu:} 20 Hz (20 mẫu/giây)
+    \item \textbf{Định dạng:} mỗi bản ghi gồm [user\_id, activity, timestamp, x, y, z], trong đó x, y, z là giá trị gia tốc trên 3 trục
+    \item \textbf{6 hoạt động:} Walking (38.6\%), Jogging (31.2\%), Upstairs (11.2\%), Downstairs (9.1\%), Sitting (5.5\%), Standing (4.4\%)
+\end{itemize}
+
+Sự mất cân bằng giữa các lớp (Walking chiếm 38.6\% trong khi Standing chỉ 4.4\%) là một thách thức cần được xử lý trong quá trình huấn luyện mô hình.
+
+\subsection{Phương pháp HAR dựa trên Deep Learning}
+
+Các phương pháp truyền thống cho HAR sử dụng trích xuất đặc trưng thủ công (hand-crafted features) kết hợp với các bộ phân loại như SVM, Decision Tree, Random Forest. Tuy nhiên, các phương pháp này phụ thuộc nhiều vào kiến thức chuyên gia và thường không tổng quát hóa tốt.
+
+Các kiến trúc Deep Learning đã chứng minh hiệu quả vượt trội cho bài toán HAR nhờ khả năng tự động học đặc trưng từ dữ liệu thô. CNN có thể trích xuất các mẫu cục bộ (local patterns) trong chuỗi cảm biến, trong khi RNN/LSTM khai thác được phụ thuộc thời gian giữa các bước trong chuỗi \cite{ordonez2016deep}. Bi-LSTM kết hợp ưu điểm của LSTM với khả năng xử lý hai chiều, đặc biệt phù hợp khi ngữ cảnh xung quanh thời điểm hiện tại đều có ý nghĩa — ví dụ, chuyển đổi giữa ``đứng'' và ``đi bộ'' được nhận dạng chính xác hơn khi mô hình nhìn được cả bước trước và bước sau.
+
+% ============================================================
+
+\section{Multilayer Perceptron (MLP)}
+\label{sec:mlp}
+
+Multilayer Perceptron (MLP) — hay mạng nơ ron truyền thẳng (feedforward neural network) — là kiến trúc mạng nơ ron cơ bản nhất, bao gồm lớp đầu vào, một hoặc nhiều lớp ẩn với hàm kích hoạt phi tuyến (thường là ReLU), và lớp đầu ra. Không giống như các kiến trúc hồi quy (RNN, LSTM, GRU), MLP xử lý mỗi đầu vào một cách độc lập mà không xét đến thứ tự thời gian.
+
+Đối với dữ liệu chuỗi thời gian, MLP nhận đầu vào là vector phẳng (flattened) của toàn bộ chuỗi — tức là nối tất cả các bước thời gian thành một vector duy nhất. Kiến trúc xử lý có dạng:
+\begin{equation}
+    \hat{y} = f_L(W_L \cdot f_{L-1}(\dots f_1(W_1 \cdot \text{flatten}(X) + b_1) \dots) + b_L)
+\end{equation}
+trong đó $X$ là ma trận chuỗi đầu vào, $\text{flatten}(\cdot)$ chuyển $X$ thành vector một chiều, $L$ là số lớp.
+
+MLP có ưu điểm là đơn giản, huấn luyện nhanh, nhưng có nhược điểm lớn khi áp dụng cho chuỗi thời gian: (1) không nắm bắt được quan hệ tuần tự giữa các bước thời gian; (2) số lượng tham số tăng nhanh khi độ dài chuỗi lớn. Trong khóa luận này, MLP được sử dụng như \textit{baseline đơn giản nhất} để đánh giá mức cải thiện khi chuyển sang các kiến trúc hồi quy.
+
+% ============================================================
+
+\section{Các kỹ thuật huấn luyện và tối ưu}
+\label{sec:training_techniques}
+
+\subsection{Hàm mất mát}
+
+Đối với bài toán hồi quy (dự đoán giá trị liên tục), hàm mất mát được sử dụng phổ biến nhất là \textbf{Mean Squared Error (MSE)}:
+\begin{equation}
+    \text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2
+\end{equation}
+trong đó $y_i$ là giá trị thực, $\hat{y}_i$ là giá trị dự đoán, và $n$ là số lượng mẫu. MSE phạt mạnh các dự đoán sai lệch lớn (do phép bình phương), khuyến khích mô hình tối thiểu hóa các lỗi cực đoan.
+
+\subsection{Bộ tối ưu Adam}
+
+Adam (Adaptive Moment Estimation) \cite{kingma2014adam} là bộ tối ưu kết hợp ưu điểm của hai phương pháp: Momentum (sử dụng trung bình động bậc nhất $m_t$ của gradient) và RMSProp (sử dụng trung bình động bậc hai $v_t$ để điều chỉnh learning rate riêng cho từng tham số). Cập nhật tham số tại bước $t$:
+\begin{equation}
+    m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t, \quad v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2
+\end{equation}
+\begin{equation}
+    \hat{m}_t = \frac{m_t}{1-\beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1-\beta_2^t}
+\end{equation}
+\begin{equation}
+    \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t
+\end{equation}
+trong đó $g_t = \nabla_\theta \mathcal{L}(\theta_t)$ là gradient, $\eta$ là learning rate, $\beta_1 = 0.9$, $\beta_2 = 0.999$, $\epsilon = 10^{-8}$ là các giá trị mặc định. Adam được sử dụng rộng rãi trong huấn luyện mạng nơ ron sâu nhờ hội tụ nhanh và ổn định trên nhiều bài toán khác nhau.
+
+\subsection{Các kỹ thuật chính quy hóa}
+
+Để tránh hiện tượng quá khớp (overfitting) — khi mô hình học quá tốt trên tập huấn luyện nhưng tổng quát hóa kém trên dữ liệu mới — khóa luận sử dụng ba kỹ thuật chính quy hóa:
+
+\textbf{Dropout} \cite{srivastava2014dropout}: Trong quá trình huấn luyện, tại mỗi bước, một tỷ lệ $p$ (dropout rate) các nơ ron được ngẫu nhiên tắt (đặt đầu ra bằng 0). Kỹ thuật này buộc mạng không được phụ thuộc vào bất kỳ nơ ron đơn lẻ nào, từ đó tăng tính tổng quát. Khi đánh giá (inference), tất cả nơ ron đều hoạt động nhưng đầu ra được nhân với $(1-p)$ để bù trừ.
+
+\textbf{Early Stopping}: Theo dõi giá trị loss trên tập validation sau mỗi epoch. Nếu validation loss không giảm sau $k$ epochs liên tiếp (gọi là \textit{patience}), quá trình huấn luyện sẽ dừng sớm và khôi phục trọng số từ epoch có validation loss tốt nhất. Kỹ thuật này tránh việc mô hình tiếp tục học các nhiễu (noise) trong tập huấn luyện.
+
+\textbf{ReduceLROnPlateau}: Tự động giảm learning rate theo hệ số $\gamma$ (thường $\gamma = 0.5$) khi validation loss không cải thiện sau một số epochs nhất định. Việc giảm learning rate giúp mô hình hội tụ tốt hơn khi đã gần vùng tối ưu.
+
+\subsection{Tối ưu siêu tham số bằng Bayesian Optimization}
+
+Hiệu năng của mô hình Deep Learning phụ thuộc đáng kể vào việc lựa chọn siêu tham số (hyperparameters) — bao gồm số lượng units, tỷ lệ dropout, learning rate, batch size, v.v. Khác với Grid Search (thử tất cả tổ hợp) và Random Search \cite{bergstra2012random} (thử ngẫu nhiên), Bayesian Optimization \cite{snoek2012practical} sử dụng mô hình xác suất (surrogate model) để dự đoán hiệu năng tại các điểm chưa thử, từ đó chọn điểm thử tiếp theo một cách thông minh hơn.
+
+Quy trình gồm ba bước lặp: (1) xây dựng mô hình surrogate (thường dùng Gaussian Process) từ các kết quả đã thử; (2) tính toán hàm acquisition (Expected Improvement) để chọn bộ siêu tham số tiếp theo; (3) huấn luyện mô hình với bộ siêu tham số đó và cập nhật surrogate. So với Grid Search, Bayesian Optimization tiết kiệm đáng kể chi phí tính toán — đặc biệt khi không gian siêu tham số lớn.
+
+% ============================================================
+
+\section{Các chỉ số đánh giá}
+\label{sec:metrics}
+
+\subsection{Chỉ số cho bài toán hồi quy (Dự đoán stress)}
+
+\textbf{MAE (Mean Absolute Error)} — Sai số tuyệt đối trung bình:
+\begin{equation}
+    \text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
+\end{equation}
+MAE cho biết trung bình mô hình sai lệch bao nhiêu đơn vị so với giá trị thực. Trên thang stress 1--9, MAE = 0.5 có nghĩa là dự đoán trung bình lệch nửa điểm.
+
+\textbf{RMSE (Root Mean Squared Error)} — Căn bậc hai sai số bình phương trung bình:
+\begin{equation}
+    \text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}
+\end{equation}
+RMSE có cùng đơn vị với biến mục tiêu và nhạy với các lỗi lớn (outlier) hơn MAE do phép bình phương.
+
+\textbf{$R^2$ (Coefficient of Determination)} — Hệ số xác định:
+\begin{equation}
+    R^2 = 1 - \frac{\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{n}(y_i - \bar{y})^2}
+\end{equation}
+$R^2$ biểu thị tỷ lệ phương sai của biến mục tiêu được giải thích bởi mô hình. $R^2 = 1$ là hoàn hảo, $R^2 = 0$ tương đương dự đoán bằng giá trị trung bình. Đây là chỉ số tổng hợp quan trọng nhất, phản ánh mức độ phù hợp tổng thể của mô hình.
+
+\subsection{Chỉ số cho bài toán phân loại (HAR)}
+
+Đối với module nhận dạng hoạt động (phân loại 6 lớp), các chỉ số đánh giá bao gồm:
+
+\textbf{Accuracy} — Tỷ lệ dự đoán đúng:
+\begin{equation}
+    \text{Accuracy} = \frac{\text{Số mẫu dự đoán đúng}}{\text{Tổng số mẫu}}
+\end{equation}
+
+\textbf{Precision, Recall, F1-score} — Đánh giá chi tiết cho từng lớp:
+\begin{equation}
+    \text{Precision} = \frac{TP}{TP + FP}, \quad \text{Recall} = \frac{TP}{TP + FN}
+\end{equation}
+\begin{equation}
+    \text{F1} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+\end{equation}
+trong đó TP (True Positives), FP (False Positives), FN (False Negatives) được tính riêng cho từng lớp. F1-score là trung bình điều hòa của Precision và Recall, đặc biệt hữu ích khi phân bố các lớp không đồng đều.
+
+% ============================================================
+
+\section{Phương pháp phân tích tầm quan trọng đặc trưng}
+\label{sec:feature_importance}
+
+Phân tích tầm quan trọng đặc trưng (Feature Importance Analysis) giúp xác định đặc trưng nào đóng góp nhiều nhất vào dự đoán của mô hình, từ đó tăng tính giải thích (interpretability) và hỗ trợ lựa chọn đặc trưng. Khóa luận sử dụng bốn phương pháp:
+
+\subsection{Permutation Importance}
+
+Phương pháp này đo mức giảm hiệu năng mô hình khi giá trị của một đặc trưng bị xáo trộn ngẫu nhiên (permuted) \cite{fisher2019permutation}. Nếu đặc trưng quan trọng, việc xáo trộn sẽ làm hiệu năng giảm mạnh. Ưu điểm: không phụ thuộc vào loại mô hình (model-agnostic), dễ hiểu. Nhược điểm: kết quả có thể thiên lệch khi các đặc trưng tương quan cao với nhau.
+
+\subsection{SHAP (SHapley Additive exPlanations)}
+
+SHAP \cite{lundberg2017shap} dựa trên lý thuyết trò chơi (game theory) của Shapley, tính toán đóng góp biên (marginal contribution) của mỗi đặc trưng vào dự đoán. Giá trị SHAP $\phi_j$ của đặc trưng $j$ được tính bằng trung bình có trọng số của đóng góp biên qua tất cả các tổ hợp đặc trưng có thể:
+\begin{equation}
+    \phi_j = \sum_{S \subseteq N \setminus \{j\}} \frac{|S|!(|N|-|S|-1)!}{|N|!} [f(S \cup \{j\}) - f(S)]
+\end{equation}
+trong đó $N$ là tập tất cả đặc trưng, $S$ là tập con không chứa $j$, $f(S)$ là dự đoán khi chỉ dùng các đặc trưng trong $S$. SHAP đảm bảo tính công bằng và nhất quán trong phân bổ đóng góp.
+
+\subsection{Correlation Analysis}
+
+Phương pháp cơ bản nhất — tính hệ số tương quan Pearson giữa mỗi đặc trưng và biến mục tiêu (stress level). Hệ số tương quan phản ánh mối quan hệ tuyến tính:
+\begin{equation}
+    r_{xy} = \frac{\sum_{i=1}^{n}(x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i - \bar{x})^2 \cdot \sum_{i=1}^{n}(y_i - \bar{y})^2}}
+\end{equation}
+Ưu điểm: đơn giản, nhanh. Nhược điểm: chỉ đo quan hệ tuyến tính, không phát hiện được quan hệ phi tuyến phức tạp.
+
+\subsection{Random Forest Surrogate}
+
+Sử dụng mô hình Random Forest \cite{breiman2001random} để xấp xỉ (surrogate) hành vi của mô hình LSTM — mô hình ``hộp đen'' — rồi trích xuất tầm quan trọng đặc trưng từ Random Forest. Phương pháp này dựa trên nguyên lý: mỗi cây quyết định trong Random Forest đo mức giảm tạp chất (impurity decrease) khi chia dữ liệu theo từng đặc trưng. Cách phương pháp hoạt động: huấn luyện Random Forest với đầu vào là các đặc trưng gốc và đầu ra là dự đoán của mô hình LSTM, sau đó tính tầm quan trọng dựa trên mức giảm tạp chất trung bình qua tất cả các cây.
+
+\textbf{Tổng hợp hạng (Rank Aggregation).} Mỗi phương pháp có ưu nhược điểm riêng, do đó khóa luận sử dụng cách tiếp cận tổng hợp: xếp hạng các đặc trưng theo từng phương pháp, sau đó tính hạng trung bình pour đưa ra đánh giá tổng thể. Phương pháp này giúp giảm thiên lệch từ bất kỳ phương pháp đơn lẻ nào.
+
+% ============================================================
+
+\section{Nghiên cứu liên quan về dự đoán stress}
+\label{sec:related_work}
+
+Bảng \ref{tab:related_work} tổng hợp các công trình nghiên cứu tiêu biểu trong lĩnh vực phát hiện và dự đoán stress dựa trên dữ liệu cảm biến.
+
+\begin{table}[H]
+\centering
+\caption{Tổng hợp các nghiên cứu liên quan về dự đoán stress}
+\label{tab:related_work}
+\small
+\begin{tabular}{|p{3cm}|p{2.5cm}|p{3cm}|p{2cm}|p{2.5cm}|}
+\hline
+\textbf{Nghiên cứu} & \textbf{Dữ liệu} & \textbf{Phương pháp} & \textbf{Bài toán} & \textbf{Kết quả} \\
+\hline
+Hovsepian et al. \cite{hovsepian2015cstress} & ECG, hô hấp & SVM, Regression & Nhị phân & F1 = 0.72 \\
+\hline
+Schmidt et al. \cite{schmidt2018wesad} & ECG, EDA, nhiệt độ, gia tốc & Random Forest, LDA, AdaBoost & 3 lớp & Acc = 80\% \\
+\hline
+Can et al. \cite{can2019stress} & EDA, BVP, nhiệt độ & CNN, LSTM & Nhị phân & Acc = 83.5\% \\
+\hline
+Rashid et al. \cite{rashid2024stress} & Đa cảm biến + hành vi & DL ensemble & Đa lớp & Acc = 88\% \\
+\hline
+\textbf{Khóa luận này} & \textbf{Gia tốc kế + hành vi + HAR} & \textbf{Stacked Bi-LSTM} & \textbf{Hồi quy (1--9)} & $\boldsymbol{R^2 = 0.9555}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+Phân tích các công trình trên cho thấy ba khoảng trống nghiên cứu mà khóa luận này hướng đến:
+
+\textbf{Khoảng trống 1 — Mô hình hóa liên tục:} Hầu hết các nghiên cứu đều tiếp cận bài toán stress dưới dạng phân loại (nhị phân hoặc đa lớp), khiến mất thông tin về mức độ stress giữa các ngưỡng. Khóa luận này sử dụng bài toán hồi quy trên thang 1--9, cho phép dự đoán chính xác hơn sự biến thiên liên tục của stress.
+
+\textbf{Khoảng trống 2 — Tích hợp ngữ cảnh hoạt động:} Chưa có công trình nào trong bảng trên kết hợp module nhận dạng hoạt động (HAR) với dự đoán stress thông qua cơ chế Context-Stress Modifiers. Cơ chế này cho phép giải mã đúng ý nghĩa sinh lý của tín hiệu — ví dụ, nhịp tim 120 bpm khi chạy bộ (bình thường) khác biệt hoàn toàn với nhịp tim 120 bpm khi ngồi (dấu hiệu stress cao).
+
+\textbf{Khoảng trống 3 — Kiến trúc hai chiều cho chuỗi thời gian stress:} Các công trình sử dụng Deep Learning chủ yếu dùng CNN hoặc LSTM đơn chiều. Khóa luận đề xuất Stacked Bi-LSTM — khai thác ngữ cảnh hai chiều trong chuỗi thời gian, kết hợp với tối ưu siêu tham số bằng Bayesian Optimization để đạt hiệu năng cao nhất.
