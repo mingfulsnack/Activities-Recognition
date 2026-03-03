@@ -8,27 +8,27 @@
 \section{Đặt vấn đề}
 \label{sec:dat_van_de}
 
-Căng thẳng tâm lý (stress) là một trong những vấn đề sức khỏe cộng đồng nghiêm trọng nhất của thế kỷ 21. Theo báo cáo của Tổ chức Y tế Thế giới (WHO), đại dịch COVID-19 đã làm gia tăng 25\% tỷ lệ rối loạn lo âu và trầm cảm trên toàn cầu \cite{who2022mental}. Tại Hoa Kỳ, khảo sát \textit{Stress in America} của Hiệp hội Tâm lý học Hoa Kỳ (APA) cho thấy hơn 78\% người trưởng thành báo cáo mức stress đáng kể liên quan đến công việc, tài chính và sức khỏe \cite{american2019stress}. Stress kéo dài không chỉ ảnh hưởng đến năng suất lao động mà còn gây ra hàng loạt hệ quả nghiêm trọng về sức khỏe thể chất — bao gồm bệnh tim mạch, suy giảm miễn dịch, rối loạn tiêu hóa — và sức khỏe tinh thần như trầm cảm, rối loạn giấc ngủ \cite{chrousos2009stress, mcewen2008central}.
+Căng thẳng tâm lý (stress) là một trong những vấn đề sức khỏe cộng đồng nghiêm trọng nhất của thế kỷ 21. Theo báo cáo của Tổ chức Y tế Thế giới (WHO), đại dịch COVID-19 đã làm gia tăng 25\% tỷ lệ rối loạn lo âu và trầm cảm trên toàn cầu \cite{who2022mental}. Stress kéo dài không chỉ ảnh hưởng đến năng suất lao động mà còn gây ra hàng loạt hệ quả nghiêm trọng về sức khỏe thể chất — bao gồm bệnh tim mạch, suy giảm miễn dịch, rối loạn tiêu hóa — và sức khỏe tinh thần như trầm cảm, rối loạn giấc ngủ \cite{chrousos2009stress}.
 
 Các phương pháp đánh giá stress truyền thống chủ yếu dựa trên bảng câu hỏi hồi cứu (retrospective questionnaires), tiêu biểu là thang đo PSS (Perceived Stress Scale) của Cohen et al. \cite{cohen1983global}. Tuy nhiên, phương pháp này có ba hạn chế cơ bản: (1) mang tính chủ quan — phụ thuộc vào nhận thức và trí nhớ của người được hỏi; (2) không liên tục — chỉ đánh giá tại thời điểm khảo sát, không phản ánh biến động stress trong ngày; và (3) gây gián đoạn — yêu cầu người dùng chủ động trả lời, không phù hợp cho giám sát dài hạn trong đời sống thường nhật.
 
-Sự phổ biến của điện thoại thông minh và thiết bị đeo (wearable devices) đã mở ra hướng tiếp cận mới cho bài toán giám sát stress. Các thiết bị này được trang bị nhiều cảm biến — gia tốc kế (accelerometer), cảm biến nhịp tim (heart rate sensor), GPS, cảm biến ánh sáng \cite{lane2010survey} — cho phép thu thập dữ liệu sinh lý và hành vi người dùng một cách liên tục, khách quan và không xâm lấn (non-invasive) \cite{majumder2017wearable, patel2012review}. Đặc biệt, dữ liệu gia tốc kế từ smartphone có thể được sử dụng để nhận dạng hoạt động con người (Human Activity Recognition — HAR), cung cấp thông tin ngữ cảnh quan trọng về trạng thái vật lý của người dùng \cite{bulling2014tutorial}.
+Sự phổ biến của điện thoại thông minh và thiết bị đeo (wearable devices) đã mở ra hướng tiếp cận mới cho bài toán giám sát stress. Các thiết bị này được trang bị nhiều cảm biến — gia tốc kế (accelerometer), cảm biến nhịp tim (heart rate sensor), GPS — cho phép thu thập dữ liệu sinh lý và hành vi người dùng một cách liên tục, khách quan và không xâm lấn (non-invasive). Đặc biệt, dữ liệu gia tốc kế từ smartphone có thể được sử dụng để nhận dạng hoạt động con người (Human Activity Recognition — HAR), cung cấp thông tin ngữ cảnh quan trọng về trạng thái vật lý của người dùng.
 
-Trong lĩnh vực phát hiện stress dựa trên cảm biến, các nghiên cứu gần đây đã đạt được nhiều kết quả đáng khích lệ. Hovsepian et al. \cite{hovsepian2015cstress} đề xuất cStress — hệ thống đánh giá stress liên tục sử dụng tín hiệu ECG và hô hấp, đạt F1-score 0.72 cho phân loại nhị phân. Schmidt et al. \cite{schmidt2018wesad} giới thiệu tập dữ liệu WESAD với nhiều loại cảm biến (điện tâm đồ, điện da, nhiệt độ, gia tốc kế), đạt độ chính xác 80\% với Random Forest cho phân loại 3 lớp. Tổng quan toàn diện của Giannakakis et al. \cite{giannakakis2019review} và D'Almeida et al. \cite{dalmeida2021stress} cho thấy xu hướng nghiên cứu đang chuyển dần từ phương pháp học máy truyền thống sang các kiến trúc học sâu (Deep Learning) nhờ khả năng tự động trích xuất đặc trưng từ dữ liệu thô.
+Trong lĩnh vực phát hiện stress dựa trên cảm biến, các nghiên cứu gần đây đã đạt được nhiều kết quả đáng khích lệ. Hovsepian et al. \cite{hovsepian2015cstress} đề xuất cStress — hệ thống đánh giá stress liên tục sử dụng tín hiệu ECG và hô hấp, đạt F1-score 0.72 cho phân loại nhị phân. Schmidt et al. \cite{schmidt2018wesad} giới thiệu tập dữ liệu WESAD với nhiều loại cảm biến (điện tâm đồ, điện da, nhiệt độ, gia tốc kế), đạt độ chính xác 80\% với Random Forest cho phân loại 3 lớp. Các khảo sát tổng quan gần đây \cite{giannakakis2019review} cho thấy xu hướng nghiên cứu đang chuyển dần từ phương pháp học máy truyền thống sang các kiến trúc học sâu (Deep Learning) nhờ khả năng tự động trích xuất đặc trưng từ dữ liệu thô.
 
 Tuy nhiên, phần lớn các nghiên cứu hiện tại vẫn tồn tại ba khoảng trống (research gap) quan trọng:
 
 \begin{enumerate}
-    \item \textbf{Phân loại nhị phân thay vì hồi quy liên tục:} Đa số hệ thống chỉ phân loại stress thành hai (có/không) hoặc ba mức (thấp/trung bình/cao) \cite{hovsepian2015cstress, schmidt2018wesad}, trong khi thực tế stress biến thiên trên một thang đo liên tục. Việc rời rạc hóa mức stress làm mất thông tin về cường độ và sự khác biệt vi mô giữa các trạng thái.
+    \item \textbf{Phân loại nhị phân thay vì hồi quy liên tục:} Đa số hệ thống chỉ phân loại stress thành hai (có/không) hoặc ba mức (thấp/trung bình/cao), trong khi thực tế stress biến thiên trên một thang đo liên tục. Việc rời rạc hóa mức stress làm mất thông tin về cường độ và sự khác biệt vi mô giữa các trạng thái.
     
-    \item \textbf{Thiếu nhận thức ngữ cảnh hoạt động:} Một thách thức cốt lõi là sự nhập nhằng (ambiguity) của các tín hiệu sinh lý. Cụ thể, nhịp tim tăng cao có thể do chạy bộ (jogging) — phản ứng sinh lý bình thường khi vận động, hoặc do áp lực công việc khi ngồi (sitting) — biểu hiện thực sự của stress tâm lý. Nếu không biết ngữ cảnh hoạt động, mô hình dễ dẫn đến nhận định sai lệch \cite{kusserow2013monitoring}. Hầu hết các nghiên cứu hiện tại xử lý tín hiệu sinh lý một cách độc lập mà không tích hợp thông tin về hoạt động đang thực hiện.
+    \item \textbf{Thiếu nhận thức ngữ cảnh hoạt động:} Một thách thức cốt lõi là sự nhập nhằng (ambiguity) của các tín hiệu sinh lý. Cụ thể, nhịp tim tăng cao có thể do chạy bộ (jogging) — phản ứng sinh lý bình thường khi vận động, hoặc do áp lực công việc khi ngồi (sitting) — biểu hiện thực sự của stress tâm lý. Nếu không biết ngữ cảnh hoạt động, mô hình dễ dẫn đến nhận định sai lệch. Hầu hết các nghiên cứu hiện tại xử lý tín hiệu sinh lý một cách độc lập mà không tích hợp thông tin về hoạt động đang thực hiện.
     
-    \item \textbf{Chưa khai thác đủ phụ thuộc thời gian dài hạn:} Stress không phải là trạng thái tức thời mà có xu hướng tích lũy theo thời gian — chịu ảnh hưởng bởi chất lượng giấc ngủ đêm trước, cường độ làm việc trong ngày, hay lịch sử hoạt động \cite{schlotz2004cortisol}. Các phương pháp học máy truyền thống (SVM, Random Forest) không tự nhiên mô hình hóa được các phụ thuộc thời gian này.
+    \item \textbf{Chưa khai thác đủ phụ thuộc thời gian dài hạn:} Stress không phải là trạng thái tức thời mà có xu hướng tích lũy theo thời gian — chịu ảnh hưởng bởi chất lượng giấc ngủ đêm trước, cường độ làm việc trong ngày, hay lịch sử hoạt động. Các phương pháp học máy truyền thống (SVM, Random Forest) không tự nhiên mô hình hóa được các phụ thuộc thời gian này.
 \end{enumerate}
 
 Từ những khoảng trống trên, khóa luận này đặt ra câu hỏi nghiên cứu chính: \textit{``Làm thế nào để xây dựng một hệ thống dự đoán mức độ stress liên tục, có khả năng nhận thức ngữ cảnh hoạt động và khai thác phụ thuộc thời gian dài hạn từ dữ liệu cảm biến và hành vi người dùng?''}
 
-Để trả lời câu hỏi này, khóa luận đề xuất một \textbf{Khung làm việc đa phương thức nhận thức ngữ cảnh} (Context-Aware Multi-Modal Framework) tích hợp module Nhận dạng hoạt động con người (HAR) với kiến trúc Stacked Bidirectional LSTM (Bi-LSTM) \cite{schuster1997bidirectional, graves2005framewise} cho bài toán hồi quy stress trên thang đo liên tục. Hệ thống sử dụng cơ chế \textit{Context-Stress Modifiers} để điều chỉnh ý nghĩa sinh lý của các chỉ số trong từng bối cảnh hoạt động cụ thể, giải quyết trực tiếp vấn đề nhập nhằng sinh lý mà các phương pháp đo đơn thuần chưa xử lý được.
+Để trả lời câu hỏi này, khóa luận đề xuất một \textbf{Khung làm việc đa phương thức nhận thức ngữ cảnh} (Context-Aware Multi-Modal Framework) tích hợp module Nhận dạng hoạt động con người (HAR) với kiến trúc Stacked Bidirectional LSTM (Bi-LSTM) \cite{hochreiter1997lstm, schuster1997bidirectional} cho bài toán hồi quy stress trên thang đo liên tục. Hệ thống sử dụng cơ chế \textit{Context-Stress Modifiers} để điều chỉnh ý nghĩa sinh lý của các chỉ số trong từng bối cảnh hoạt động cụ thể, giải quyết trực tiếp vấn đề nhập nhằng sinh lý mà các phương pháp đo đơn thuần chưa xử lý được.
 
 % ============================================================
 
@@ -48,11 +48,60 @@ Mục tiêu tổng quát của khóa luận là nghiên cứu và xây dựng m�
     
     \item \textbf{Tạo tập dữ liệu đa phương thức:} Xây dựng hệ thống sinh dữ liệu kết hợp hai nguồn: (i) dữ liệu gia tốc kế thực từ WISDM v1.1 để đảm bảo tính chân thực của tín hiệu cảm biến; và (ii) dữ liệu hành vi mô phỏng thực tế theo lịch trình sinh hoạt 30 ngày (nhịp tim, tâm trạng, sử dụng điện thoại, vị trí, giấc ngủ). Điểm then chốt là tích hợp cơ chế Context-Stress Modifiers — điều chỉnh mức stress dựa trên sự tương tác giữa chỉ số sinh lý và hoạt động đang thực hiện.
     
-    \item \textbf{Lựa chọn đặc trưng tối ưu:} Thực hiện quy trình lựa chọn đặc trưng hệ thống từ 44 trường dữ liệu ban đầu xuống tập đặc trưng tối ưu, sử dụng kết hợp phân tích tầm quan trọng (Random Forest Importance \cite{breiman2001random}), loại bỏ đặc trưng dư thừa, và đảm bảo tránh rò rỉ dữ liệu (data leakage) \cite{kaufman2012leakage}. Mục tiêu là giữ lại các đặc trưng có đóng góp thực sự cho dự đoán stress mà không làm giảm đáng kể hiệu năng mô hình.
+    \item \textbf{Lựa chọn đặc trưng tối ưu:} Thực hiện quy trình lựa chọn đặc trưng hệ thống từ 44 trường dữ liệu ban đầu xuống tập đặc trưng tối ưu, sử dụng kết hợp phân tích tầm quan trọng (Random Forest Importance), loại bỏ đặc trưng dư thừa, và đảm bảo tránh rò rỉ dữ liệu (data leakage) \cite{kaufman2012leakage}. Mục tiêu là giữ lại các đặc trưng có đóng góp thực sự cho dự đoán stress mà không làm giảm đáng kể hiệu năng mô hình.
     
-    \item \textbf{Huấn luyện và tối ưu mô hình Stacked Bi-LSTM:} Thiết kế kiến trúc Stacked Bidirectional LSTM cho bài toán hồi quy chuỗi thời gian \cite{hochreiter1997lstm, schuster1997bidirectional}, bao gồm: (i) huấn luyện mô hình baseline với cấu hình mặc định; (ii) tối ưu siêu tham số (hyperparameter tuning) bằng Bayesian Optimization \cite{snoek2012practical} để tìm cấu hình tối ưu về số lượng units, tỷ lệ dropout, learning rate; và (iii) phân tích tầm quan trọng đặc trưng bằng 4 phương pháp (Permutation Importance \cite{fisher2019permutation}, SHAP \cite{lundberg2017shap}, Correlation Analysis, Random Forest Surrogate) để giải thích quyết định của mô hình.
+    \item \textbf{Huấn luyện và tối ưu mô hình Stacked Bi-LSTM:} Thiết kế kiến trúc Stacked Bidirectional LSTM cho bài toán hồi quy chuỗi thời gian \cite{hochreiter1997lstm}, bao gồm: (i) huấn luyện mô hình baseline với cấu hình mặc định; (ii) tối ưu siêu tham số (hyperparameter tuning) bằng Bayesian Optimization \cite{snoek2012practical} để tìm cấu hình tối ưu về số lượng units, tỷ lệ dropout, learning rate; và (iii) phân tích tầm quan trọng đặc trưng bằng 4 phương pháp (Permutation Importance, SHAP \cite{lundberg2017shap}, Correlation Analysis, Random Forest Surrogate) để giải thích quyết định của mô hình.
     
-    \item \textbf{So sánh và đánh giá hệ thống:} Thực hiện so sánh công bằng (fair comparison) mô hình đề xuất với 4 kiến trúc khác — MLP, Simple LSTM, Stacked Bi-LSTM chưa tối ưu, và Stacked Bi-GRU \cite{cho2014learning, chung2014empirical} — trên cùng pipeline xử lý dữ liệu và cùng tập kiểm tra. Đồng thời tiến hành phân tích lỗi chi tiết (error analysis) theo mức stress, hoạt động và thời gian để xác định điểm mạnh và hạn chế của mô hình.
+    \item \textbf{So sánh và đánh giá hệ thống:} Thực hiện so sánh công bằng (fair comparison) mô hình đề xuất với 4 kiến trúc khác — MLP, Simple LSTM, Stacked Bi-LSTM chưa tối ưu, và Stacked Bi-GRU \cite{cho2014learning} — trên cùng pipeline xử lý dữ liệu và cùng tập kiểm tra. Đồng thời tiến hành phân tích lỗi chi tiết (error analysis) theo mức stress, hoạt động và thời gian để xác định điểm mạnh và hạn chế của mô hình.
 \end{enumerate}
 
 Các chỉ số đánh giá chính bao gồm: Sai số tuyệt đối trung bình (MAE), Căn bậc hai sai số bình phương trung bình (RMSE), và Hệ số xác định ($R^2$). Mục tiêu cụ thể: đạt $R^2 \geq 0.90$ và $\text{MAE} \leq 0.70$ trên tập kiểm tra.
+
+% ============================================================
+
+\section{Phạm vi nghiên cứu}
+\label{sec:pham_vi}
+
+Để đảm bảo tính khả thi và tập trung, khóa luận giới hạn phạm vi nghiên cứu theo ba chiều: dữ liệu, phương pháp và đầu ra.
+
+\textbf{Về dữ liệu:} Hệ thống sử dụng hai nguồn dữ liệu chính. Nguồn thứ nhất là tập dữ liệu gia tốc kế WISDM v1.1 — một tập dữ liệu công khai được thu thập trực tiếp từ cảm biến smartphone, bao gồm 1.098.207 bản ghi từ 36 người dùng thực hiện 6 hoạt động. Nguồn thứ hai là dữ liệu hành vi và sinh lý được mô phỏng theo lịch trình sinh hoạt thực tế trong 30 ngày, bao gồm nhịp tim, tâm trạng, mức sử dụng điện thoại, vị trí, và chất lượng giấc ngủ. Hai nguồn dữ liệu được tích hợp thông qua cơ chế Context-Stress Modifiers để tạo thành tập dữ liệu đa phương thức hoàn chỉnh với 54.448 mẫu.
+
+\textbf{Về phương pháp:} Khóa luận tập trung vào các kiến trúc học sâu (Deep Learning) thuộc họ mạng hồi quy — cụ thể là LSTM và các biến thể (Bidirectional LSTM, GRU). Các phương pháp học máy truyền thống (SVM, Random Forest, XGBoost) không nằm trong phạm vi nghiên cứu chính, mặc dù Random Forest được sử dụng như công cụ phụ trợ trong bước lựa chọn đặc trưng và phân tích tầm quan trọng.
+
+\textbf{Về đầu ra:} Hệ thống dự đoán mức stress dưới dạng giá trị hồi quy liên tục trên thang đo 1--9 điểm, khác biệt với phần lớn nghiên cứu hiện có sử dụng phân loại nhị phân hoặc đa lớp. Đầu vào của mô hình là chuỗi thời gian 60 bước (time steps), mỗi bước chứa 13 đặc trưng đã được lựa chọn.
+
+% ============================================================
+
+\section{Đóng góp của khóa luận}
+\label{sec:dong_gop}
+
+Khóa luận đóng góp bốn điểm chính sau:
+
+\begin{enumerate}
+    \item \textbf{Hệ thống end-to-end nhận thức ngữ cảnh:} Xây dựng pipeline hoàn chỉnh từ nhận dạng hoạt động (HAR) đến sinh dữ liệu đa phương thức và dự đoán stress liên tục. Điểm khác biệt cốt lõi so với các nghiên cứu trước là tích hợp cơ chế Context-Stress Modifiers — cho phép giải mã đúng ý nghĩa sinh lý của tín hiệu tùy thuộc vào hoạt động người dùng đang thực hiện.
+    
+    \item \textbf{Pipeline xử lý dữ liệu chống rò rỉ thông tin:} Thiết kế quy trình tiền xử lý nghiêm ngặt tuân thủ nguyên tắc ``train-only fitting'' — tất cả các bước mã hóa (encoding) và chuẩn hóa (normalization) chỉ được fit trên tập huấn luyện, sau đó transform cho tập validation và test. Việc chia dữ liệu được thực hiện trước mọi bước xử lý, đảm bảo không có thông tin từ tập kiểm tra rò rỉ vào quá trình huấn luyện.
+    
+    \item \textbf{Phân tích tầm quan trọng đặc trưng đa phương pháp:} Kết hợp 4 phương pháp (Permutation Importance, SHAP, Correlation Analysis, Random Forest Surrogate) để đánh giá vai trò của từng đặc trưng một cách toàn diện. Phương pháp tổng hợp hạng (rank aggregation) giúp giảm thiên lệch (bias) từ bất kỳ phương pháp đơn lẻ nào.
+    
+    \item \textbf{So sánh hệ thống 5 kiến trúc Deep Learning:} Đánh giá công bằng 5 kiến trúc (MLP, Simple LSTM, Stacked Bi-LSTM Baseline, Stacked Bi-GRU, Stacked Bi-LSTM Tuned) trên cùng pipeline dữ liệu, cùng tập kiểm tra và cùng bộ chỉ số đánh giá, cung cấp cái nhìn toàn diện về hiệu quả của từng kiến trúc cho bài toán hồi quy stress.
+\end{enumerate}
+
+% ============================================================
+
+\section{Bố cục khóa luận}
+\label{sec:bo_cuc}
+
+Ngoài phần mở đầu và kết luận, khóa luận được tổ chức thành 5 chương với nội dung như sau:
+
+\begin{itemize}
+    \item \textbf{Chương 1 — Giới thiệu:} Trình bày bối cảnh, động lực nghiên cứu, các khoảng trống trong nghiên cứu hiện tại, mục tiêu, phạm vi, đóng góp và bố cục của khóa luận.
+    
+    \item \textbf{Chương 2 — Cơ sở lý thuyết và nghiên cứu liên quan:} Cung cấp nền tảng lý thuyết về nhận dạng hoạt động (HAR), stress và phương pháp đo lường, các kiến trúc mạng nơ-ron hồi quy (RNN, LSTM, Bi-LSTM, GRU), các kỹ thuật tối ưu siêu tham số, phân tích tầm quan trọng đặc trưng, và tổng quan các công trình liên quan.
+    
+    \item \textbf{Chương 3 — Phương pháp đề xuất:} Mô tả chi tiết kiến trúc hệ thống tổng thể gồm 5 module (HAR, sinh dữ liệu, tiền xử lý, mô hình Stacked Bi-LSTM, đánh giá), quy trình xử lý dữ liệu chống rò rỉ, thiết kế từng module và luồng xử lý dữ liệu xuyên suốt hệ thống.
+    
+    \item \textbf{Chương 4 — Thực nghiệm và đánh giá:} Trình bày cấu hình thực nghiệm, kết quả đào tạo và đánh giá cho cả module HAR và mô hình dự đoán stress, kết quả tối ưu siêu tham số bằng Bayesian Optimization, phân tích tầm quan trọng đặc trưng, so sánh 5 kiến trúc, và phân tích lỗi chi tiết.
+    
+    \item \textbf{Chương 5 — Kết luận và hướng phát triển:} Tóm tắt các kết quả đạt được, đánh giá mức độ hoàn thành mục tiêu, nêu hạn chế hiện tại và đề xuất hướng phát triển trong tương lai.
+\end{itemize}
