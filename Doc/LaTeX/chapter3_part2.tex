@@ -1,0 +1,523 @@
+% ============================================================
+% CHƯƠNG 3: PHƯƠNG PHÁP ĐỀ XUẤT (Phần 2/2 — Mục 3.4–3.7)
+% ============================================================
+% Tiếp nối chapter3_part1.tex (Mục 3.1–3.3)
+
+\section{Module 3: Lựa chọn đặc trưng}
+\label{sec:feature_selection}
+
+Tập dữ liệu ban đầu gồm 44 trường dữ liệu chứa nhiều đặc trưng dư thừa (derived features) và đặc trưng có tương quan cao. Quá trình lựa chọn đặc trưng được thực hiện qua 3 bước để giảm xuống 13 đặc trưng tối ưu, nhằm cải thiện hiệu suất mô hình, giảm nguy cơ overfitting, và tăng khả năng diễn giải.
+
+\subsection{Bước 1: Giảm từ 44 xuống 23 đặc trưng}
+\label{subsec:step1_44to23}
+
+Bước đầu tiên loại bỏ các trường dữ liệu rõ ràng dư thừa hoặc không phù hợp làm đặc trưng đầu vào:
+
+\begin{itemize}
+    \item \textbf{Trường nhận dạng} (identifier): \texttt{Timestamp}, \texttt{User\_ID} — không mang thông tin dự đoán, chỉ dùng để quản lý dữ liệu.
+    \item \textbf{Trường phái sinh} (derived): \texttt{Steps}, \texttt{Calories}, \texttt{Exercise\_Minutes} — có thể suy ra trực tiếp từ \texttt{Activity} và thời gian, gây đa cộng tuyến.
+    \item \textbf{Trường tổng hợp ngày} (daily aggregates): \texttt{Daily\_Avg\_Stress}, \texttt{Daily\_Max\_HR}, \texttt{Daily\_Steps\_Total} — vi phạm tính nhân quả trong dữ liệu chuỗi thời gian (dùng thông tin tương lai để dự đoán hiện tại).
+    \item \textbf{Trường trùng lặp ngữ nghĩa}: \texttt{Is\_Weekend} (có thể suy từ \texttt{Day\_of\_Week}), các trường có Pearson correlation $>0.95$ với trường khác.
+\end{itemize}
+
+Sau bước này, giữ lại 23 đặc trưng gồm: 3 cảm biến (Accelerometer X/Y/Z), 9 đặc trưng lõi (Activity, Location, Heart\_Rate, Sleep\_Duration, Sleep\_Quality, Energy\_Level, Mood\_Score, Hour, Day\_of\_Week), 7 đặc trưng hành vi (Screen\_Usage\_Current, Screen\_Usage\_15min\_Avg, Screen\_Usage\_Trend, Phone\_Usage\_Intensity, Phone\_Event\_Frequency, Social\_Current\_Level, Social\_1hour\_Avg), và 4 đặc trưng môi trường (Ambient\_Light, Noise\_Level, Weather\_Condition, Exercise\_Minutes).
+
+\subsection{Bước 2: Thử nghiệm 17 đặc trưng với Feature Engineering}
+\label{subsec:step2_17features}
+
+Từ 23 đặc trưng, khóa luận tiến hành thêm 6 đặc trưng kỹ thuật (engineered features) dựa trên cơ sở khoa học từ các nghiên cứu liên quan:
+
+\begin{table}[H]
+\centering
+\caption{6 đặc trưng kỹ thuật được thêm vào (Bước 2)}
+\label{tab:engineered_features}
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Đặc trưng} & \textbf{Công thức} & \textbf{Cơ sở} \\
+\hline
+\texttt{morning\_cortisol\_window} & $\mathbb{1}[\text{Hour} \in [7,9]]$ & Schlotz et al. \cite{schlotz2004cortisol} \\
+\texttt{work\_hours}              & $\mathbb{1}[\text{Hour} \in [8,17]]$ & Temporal context \\
+\texttt{sedentary\_duration}      & Rolling count Sitting/Standing & Garcia-Ceja et al. \cite{garciaceja2018stress} \\
+\texttt{hr\_activity\_ratio}      & $\text{HR} / \text{HR}_{\text{expected}}(\text{Activity})$ & Hovsepian et al. \cite{hovsepian2015cstress} \\
+\texttt{movement\_variability}    & Rolling std(Accel\_X/Y/Z) & Kusserow et al. \cite{kusserow2013monitoring} \\
+\texttt{Sleep\_Duration}          & Số giờ ngủ đêm trước & Recovery indicator \\
+\hline
+\end{tabular}
+\end{table}
+
+Kết hợp 7 đặc trưng lõi (Tier 1) + 4 đặc trưng quan trọng từ RF (Tier 2) + 6 đặc trưng kỹ thuật (Tier 3) = 17 đặc trưng. Tuy nhiên, khi huấn luyện mô hình LSTM trên tập 17 đặc trưng này, \textbf{phát hiện vấn đề nghiêm trọng}:
+
+\begin{itemize}
+    \item Training loss đạt $\sim$10.23 thay vì $\sim$0.92 như kỳ vọng — mô hình không hội tụ.
+    \item \textbf{Nguyên nhân}: Các đặc trưng rolling (\texttt{sedentary\_duration}, \texttt{movement\_variability}) sử dụng cửa sổ trượt trên toàn bộ dữ liệu, bao gồm cả các mẫu sau thời điểm hiện tại. Khi tạo sequence (chuỗi 60 mẫu liên tiếp), thông tin tương lai đã ``rò rỉ'' vào đầu vào — đây là hiện tượng \textbf{data leakage} \cite{kaufman2012leakage}.
+    \item Tương tự, \texttt{hr\_activity\_ratio} chia cho giá trị trung bình ước tính trên toàn bộ tập dữ liệu, vi phạm nguyên tắc phân chia train/test.
+\end{itemize}
+
+Phát hiện này cho thấy feature engineering trên dữ liệu chuỗi thời gian cần đặc biệt cẩn thận — các phép tính rolling window hoặc aggregate statistics phải được thực hiện \textit{sau} khi chia dữ liệu, và chỉ fit trên tập huấn luyện.
+
+\subsection{Bước 3: Giải pháp cuối — 13 đặc trưng}
+\label{subsec:step3_13features}
+
+Thay vì sửa lỗi data leakage trong các đặc trưng kỹ thuật phức tạp, khóa luận chọn phương án đơn giản hóa: kết hợp \textbf{kiến thức chuyên ngành} (domain knowledge) với \textbf{phân tích định lượng} (Random Forest importance) để chọn 13 đặc trưng không chứa phép tính rolling.
+
+\textbf{Phân tích Random Forest Importance:} Huấn luyện mô hình Random Forest (1000 cây, max\_depth=20) trên tập 23 đặc trưng gốc để đánh giá tầm quan trọng tương đối \cite{breiman2001random}. Kết quả cho thấy 10 đặc trưng chiếm 98.09\% tổng importance (Bảng~\ref{tab:rf_importance}).
+
+\begin{table}[H]
+\centering
+\caption{Top-10 đặc trưng theo Random Forest Importance}
+\label{tab:rf_importance}
+\small
+\begin{tabular}{|c|l|r|r|}
+\hline
+\textbf{Hạng} & \textbf{Đặc trưng} & \textbf{Importance (\%)} & \textbf{Tích lũy (\%)} \\
+\hline
+1  & Location                 & 64.98 & 64.98 \\
+2  & Heart\_Rate              & 13.93 & 78.91 \\
+3  & Screen\_Usage\_Current   &  7.46 & 86.37 \\
+4  & Phone\_Event\_Frequency  &  3.35 & 89.72 \\
+5  & Mood\_Score              &  2.55 & 92.27 \\
+6  & Energy\_Level            &  1.99 & 94.26 \\
+7  & Exercise\_Minutes        &  1.09 & 95.35 \\
+8  & Sleep\_Duration          &  1.06 & 96.41 \\
+9  & Screen\_Usage\_15min\_Avg &  1.05 & 97.46 \\
+10 & Sleep\_Quality           &  0.63 & 98.09 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{13 đặc trưng cuối cùng} được xác định bằng cách kết hợp:
+\begin{enumerate}
+    \item \textbf{7 đặc trưng lõi} (domain knowledge): Hour, Day\_of\_Week (temporal patterns — \cite{schlotz2004cortisol}), Activity (HAR output — \cite{garciaceja2018stress}), Accelerometer\_X/Y/Z (sensor data — \cite{kusserow2013monitoring}), Heart\_Rate (physiological marker — \cite{hovsepian2015cstress}).
+    \item \textbf{6 đặc trưng bổ sung} (RF importance): Location (64.98\%), Screen\_Usage\_Current (7.46\%), Phone\_Event\_Frequency (3.35\%), Mood\_Score (2.55\%), Energy\_Level (1.99\%), Sleep\_Duration (1.06\%).
+\end{enumerate}
+
+So với top-10 RF, khóa luận \textit{thay thế} Exercise\_Minutes, Screen\_Usage\_15min\_Avg, Sleep\_Quality bằng Hour, Day\_of\_Week, Activity, Accelerometer\_X/Y/Z — vì nhóm sau mang thông tin temporal và sensor mà RF không đánh giá cao (do tương quan phi tuyến mà Decision Tree không nắm bắt tốt).
+
+\begin{table}[H]
+\centering
+\caption{13 đặc trưng cuối cùng phân theo nhóm}
+\label{tab:13_features_final}
+\small
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Nhóm} & \textbf{Số lượng} & \textbf{Đặc trưng} \\
+\hline
+Thời gian (Temporal)     & 2 & Hour, Day\_of\_Week \\
+Hoạt động \& Cảm biến   & 4 & Activity, Accelerometer\_X, Y, Z \\
+Sinh lý (Physiological)  & 1 & Heart\_Rate \\
+Hành vi (Behavioral)     & 3 & Screen\_Usage\_Current, Phone\_Event\_Frequency, Mood\_Score \\
+Ngữ cảnh (Contextual)    & 3 & Location, Energy\_Level, Sleep\_Duration \\
+\hline
+\textbf{Tổng}            & \textbf{13} & -- \\
+\hline
+\end{tabular}
+\end{table}
+
+Việc giảm từ 44 xuống 13 đặc trưng (giảm 70.5\%) giúp:
+\begin{itemize}
+    \item Loại bỏ hoàn toàn nguy cơ data leakage từ rolling features;
+    \item Giảm số tham số mô hình (ít chiều đầu vào hơn), hạn chế overfitting;
+    \item Tăng tốc độ huấn luyện (ít phép tính hơn mỗi timestep);
+    \item Giữ lại đầy đủ các nhóm thông tin cần thiết: temporal, sensor, physiological, behavioral, contextual.
+\end{itemize}
+
+% ============================================================
+
+\section{Module 4: Pipeline xử lý dữ liệu}
+\label{sec:data_pipeline}
+
+\subsection{Vấn đề rò rỉ dữ liệu trong chuỗi thời gian}
+\label{subsec:data_leakage_problem}
+
+Data leakage (rò rỉ dữ liệu) xảy ra khi thông tin từ tập kiểm tra vô tình xuất hiện trong quá trình huấn luyện, dẫn đến hiệu suất đánh giá cao giả tạo \cite{kaufman2012leakage}. Trong dữ liệu chuỗi thời gian, data leakage đặc biệt nguy hiểm vì:
+
+\begin{enumerate}
+    \item \textbf{Không được xáo trộn (shuffle) dữ liệu}: Các mẫu liền kề có quan hệ thời gian chặt chẽ. Nếu shuffle, mẫu tương lai có thể xuất hiện trước mẫu hiện tại trong tập huấn luyện, khiến mô hình ``nhớ'' thay vì ``học'' xu hướng.
+    \item \textbf{Chia dữ liệu phải theo thứ tự thời gian}: Train = phần đầu, Validation = phần giữa, Test = phần cuối — mô phỏng đúng tình huống triển khai thực tế.
+    \item \textbf{Fit encoders/scalers chỉ trên train}: Nếu fit StandardScaler hoặc LabelEncoder trên toàn bộ dữ liệu, tham số thống kê (mean, std) sẽ chứa thông tin từ tập test.
+\end{enumerate}
+
+Khóa luận thiết kế pipeline xử lý dữ liệu tuân thủ nghiêm ngặt các nguyên tắc trên.
+
+\subsection{Quy trình pipeline chi tiết}
+\label{subsec:pipeline_detail}
+
+Pipeline gồm 4 bước tuần tự, được minh họa trong Hình~\ref{fig:data_pipeline}:
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\linewidth]{chapter3/figs/data_pipeline.png}
+    \caption{Pipeline xử lý dữ liệu chống rò rỉ}
+    \label{fig:data_pipeline}
+\end{figure}
+
+\textbf{Bước 1 — Chia dữ liệu (Sequential Split):}
+
+Dữ liệu 54.448 mẫu được chia theo thứ tự thời gian (không shuffle) với tỷ lệ 70/15/15:
+
+\begin{equation}
+\label{eq:data_split}
+\begin{aligned}
+\text{Train} &= \text{data}[0 : n_{\text{train}}] & \text{với } n_{\text{train}} &= \lfloor 0.70 \times N \rfloor = 38{,}113 \\
+\text{Val}   &= \text{data}[n_{\text{train}} : n_{\text{val}}] & \text{với } n_{\text{val}} &= \lfloor 0.85 \times N \rfloor = 46{,}280 \\
+\text{Test}  &= \text{data}[n_{\text{val}} : N] & & = 8{,}168 \text{ mẫu}
+\end{aligned}
+\end{equation}
+
+Cách chia này đảm bảo tập test luôn nằm ở cuối dòng thời gian (tương ứng những ngày cuối cùng của 30 ngày mô phỏng), phản ánh đúng bài toán dự đoán tương lai.
+
+\textbf{Bước 2 — Mã hóa biến phân loại (Label Encoding):}
+
+Hai biến phân loại được mã hóa thành số nguyên bằng \texttt{LabelEncoder} của scikit-learn. Encoder được \textbf{fit chỉ trên tập train}, sau đó transform cho val và test:
+
+\begin{table}[H]
+\centering
+\caption{Mã hóa biến phân loại}
+\label{tab:label_encoding}
+\small
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Biến} & \textbf{Số lớp} & \textbf{Giá trị} \\
+\hline
+Activity & 6 & Walking (5), Jogging (1), Upstairs (4), Downstairs (0), Sitting (2), Standing (3) \\
+Location & 6 & Home (2), Office (3), Gym (1), Commute (0), Outdoor (4), Other (5) \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Bước 3 — Chuẩn hóa (Standard Normalization):}
+
+Toàn bộ 13 đặc trưng (sau mã hóa) được chuẩn hóa bằng \texttt{StandardScaler}:
+
+\begin{equation}
+\label{eq:standardscaler}
+x'_i = \frac{x_i - \mu_{\text{train}}}{\sigma_{\text{train}}}
+\end{equation}
+
+\noindent trong đó $\mu_{\text{train}}$ và $\sigma_{\text{train}}$ là giá trị trung bình và độ lệch chuẩn tính \textit{chỉ trên tập train}. Các tập val và test dùng cùng $\mu_{\text{train}}$, $\sigma_{\text{train}}$ — không fit lại.
+
+\textbf{Bước 4 — Tạo chuỗi (Sequence Creation):}
+
+Dữ liệu được biến đổi thành chuỗi bằng cửa sổ trượt (sliding window) với độ dài \texttt{seq\_length} = 60:
+
+\begin{equation}
+\label{eq:sequences}
+\mathbf{X}_i = [\mathbf{x}_{i}, \mathbf{x}_{i+1}, \ldots, \mathbf{x}_{i+59}] \in \mathbb{R}^{60 \times 13}, \quad y_i = \text{Stress\_Level}_{i+60}
+\end{equation}
+
+\noindent Mỗi chuỗi gồm 60 mẫu liên tiếp (tương đương 30 phút ở tần suất 2 mẫu/phút), dùng để dự đoán giá trị stress tại thời điểm tiếp theo. Cửa sổ trượt di chuyển từng bước (stride = 1), tạo số lượng sequence lớn nhất có thể.
+
+\begin{table}[H]
+\centering
+\caption{Kích thước dữ liệu qua từng bước pipeline}
+\label{tab:pipeline_sizes}
+\small
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Bước} & \textbf{Train} & \textbf{Val} & \textbf{Test} \\
+\hline
+1. Split (mẫu)     & 38.113 & 8.167 & 8.168 \\
+2. Encode           & 38.113 $\times$ 13 & 8.167 $\times$ 13 & 8.168 $\times$ 13 \\
+3. Normalize        & 38.113 $\times$ 13 & 8.167 $\times$ 13 & 8.168 $\times$ 13 \\
+4. Sequences        & 38.053 $\times$ 60 $\times$ 13 & 8.107 $\times$ 60 $\times$ 13 & 8.108 $\times$ 60 $\times$ 13 \\
+\hline
+\end{tabular}
+\end{table}
+
+Số sequence = số mẫu $- $ \texttt{seq\_length} = $N - 60$. Ví dụ, tập train: $38.113 - 60 = 38.053$ sequences.
+
+Điểm mấu chốt của pipeline: thứ tự \textbf{Split $\rightarrow$ Encode $\rightarrow$ Normalize $\rightarrow$ Sequences} đảm bảo không có rò rỉ dữ liệu ở bất kỳ bước nào. Nếu thực hiện encode/normalize trước split, hoặc tạo sequences trên toàn bộ dữ liệu rồi chia, thông tin thống kê từ tập test sẽ ảnh hưởng quá trình huấn luyện.
+
+% ============================================================
+
+\section{Module 5: Kiến trúc mô hình Stacked Bidirectional LSTM}
+\label{sec:model_architecture}
+
+\subsection{Kiến trúc Baseline}
+\label{subsec:baseline_architecture}
+
+Mô hình baseline sử dụng kiến trúc Stacked Bidirectional LSTM gồm 2 lớp Bi-LSTM xếp chồng, kế thừa ưu điểm xử lý ngữ cảnh hai chiều đã chứng minh trong module HAR (Mục~\ref{sec:har_module}). Kiến trúc được thiết kế cho bài toán hồi quy (regression) dự đoán mức stress liên tục.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{chapter3/figs/bilstm_baseline.png}
+    \caption{Kiến trúc Stacked Bi-LSTM Baseline}
+    \label{fig:bilstm_baseline}
+\end{figure}
+
+Chi tiết kiến trúc:
+
+\begin{table}[H]
+\centering
+\caption{Kiến trúc chi tiết mô hình Baseline}
+\label{tab:baseline_architecture}
+\small
+\begin{tabular}{|c|l|l|r|}
+\hline
+\textbf{Lớp} & \textbf{Tên lớp} & \textbf{Output Shape} & \textbf{Params} \\
+\hline
+1 & Input                              & (60, 13)         & 0 \\
+2 & Bidirectional(LSTM(128, return\_seq=True)) & (60, 256)  & 145.408 \\
+3 & Dropout(0.3)                       & (60, 256)        & 0 \\
+4 & Bidirectional(LSTM(64))            & (128)            & 164.096 \\
+5 & Dropout(0.3)                       & (128)            & 0 \\
+6 & Dense(64, ReLU)                    & (64)             & 8.256 \\
+7 & Dropout(0.3)                       & (64)             & 0 \\
+8 & Dense(32, ReLU)                    & (32)             & 2.080 \\
+9 & Dense(1, Linear)                   & (1)              & 33 \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Tổng tham số}} & \textbf{320.129} \\
+\hline
+\end{tabular}
+\end{table}
+
+Giải thích thiết kế:
+\begin{itemize}
+    \item \textbf{Lớp Bi-LSTM đầu (128 units)}: Sử dụng \texttt{return\_sequences=True} để truyền toàn bộ hidden states cho lớp tiếp theo. Mỗi chiều (forward, backward) có 128 units, output tổng = 256 chiều. Lớp này nắm bắt các mẫu thời gian chi tiết (local patterns).
+    \item \textbf{Lớp Bi-LSTM thứ hai (64 units)}: Chỉ trả về hidden state cuối cùng (mặc định \texttt{return\_sequences=False}), tổng hợp thông tin từ toàn bộ chuỗi thành vector 128 chiều. Lớp này nắm bắt xu hướng tổng thể (global trends).
+    \item \textbf{Dropout(0.3)}: Regularization ngăn overfitting, ngẫu nhiên tắt 30\% neurons khi huấn luyện \cite{srivastava2014dropout}.
+    \item \textbf{Dense layers (64 $\to$ 32 $\to$ 1)}: Giảm dần chiều (funnel architecture), với activation ReLU cho lớp ẩn. Lớp đầu ra dùng activation Linear phù hợp bài toán hồi quy.
+\end{itemize}
+
+Cấu hình huấn luyện baseline:
+\begin{itemize}
+    \item \textbf{Optimizer}: Adam \cite{kingma2014adam} với learning rate = 0.001.
+    \item \textbf{Loss function}: Mean Squared Error (MSE).
+    \item \textbf{Callbacks}:
+    \begin{itemize}
+        \item EarlyStopping(monitor=\texttt{val\_loss}, patience=15, restore\_best\_weights=True)
+        \item ReduceLROnPlateau(monitor=\texttt{val\_loss}, factor=0.5, patience=5, min\_lr=$10^{-6}$)
+        \item ModelCheckpoint — lưu mô hình tốt nhất theo val\_loss
+    \end{itemize}
+    \item \textbf{Batch size}: 64, \textbf{Max epochs}: 100.
+\end{itemize}
+
+\subsection{Tối ưu siêu tham số bằng Bayesian Optimization}
+\label{subsec:bayesian_optimization}
+
+Để cải thiện hiệu suất baseline, khóa luận sử dụng Bayesian Optimization \cite{snoek2012practical} thông qua thư viện Keras Tuner \cite{omalley2019kerastuner} để tìm kiếm tổ hợp siêu tham số tối ưu. So với Grid Search (thử tất cả tổ hợp) hay Random Search \cite{bergstra2012random} (thử ngẫu nhiên), Bayesian Optimization sử dụng mô hình xác suất (Gaussian Process) để dự đoán vùng tham số triển vọng, giúp tìm giải pháp tốt với ít trials hơn.
+
+\textbf{Không gian tìm kiếm (Search Space):}
+
+\begin{table}[H]
+\centering
+\caption{Không gian tìm kiếm siêu tham số}
+\label{tab:search_space}
+\small
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Siêu tham số} & \textbf{Kiểu} & \textbf{Phạm vi} \\
+\hline
+\texttt{lstm\_units\_1} (Bi-LSTM lớp 1) & Choice    & \{64, 128, 256\} \\
+\texttt{lstm\_units\_2} (Bi-LSTM lớp 2) & Choice    & \{32, 64, 128\} \\
+\texttt{dropout\_rate}                  & Float     & [0.1, 0.5], step 0.1 \\
+\texttt{dense\_units}                   & Choice    & \{32, 64, 128\} \\
+\texttt{learning\_rate}                 & Log Float & [$10^{-4}$, $10^{-2}$] \\
+\hline
+\end{tabular}
+\end{table}
+
+Tổng không gian: $3 \times 3 \times 5 \times 3 \times \text{continuous} = $ hàng trăm tổ hợp rời rạc, cộng thêm chiều liên tục của learning rate. Bayesian Optimization chỉ cần 20 trials (với 5 trials khám phá ngẫu nhiên ban đầu) để tìm giải pháp gần tối ưu.
+
+\textbf{Cấu hình tuning:}
+\begin{itemize}
+    \item Số trials tối đa: 20 (5 random + 15 Bayesian)
+    \item Epochs mỗi trial: 30 (với EarlyStopping patience=7)
+    \item Objective: minimize \texttt{val\_mae}
+    \item Batch size: 32
+    \item Retraining: Mô hình tốt nhất được huấn luyện lại với 80 epochs và patience=15
+\end{itemize}
+
+\subsection{Kiến trúc Tuned (sau tối ưu)}
+\label{subsec:tuned_architecture}
+
+Bayesian Optimization tìm được tổ hợp siêu tham số tối ưu sau 20 trials. Bảng~\ref{tab:baseline_vs_tuned} so sánh cấu hình baseline và tuned.
+
+\begin{table}[H]
+\centering
+\caption{So sánh cấu hình Baseline và Tuned}
+\label{tab:baseline_vs_tuned}
+\small
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Tham số} & \textbf{Baseline} & \textbf{Tuned} & \textbf{Nhận xét} \\
+\hline
+\texttt{lstm\_units\_1}  & 128 & \textbf{64}   & Giảm 50\% — mô hình nhỏ hơn \\
+\texttt{lstm\_units\_2}  & 64  & \textbf{64}   & Giữ nguyên \\
+\texttt{dropout\_rate}   & 0.3 & \textbf{0.1}  & Giảm mạnh — ít regularization hơn \\
+\texttt{dense\_units}    & 64  & \textbf{128}  & Tăng — mở rộng lớp Dense \\
+\texttt{learning\_rate}  & 0.001 & \textbf{0.01} & Tăng 10$\times$ — hội tụ nhanh hơn \\
+\hline
+\textbf{Tổng params}     & 320.129 & \textbf{163.585} & Giảm 48.9\% \\
+\hline
+\end{tabular}
+\end{table}
+
+Kiến trúc mô hình tuned:
+
+\begin{table}[H]
+\centering
+\caption{Kiến trúc chi tiết mô hình Tuned}
+\label{tab:tuned_architecture}
+\small
+\begin{tabular}{|c|l|l|r|}
+\hline
+\textbf{Lớp} & \textbf{Tên lớp} & \textbf{Output Shape} & \textbf{Params} \\
+\hline
+1 & Input                              & (60, 13)        & 0 \\
+2 & Bidirectional(LSTM(64, return\_seq=True)) & (60, 128) & 39.936 \\
+3 & Dropout(0.1)                       & (60, 128)       & 0 \\
+4 & Bidirectional(LSTM(64))            & (128)           & 98.816 \\
+5 & Dropout(0.1)                       & (128)           & 0 \\
+6 & Dense(128, ReLU)                   & (128)           & 16.512 \\
+7 & Dropout(0.1)                       & (128)           & 0 \\
+8 & Dense(64, ReLU)                    & (64)            & 8.256 \\
+9 & Dense(1, Linear)                   & (1)             & 65 \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Tổng tham số}} & \textbf{163.585} \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Phân tích thay đổi:}
+\begin{itemize}
+    \item \textbf{Dropout 0.3 $\to$ 0.1}: Baseline có dấu hiệu underfitting nhẹ (val\_loss vẫn giảm khi dừng). Giảm dropout cho phép mô hình sử dụng nhiều neurons hơn trong quá trình huấn luyện, tăng khả năng biểu diễn.
+    \item \textbf{LSTM units 128 $\to$ 64}: Giảm kích thước lớp Bi-LSTM đầu tiên nhưng giữ lớp thứ hai tại 64, tạo kiến trúc ``song song'' (equal-width) thay vì ``phễu'' (funnel) — phù hợp hơn khi dữ liệu không quá phức tạp.
+    \item \textbf{Dense 64 $\to$ 128}: Mở rộng lớp Dense bù đắp cho việc giảm LSTM units, tăng khả năng mapping từ biểu diễn sequence sang stress level.
+    \item \textbf{Learning rate 0.001 $\to$ 0.01}: Tốc độ học cao hơn giúp mô hình thoát khỏi local minima nhanh hơn, kết hợp với ReduceLROnPlateau sẽ tự động giảm dần khi cần thiết.
+\end{itemize}
+
+Kết quả so sánh sẽ được trình bày chi tiết trong Chương~\ref{chap:experiments}.
+
+% ============================================================
+
+\section{Các mô hình so sánh}
+\label{sec:comparison_models}
+
+Để đánh giá hiệu quả của kiến trúc Stacked Bi-LSTM đề xuất, khóa luận so sánh với 3 mô hình khác, từ đơn giản đến phức tạp, tất cả sử dụng cùng pipeline xử lý dữ liệu (Mục~\ref{sec:data_pipeline}) để đảm bảo tính công bằng.
+
+\subsection{MLP (Multi-Layer Perceptron)}
+\label{subsec:mlp_model}
+
+Mô hình MLP là baseline đơn giản nhất, không có khả năng xử lý thông tin tuần tự. Toàn bộ chuỗi đầu vào $(60 \times 13)$ được làm phẳng (flatten) thành một vector 780 chiều, sau đó đi qua các lớp Dense:
+
+\begin{table}[H]
+\centering
+\caption{Kiến trúc MLP}
+\label{tab:mlp_architecture}
+\small
+\begin{tabular}{|c|l|l|r|}
+\hline
+\textbf{Lớp} & \textbf{Tên lớp} & \textbf{Output} & \textbf{Params} \\
+\hline
+1 & Input          & (60, 13)  & 0 \\
+2 & Flatten        & (780)     & 0 \\
+3 & Dense(256, ReLU) & (256)   & 199.936 \\
+4 & Dropout(0.3)   & (256)     & 0 \\
+5 & Dense(128, ReLU) & (128)   & 32.896 \\
+6 & Dropout(0.3)   & (128)     & 0 \\
+7 & Dense(64, ReLU)  & (64)    & 8.256 \\
+8 & Dropout(0.2)   & (64)      & 0 \\
+9 & Dense(1, Linear) & (1)     & 65 \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Tổng tham số}} & \textbf{241.153} \\
+\hline
+\end{tabular}
+\end{table}
+
+MLP xem toàn bộ chuỗi như một vector phẳng — mất hoàn toàn thông tin thứ tự thời gian. Mục đích so sánh: đánh giá mức độ đóng góp của thông tin tuần tự (temporal patterns) vào dự đoán stress.
+
+\subsection{Simple LSTM (1 lớp, một chiều)}
+\label{subsec:simple_lstm_model}
+
+Simple LSTM sử dụng 1 lớp LSTM đơn (unidirectional), chỉ xử lý dữ liệu theo một chiều thời gian (quá khứ $\to$ hiện tại):
+
+\begin{table}[H]
+\centering
+\caption{Kiến trúc Simple LSTM}
+\label{tab:simple_lstm_architecture}
+\small
+\begin{tabular}{|c|l|l|r|}
+\hline
+\textbf{Lớp} & \textbf{Tên lớp} & \textbf{Output} & \textbf{Params} \\
+\hline
+1 & Input           & (60, 13)  & 0 \\
+2 & LSTM(128)       & (128)     & 72.704 \\
+3 & Dropout(0.3)    & (128)     & 0 \\
+4 & Dense(64, ReLU) & (64)      & 8.256 \\
+5 & Dropout(0.2)    & (64)      & 0 \\
+6 & Dense(32, ReLU) & (32)      & 2.080 \\
+7 & Dense(1, Linear) & (1)     & 33 \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Tổng tham số}} & \textbf{83.073} \\
+\hline
+\end{tabular}
+\end{table}
+
+So với Stacked Bi-LSTM, Simple LSTM có \textit{ít tham số nhất} (83K) vì chỉ có 1 lớp LSTM, 1 chiều. Mục đích: đánh giá lợi ích khi thêm lớp thứ hai (stacking) và xử lý hai chiều (bidirectional).
+
+\subsection{Stacked Bi-GRU}
+\label{subsec:bigru_model}
+
+GRU (Gated Recurrent Unit) \cite{cho2014learning} là biến thể đơn giản hơn LSTM, chỉ có 2 cổng (reset và update) thay vì 3 cổng (forget, input, output). Kiến trúc Stacked Bi-GRU được thiết kế tương tự Stacked Bi-LSTM baseline để so sánh trực tiếp:
+
+\begin{table}[H]
+\centering
+\caption{Kiến trúc Stacked Bi-GRU}
+\label{tab:bigru_architecture}
+\small
+\begin{tabular}{|c|l|l|r|}
+\hline
+\textbf{Lớp} & \textbf{Tên lớp} & \textbf{Output} & \textbf{Params} \\
+\hline
+1 & Input                                   & (60, 13)   & 0 \\
+2 & Bidirectional(GRU(128, return\_seq=True)) & (60, 256)  & 109.824 \\
+3 & Dropout(0.3)                            & (60, 256)  & 0 \\
+4 & Bidirectional(GRU(64))                  & (128)      & 123.648 \\
+5 & Dropout(0.3)                            & (128)      & 0 \\
+6 & Dense(64, ReLU)                         & (64)       & 8.256 \\
+7 & Dropout(0.3)                            & (64)       & 0 \\
+8 & Dense(32, ReLU)                         & (32)       & 2.080 \\
+9 & Dense(1, Linear)                        & (1)        & 33 \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Tổng tham số}} & \textbf{243.841} \\
+\hline
+\end{tabular}
+\end{table}
+
+GRU có ít tham số hơn LSTM (243K vs 320K cùng cấu hình) do ít cổng hơn. Mục đích: đánh giá liệu cấu trúc cổng đơn giản hơn có đủ cho bài toán dự đoán stress hay không.
+
+\subsection{Tóm tắt 5 kiến trúc so sánh}
+\label{subsec:model_summary}
+
+Bảng~\ref{tab:five_models} tóm tắt 5 mô hình được so sánh trong khóa luận, sắp xếp theo độ phức tạp tăng dần.
+
+\begin{table}[H]
+\centering
+\caption{Tóm tắt 5 kiến trúc mô hình}
+\label{tab:five_models}
+\small
+\begin{tabular}{|c|l|c|c|l|}
+\hline
+\textbf{\#} & \textbf{Mô hình} & \textbf{Params} & \textbf{Recurrent} & \textbf{Đặc điểm chính} \\
+\hline
+1 & MLP (Dense)                 & 241.153 & Không     & Flatten sequence, mất temporal \\
+2 & Simple LSTM                 & 83.073  & 1 lớp, 1 chiều & Baseline RNN đơn giản \\
+3 & Stacked Bi-LSTM (Baseline)  & 320.129 & 2 lớp, 2 chiều & Kiến trúc đề xuất \\
+4 & Stacked Bi-GRU              & 243.841 & 2 lớp, 2 chiều & Thay LSTM bằng GRU \\
+5 & Stacked Bi-LSTM (Tuned)     & 163.585 & 2 lớp, 2 chiều & Tối ưu bằng Bayesian Opt. \\
+\hline
+\end{tabular}
+\end{table}
+
+Mọi mô hình đều:
+\begin{itemize}
+    \item Sử dụng cùng pipeline dữ liệu (Split $\to$ Encode $\to$ Normalize $\to$ Sequences);
+    \item Cùng tập train/val/test (đảm bảo công bằng);
+    \item Optimizer Adam, loss MSE;
+    \item Callbacks: EarlyStopping (patience=15), ReduceLROnPlateau (factor=0.5, patience=5);
+    \item Batch size = 32, max epochs = 80.
+\end{itemize}
+
+\noindent Riêng mô hình Tuned (mô hình 5) có learning rate và dropout khác do kết quả tối ưu hóa. Kết quả so sánh chi tiết sẽ được trình bày trong Mục~\ref{sec:model_comparison_results} của Chương~\ref{chap:experiments}.
