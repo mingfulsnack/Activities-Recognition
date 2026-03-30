@@ -180,8 +180,8 @@ Hai biến phân loại được mã hóa thành số nguyên bằng \texttt{Lab
 \hline
 \textbf{Biến} & \textbf{Số lớp} & \textbf{Giá trị} \\
 \hline
-Activity & 6 & Walking (5), Jogging (1), Upstairs (4), Downstairs (0), Sitting (2), Standing (3) \\
-Location & 6 & Home (2), Office (3), Gym (1), Commute (0), Outdoor (4), Other (5) \\
+Activity & 6 & Downstairs, Jogging, Sitting, Standing, Upstairs, Walking (mã hóa tự động theo LabelEncoder) \\
+Location & 6 & commute, gym, home, outdoor, social, work (mã hóa tự động theo LabelEncoder) \\
 \hline
 \end{tabular}
 \end{table}
@@ -228,6 +228,20 @@ Dữ liệu được biến đổi thành chuỗi bằng cửa sổ trượt (sl
 Số sequence = số mẫu $- $ \texttt{seq\_length} = $N - 60$. Ví dụ, tập train: $38.113 - 60 = 38.053$ sequences.
 
 Điểm mấu chốt của pipeline: thứ tự \textbf{Split $\rightarrow$ Encode $\rightarrow$ Normalize $\rightarrow$ Sequences} đảm bảo không có rò rỉ dữ liệu ở bất kỳ bước nào. Nếu thực hiện encode/normalize trước split, hoặc tạo sequences trên toàn bộ dữ liệu rồi chia, thông tin thống kê từ tập test sẽ ảnh hưởng quá trình huấn luyện.
+
+\subsection{Khả năng tái lập thực nghiệm}
+\label{subsec:reproducibility}
+
+Để tăng độ tin cậy khoa học và khả năng tái lập (reproducibility), khóa luận áp dụng các cơ chế kiểm soát sau trong toàn bộ pipeline huấn luyện:
+
+\begin{itemize}
+    \item \textbf{Cố định ngẫu nhiên:} sử dụng seed thống nhất (\texttt{RANDOM\_SEED = 42}) cho các thành phần ngẫu nhiên chính (NumPy, TensorFlow) trong các script huấn luyện baseline và tuning.
+    \item \textbf{Chia dữ liệu tất định theo thời gian:} giữ thứ tự thời gian, không shuffle, với tỷ lệ 70/15/15 cố định để bảo đảm các lần chạy dùng cùng protocol đánh giá.
+    \item \textbf{Tiền xử lý nhất quán:} tuân thủ nghiêm thứ tự Split $\rightarrow$ Encode $\rightarrow$ Normalize $\rightarrow$ Sequences; các encoder/scaler chỉ fit trên train và tái sử dụng cho val/test.
+    \item \textbf{Lưu artifacts tiền xử lý và mô hình:} lưu \texttt{scaler}, \texttt{label encoders} và checkpoint mô hình tốt nhất, cho phép suy luận và phân tích lỗi trên cùng không gian đặc trưng đã huấn luyện.
+\end{itemize}
+
+Với cấu hình trên, các chỉ số MAE/RMSE/$R^2$ ổn định giữa các lần chạy lặp lại (dao động nhỏ do backend tính toán song song), đủ để hỗ trợ kết luận so sánh mô hình ở Chương~\ref{chap:experiments}.
 
 % ============================================================
 
@@ -491,7 +505,7 @@ GRU có ít tham số hơn LSTM (243K vs 320K cùng cấu hình) do ít cổng h
 \subsection{Tóm tắt 5 kiến trúc so sánh}
 \label{subsec:model_summary}
 
-Bảng~\ref{tab:five_models} tóm tắt 5 mô hình được so sánh trong khóa luận, sắp xếp theo độ phức tạp tăng dần.
+Bảng~\ref{tab:five_models} tóm tắt 5 mô hình được so sánh trong khóa luận, theo trình tự từ baseline đơn giản đến mô hình đề xuất và biến thể tối ưu.
 
 \begin{table}[H]
 \centering

@@ -40,38 +40,63 @@ Các kết quả chính đạt được:
 
 Tổng hợp các kết quả trên cho thấy mục tiêu nghiên cứu đã được hoàn thành: khóa luận không chỉ chứng minh tính khả thi của việc dự đoán stress liên tục bằng Deep Learning, mà còn đề xuất được một quy trình có thể tái sử dụng cho các bài toán sức khỏe số dựa trên dữ liệu cảm biến và hành vi.
 
+\section{Đóng góp học thuật và điểm khác biệt}
+\label{sec:academic_contributions}
+
+Để nhấn mạnh bản chất nghiên cứu thay vì báo cáo triển khai kỹ thuật, các đóng góp của khóa luận có thể được nhìn nhận theo ba lớp học thuật sau:
+
+\begin{enumerate}
+    \item \textbf{Đóng góp ở mức bài toán (problem formulation):}
+    
+    Khóa luận chuyển trọng tâm từ phân loại stress rời rạc (binary/multi-class) sang \textbf{hồi quy stress liên tục} trên thang 1--9. Đây là thay đổi quan trọng vì cho phép biểu diễn cường độ stress mịn hơn, phù hợp với mục tiêu theo dõi và can thiệp sớm.
+
+    \item \textbf{Đóng góp ở mức phương pháp (methodological contribution):}
+    
+    Khóa luận đề xuất khung \textit{context-aware multi-modal} tích hợp HAR với mô hình chuỗi thời gian Bi-LSTM và cơ chế Context-Stress Modifiers để giảm nhập nhằng sinh lý. Điểm khác biệt so với nhiều công trình cũ là không xử lý tín hiệu sinh lý như biến độc lập, mà diễn giải theo tổ hợp hoạt động-ngữ cảnh-thời gian.
+
+    \item \textbf{Đóng góp ở mức bằng chứng thực nghiệm (empirical evidence):}
+    
+    Nghiên cứu không dừng ở một mô hình đơn lẻ mà thực hiện so sánh công bằng 5 kiến trúc, kết hợp 4 phương pháp giải thích đặc trưng và phân tích lỗi đa chiều. Kết quả cho thấy Bi-LSTM tuned vượt trội đồng thời về độ chính xác và hiệu quả tham số, từ đó tạo bằng chứng thuyết phục cho lựa chọn phương pháp.
+\end{enumerate}
+
+Từ góc nhìn học thuật, giá trị cốt lõi của khóa luận không chỉ nằm ở con số R² cao, mà ở việc xác lập được mối liên hệ nhất quán giữa \textbf{câu hỏi nghiên cứu $\rightarrow$ thiết kế phương pháp $\rightarrow$ bằng chứng thực nghiệm $\rightarrow$ kết luận khoa học}.
+
 \section{Hạn chế của khóa luận}
 \label{sec:limitations}
 
-Mặc dù đạt kết quả tích cực, khóa luận vẫn tồn tại một số hạn chế cần được nhìn nhận rõ để định hướng các bước phát triển tiếp theo:
+Mặc dù đạt kết quả tích cực, khóa luận vẫn tồn tại một số hạn chế. Mục này đồng thời tổng hợp các đe dọa đến tính hiệu lực nghiên cứu dưới dạng các giới hạn học thuật và triển khai:
 
 \begin{enumerate}
-    \item \textbf{Hạn chế về dữ liệu thực địa:}
+    \item \textbf{Hạn chế về construct validity (độ giá trị cấu trúc):}
     
-    Dữ liệu dùng trong khóa luận được sinh theo mô phỏng có căn cứ (semi-synthetic), chưa phải dữ liệu thu thập thực tế từ nhiều người dùng trong môi trường tự nhiên. Điều này giúp kiểm soát biến nhưng có thể làm tăng tính nhất quán nội tại của dữ liệu so với thế giới thật.
+    Stress\_Level được sinh theo mô hình mô phỏng có căn cứ (semi-synthetic), chưa phải nhãn lâm sàng đo trực tiếp từ nghiên cứu thực địa đa đối tượng. Vì vậy, kết quả phản ánh tốt trong khung giả định nhưng chưa đại diện đầy đủ cho thực tế lâm sàng.
 
-    \item \textbf{Hạn chế về đa dạng đối tượng:}
+    \item \textbf{Hạn chế về internal validity (độ giá trị nội tại):}
     
-    Kịch bản mô phỏng tập trung vào hồ sơ người dùng điển hình trong 30 ngày. Các khác biệt theo giới, tuổi, nghề nghiệp, bệnh nền, hoặc nhịp sinh hoạt cá nhân chưa được mô hình hóa đầy đủ.
+    Pipeline đã kiểm soát data leakage theo thứ tự Split $\to$ Encode $\to$ Normalize $\to$ Sequence, tuy nhiên vẫn tồn tại rủi ro thiên lệch do các giả định của bộ sinh dữ liệu và chưa có đầy đủ thí nghiệm ablation cho từng thành phần ngữ cảnh.
+
+    \item \textbf{Hạn chế về external validity và đa dạng đối tượng:}
+    
+    Kịch bản mô phỏng tập trung vào hồ sơ người dùng điển hình trong 30 ngày; mô hình chưa được kiểm chứng trên tập dữ liệu độc lập bên ngoài (external validation set) hoặc subject-wise cross-validation. Do đó, khả năng tổng quát hóa theo giới, tuổi, nghề nghiệp, bệnh nền và lối sống vẫn cần xác nhận thêm.
+
+    \item \textbf{Hạn chế về conclusion validity (độ giá trị kết luận):}
+    
+    Kết luận hiện chủ yếu dựa trên các chỉ số trung bình (MAE/RMSE/R²). Nghiên cứu chưa thực hiện đầy đủ kiểm định thống kê suy luận (ví dụ paired test, bootstrap confidence interval) qua nhiều lần chạy độc lập để tăng độ chắc chắn cho so sánh mô hình.
 
     \item \textbf{Hạn chế về không gian mô hình:}
     
-    Phần so sánh tập trung vào nhóm mô hình LSTM family (LSTM, Bi-LSTM, Bi-GRU) và MLP, chưa mở rộng sang Transformer/Attention-based time-series models, Temporal Convolutional Networks, hoặc mô hình lai đa nhánh.
+    Phần so sánh tập trung vào nhóm LSTM family (LSTM, Bi-LSTM, Bi-GRU) và MLP, chưa mở rộng sang Transformer/Attention-based time-series models, Temporal Convolutional Networks hoặc kiến trúc lai đa nhánh.
 
     \item \textbf{Hạn chế về nguồn lực tính toán:}
     
-    Toàn bộ thí nghiệm huấn luyện trên CPU, dẫn đến giới hạn số lượng trial trong hyperparameter tuning và giới hạn quy mô thử nghiệm (số mô hình, số cấu hình, số lần lặp).
-
-    \item \textbf{Hạn chế về xác thực ngoài miền (out-of-domain):}
-    
-    Mô hình chưa được đánh giá trên tập dữ liệu độc lập bên ngoài (external validation set) hoặc kiểm thử chéo theo cá nhân (subject-wise cross-validation), do đó khả năng tổng quát hóa liên cá thể vẫn cần kiểm chứng thêm.
+    Toàn bộ thí nghiệm được huấn luyện trên CPU, dẫn đến giới hạn số lượng trial trong hyperparameter tuning và giới hạn quy mô thử nghiệm (số mô hình, số cấu hình, số lần lặp).
 
     \item \textbf{Hạn chế về triển khai thời gian thực:}
     
-    Khóa luận dừng ở mức nghiên cứu mô hình ngoại tuyến (offline). Các yêu cầu triển khai thực tế như tối ưu latency, tiêu thụ pin, drift detection, và cập nhật mô hình online chưa được xử lý đầy đủ.
+    Khóa luận dừng ở mức nghiên cứu mô hình ngoại tuyến (offline). Các yêu cầu triển khai thực tế như tối ưu latency, tiêu thụ pin, drift detection và cập nhật mô hình online chưa được xử lý đầy đủ.
 \end{enumerate}
 
-Những hạn chế này không phủ nhận giá trị khoa học của kết quả đạt được, nhưng chỉ ra ranh giới áp dụng hiện tại và làm cơ sở để xây dựng lộ trình phát triển rõ ràng trong tương lai.
+Những hạn chế trên không phủ nhận giá trị khoa học của kết quả đạt được, nhưng chỉ ra ranh giới áp dụng hiện tại và là cơ sở để xây dựng lộ trình phát triển có kiểm chứng mạnh hơn trong tương lai.
 
 \section{Hướng phát triển}
 \label{sec:future_work}

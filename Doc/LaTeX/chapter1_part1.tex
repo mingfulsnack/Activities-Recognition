@@ -12,6 +12,31 @@ Căng thẳng tâm lý (stress) là một trong những vấn đề sức khỏe
 
 Các phương pháp đánh giá stress truyền thống chủ yếu dựa trên bảng câu hỏi hồi cứu (retrospective questionnaires), tiêu biểu là thang đo PSS (Perceived Stress Scale) của Cohen et al. \cite{cohen1983global}. Tuy nhiên, phương pháp này có ba hạn chế cơ bản: (1) mang tính chủ quan — phụ thuộc vào nhận thức và trí nhớ của người được hỏi; (2) không liên tục — chỉ đánh giá tại thời điểm khảo sát, không phản ánh biến động stress trong ngày; và (3) gây gián đoạn — yêu cầu người dùng chủ động trả lời, không phù hợp cho giám sát dài hạn trong đời sống thường nhật.
 
+\subsection{Khảo sát các hướng tiếp cận truyền thống và hạn chế}
+\label{subsec:traditional_approaches}
+
+Trong thực hành hiện nay, các hướng tiếp cận truyền thống cho bài toán stress có thể chia thành ba nhóm chính:
+
+\begin{table}[H]
+\centering
+\caption{Khảo sát các hướng tiếp cận truyền thống trong dự đoán/phát hiện stress}
+\label{tab:traditional_methods_stress}
+\small
+\begin{tabular}{|p{3.2cm}|p{3.8cm}|p{2.8cm}|p{4.0cm}|}
+\hline
+\textbf{Nhóm phương pháp} & \textbf{Kỹ thuật điển hình} & \textbf{Ưu điểm} & \textbf{Nhược điểm chính} \\
+\hline
+Đánh giá tâm lý tự báo cáo & PSS, DASS, khảo sát hồi cứu \cite{cohen1983global} & Dễ triển khai, chi phí thấp & Chủ quan; không liên tục theo thời gian; có recall bias \\
+\hline
+Luật ngưỡng sinh lý (rule-based) & Ngưỡng HR/HRV, EDA theo chuyên gia \cite{chrousos2009stress} & Dễ giải thích, triển khai nhanh & Khó cá nhân hóa; cùng tín hiệu nhưng khác ngữ cảnh có thể cho kết luận sai \\
+\hline
+Học máy truyền thống & SVM, Random Forest trên đặc trưng thủ công \cite{hovsepian2015cstress, schmidt2018wesad} & Hiệu quả khá tốt với dữ liệu nhỏ-vừa & Phụ thuộc mạnh vào feature engineering; hạn chế mô hình hóa phụ thuộc dài hạn trong chuỗi \\
+\hline
+\end{tabular}
+\end{table}
+
+Các khảo sát gần đây \cite{giannakakis2019review, dalmeida2021stress, rashid2024stress} chỉ ra rằng dù phương pháp truyền thống vẫn có giá trị, chúng thường gặp ba điểm nghẽn lặp lại: thiếu tính liên tục theo thời gian, khó xử lý nhập nhằng ngữ cảnh sinh lý, và khó mở rộng sang bài toán dự đoán stress dạng hồi quy liên tục.
+
 Sự phổ biến của điện thoại thông minh và thiết bị đeo (wearable devices) đã mở ra hướng tiếp cận mới cho bài toán giám sát stress. Các thiết bị này được trang bị nhiều cảm biến — gia tốc kế (accelerometer), cảm biến nhịp tim (heart rate sensor), GPS — cho phép thu thập dữ liệu sinh lý và hành vi người dùng một cách liên tục, khách quan và không xâm lấn (non-invasive). Đặc biệt, dữ liệu gia tốc kế từ smartphone có thể được sử dụng để nhận dạng hoạt động con người (Human Activity Recognition — HAR), cung cấp thông tin ngữ cảnh quan trọng về trạng thái vật lý của người dùng.
 
 Trong lĩnh vực phát hiện stress dựa trên cảm biến, các nghiên cứu gần đây đã đạt được nhiều kết quả đáng khích lệ. Hovsepian et al. \cite{hovsepian2015cstress} đề xuất cStress — hệ thống đánh giá stress liên tục sử dụng tín hiệu ECG và hô hấp, đạt F1-score 0.72 cho phân loại nhị phân. Schmidt et al. \cite{schmidt2018wesad} giới thiệu tập dữ liệu WESAD với nhiều loại cảm biến (điện tâm đồ, điện da, nhiệt độ, gia tốc kế), đạt độ chính xác 80\% với Random Forest cho phân loại 3 lớp. Các khảo sát tổng quan gần đây \cite{giannakakis2019review} cho thấy xu hướng nghiên cứu đang chuyển dần từ phương pháp học máy truyền thống sang các kiến trúc học sâu (Deep Learning) nhờ khả năng tự động trích xuất đặc trưng từ dữ liệu thô.
@@ -26,7 +51,23 @@ Tuy nhiên, phần lớn các nghiên cứu hiện tại vẫn tồn tại ba kh
     \item \textbf{Chưa khai thác đủ phụ thuộc thời gian dài hạn:} Stress không phải là trạng thái tức thời mà có xu hướng tích lũy theo thời gian — chịu ảnh hưởng bởi chất lượng giấc ngủ đêm trước, cường độ làm việc trong ngày, hay lịch sử hoạt động. Các phương pháp học máy truyền thống (SVM, Random Forest) không tự nhiên mô hình hóa được các phụ thuộc thời gian này.
 \end{enumerate}
 
-Từ những khoảng trống trên, khóa luận này đặt ra câu hỏi nghiên cứu chính: \textit{``Làm thế nào để xây dựng một hệ thống dự đoán mức độ stress liên tục, có khả năng nhận thức ngữ cảnh hoạt động và khai thác phụ thuộc thời gian dài hạn từ dữ liệu cảm biến và hành vi người dùng?''}
+Từ những khoảng trống trên, khóa luận này không chỉ đặt ra một câu hỏi tổng quát mà cụ thể hóa thành bốn câu hỏi nghiên cứu (Research Questions):
+
+\begin{itemize}
+    \item \textbf{RQ1:} Việc tích hợp ngữ cảnh hoạt động (context-aware) có giúp mô hình diễn giải đúng hơn tín hiệu sinh lý trong dự đoán stress không?
+    \item \textbf{RQ2:} Các mô hình chuỗi thời gian (LSTM/Bi-LSTM/GRU) có vượt trội so với mô hình phi chuỗi (MLP) cho bài toán stress liên tục không?
+    \item \textbf{RQ3:} Tối ưu siêu tham số bằng Bayesian Optimization có tạo khác biệt đáng kể so với cấu hình baseline không?
+    \item \textbf{RQ4:} Trong dữ liệu đa phương thức, nhóm đặc trưng nào đóng góp chính cho dự đoán stress?
+\end{itemize}
+
+Tương ứng với các câu hỏi trên, khóa luận xây dựng các giả thuyết nghiên cứu:
+
+\begin{itemize}
+    \item \textbf{H1:} Context-aware modeling giúp giảm sai số dự đoán ở các trạng thái nhập nhằng sinh lý.
+    \item \textbf{H2:} Mô hình chuỗi thời gian đạt hiệu năng cao hơn mô hình phi chuỗi cho bài toán hồi quy stress.
+    \item \textbf{H3:} Bayesian Optimization cải thiện đáng kể MAE/RMSE và/hoặc số tham số mô hình so với baseline.
+    \item \textbf{H4:} Đặc trưng sinh lý-hành vi (đặc biệt Heart\_Rate và Mood\_Score) có mức đóng góp cao và ổn định qua nhiều phương pháp giải thích.
+\end{itemize}
 
 Để trả lời câu hỏi này, khóa luận đề xuất một \textbf{Khung làm việc đa phương thức nhận thức ngữ cảnh} (Context-Aware Multi-Modal Framework) tích hợp module Nhận dạng hoạt động con người (HAR) với kiến trúc Stacked Bidirectional LSTM (Bi-LSTM) \cite{hochreiter1997lstm, schuster1997bidirectional} cho bài toán hồi quy stress trên thang đo liên tục. Hệ thống sử dụng cơ chế \textit{Context-Stress Modifiers} để điều chỉnh ý nghĩa sinh lý của các chỉ số trong từng bối cảnh hoạt động cụ thể, giải quyết trực tiếp vấn đề nhập nhằng sinh lý mà các phương pháp đo đơn thuần chưa xử lý được.
 

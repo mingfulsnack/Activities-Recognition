@@ -33,6 +33,33 @@ Năm module chính của hệ thống:
 
 Luồng dữ liệu đi tuần tự từ Module 1 đến Module 5. Đặc biệt, nhãn hoạt động từ Module 1 trở thành đầu vào bắt buộc cho Module 2 — đây là điểm tạo nên tính ``nhận thức ngữ cảnh'' (context-aware) của toàn hệ thống: mức stress không chỉ phụ thuộc vào các chỉ số sinh lý mà còn được điều chỉnh theo hoạt động đang thực hiện.
 
+\subsection{Liên kết câu hỏi nghiên cứu và thiết kế phương pháp}
+\label{subsec:rq_method_mapping}
+
+Để đảm bảo Chương~\ref{chap:method} bám sát mục tiêu khoa học đã nêu ở Chương~\ref{chap:introduction}, khóa luận thiết kế quy trình kiểm chứng tương ứng với từng câu hỏi nghiên cứu/giả thuyết như sau:
+
+\begin{table}[H]
+\centering
+\caption{Ánh xạ câu hỏi nghiên cứu/giả thuyết với thiết kế phương pháp}
+\label{tab:rq_method_mapping}
+\small
+\begin{tabular}{|p{2.0cm}|p{5.0cm}|p{6.5cm}|}
+\hline
+\textbf{RQ/H} & \textbf{Mục tiêu kiểm chứng} & \textbf{Thiết kế phương pháp trong Chương 3} \\
+\hline
+RQ1 / H1 & Đánh giá vai trò của ngữ cảnh hoạt động trong diễn giải tín hiệu sinh lý & Module HAR (Mục~\ref{sec:har_module}) cung cấp nhãn hoạt động; Module sinh dữ liệu đa phương thức và Context-Stress Modifiers (Mục~\ref{sec:data_generation}, Mục~\ref{subsec:context_stress_modifier}) tạo cơ chế context-aware để kiểm chứng ảnh hưởng ngữ cảnh. \\
+\hline
+RQ2 / H2 & So sánh mô hình chuỗi và phi chuỗi cho dự đoán stress liên tục & Thiết kế benchmark công bằng 5 kiến trúc (Mục~\ref{sec:comparison_models}) trên cùng pipeline dữ liệu chống leakage (Mục~\ref{sec:data_pipeline}). \\
+\hline
+RQ3 / H3 & Định lượng hiệu quả của tối ưu siêu tham số & Xây dựng baseline và quy trình Bayesian Optimization (Mục~\ref{subsec:baseline_architecture}, Mục~\ref{subsec:bayesian_optimization}, Mục~\ref{subsec:tuned_architecture}) để so sánh trước/sau tối ưu. \\
+\hline
+RQ4 / H4 & Xác định nhóm đặc trưng đóng góp chính cho dự đoán stress & Quy trình lựa chọn đặc trưng theo domain knowledge + Random Forest importance (Mục~\ref{sec:feature_selection}) làm nền cho phân tích tầm quan trọng đặc trưng ở Chương~\ref{chap:experiments}. \\
+\hline
+\end{tabular}
+\end{table}
+
+Thiết kế này bảo đảm chuỗi lập luận nghiên cứu nhất quán: câu hỏi khoa học $\rightarrow$ quyết định phương pháp $\rightarrow$ kết quả thực nghiệm đối chứng.
+
 % ============================================================
 
 \section{Module 1: Nhận dạng hoạt động (HAR Module)}

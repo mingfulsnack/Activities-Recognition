@@ -461,6 +461,29 @@ Hình~\ref{fig:model_radar} cung cấp góc nhìn radar chart đa chiều.
 
 % ============================================================
 
+\section{Thảo luận theo câu hỏi nghiên cứu}
+\label{sec:rq_discussion}
+
+Phần này tổng hợp kết quả thực nghiệm theo các câu hỏi nghiên cứu đã nêu ở Chương~\ref{chap:introduction}.
+
+\textbf{RQ1 -- Context-aware có giúp diễn giải tín hiệu sinh lý tốt hơn không?}
+
+Kết quả phân tích đặc trưng cho thấy các biến ngữ cảnh-hành vi (Mood\_Score, Screen\_Usage\_Current, Phone\_Event\_Frequency, Location) cùng với Heart\_Rate đồng thời nằm trong nhóm đóng góp cao. Điều này cho thấy mô hình không dựa vào sinh lý đơn biến mà học theo tổ hợp ngữ cảnh. Tuy nhiên, để khẳng định quan hệ nhân quả chặt chẽ hơn, nghiên cứu tiếp theo nên bổ sung thí nghiệm ablation trực tiếp (bật/tắt Context-Stress Modifier).
+
+\textbf{RQ2 -- Mô hình chuỗi thời gian có vượt trội mô hình phi chuỗi không?}
+
+Kết quả ủng hộ rõ ràng: MLP (R² = 0.833) thấp hơn đáng kể so với các mô hình hồi quy theo chuỗi như Simple LSTM (R² = 0.943) và Bi-LSTM Tuned (R² = 0.956). Do đó, giả thuyết về vai trò của phụ thuộc thời gian được xác nhận.
+
+\textbf{RQ3 -- Bayesian Optimization có tạo khác biệt đáng kể so với baseline không?}
+
+Kết quả xác nhận mạnh: từ Bi-LSTM Baseline sang Bi-LSTM Tuned, MAE giảm 38.4\%, R² tăng 5.4\%, đồng thời số tham số giảm 48.9\%. Điều này cho thấy đóng góp của tối ưu siêu tham số là bản chất, không chỉ là tinh chỉnh nhỏ.
+
+\textbf{RQ4 -- Nhóm đặc trưng nào đóng góp chính cho dự đoán stress?}
+
+Bốn phương pháp giải thích độc lập đều chỉ ra sự nhất quán cao ở nhóm sinh lý-hành vi, đặc biệt là Mood\_Score và Heart\_Rate. Kết quả này củng cố giả thuyết rằng dự đoán stress hiệu quả cần tích hợp đa nguồn tín hiệu thay vì chỉ dựa trên dữ liệu cảm biến chuyển động.
+
+% ============================================================
+
 \section{So sánh với nghiên cứu liên quan}
 \label{sec:related_comparison}
 
@@ -502,6 +525,15 @@ Rashid et al. \cite{rashid2024stress} & Bi-LSTM & Multi-class & Custom & F1 = 0.
     
     \item \textbf{Hạn chế}: Dữ liệu của khóa luận là dữ liệu mô phỏng (simulated), không phải thu thập thực tế. Do đó, kết quả R² cao có thể phần nào phản ánh tính nhất quán của mô hình sinh dữ liệu. Để khẳng định mạnh hơn, cần kiểm chứng trên dữ liệu thực tế.
 \end{enumerate}
+
+% ============================================================
+
+\section{Đe dọa đến tính hiệu lực của nghiên cứu}
+\label{sec:validity_threats}
+
+Để giữ trọng tâm của Chương 4 vào báo cáo và đối chiếu kết quả thực nghiệm, phần phân tích chi tiết các đe dọa đến tính hiệu lực (construct, internal, external, conclusion validity) được chuyển sang Mục~\ref{sec:limitations} của Chương~\ref{chap:conclusion} dưới dạng các hạn chế nghiên cứu.
+
+Trong chương này, kết quả được diễn giải theo phạm vi dữ liệu và thiết kế thí nghiệm đã nêu; các giới hạn suy luận và hướng kiểm chứng bổ sung được thảo luận tập trung ở Chương 5.
 
 % ============================================================
 

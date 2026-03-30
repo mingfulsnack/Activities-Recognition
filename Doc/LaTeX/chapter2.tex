@@ -258,9 +258,9 @@ Sự mất cân bằng giữa các lớp (Walking chiếm 38.6\% trong khi Stand
 
 \subsection{Phương pháp HAR dựa trên Deep Learning}
 
-Các phương pháp truyền thống cho HAR sử dụng trích xuất đặc trưng thủ công (hand-crafted features) kết hợp với các bộ phân loại như SVM, Decision Tree, Random Forest. Tuy nhiên, các phương pháp này phụ thuộc nhiều vào kiến thức chuyên gia và thường không tổng quát hóa tốt.
+Các phương pháp truyền thống cho HAR thường dựa trên trích xuất đặc trưng thủ công (thống kê miền thời gian/tần số) kết hợp với SVM, Decision Tree, hoặc Random Forest \cite{bulling2014tutorial}. Dù hiệu quả trong các kịch bản có kiểm soát, hướng tiếp cận này có ba hạn chế phổ biến: (i) phụ thuộc mạnh vào kinh nghiệm chuyên gia khi thiết kế đặc trưng; (ii) nhạy với lựa chọn cửa sổ thời gian và tần số lấy mẫu; (iii) khó tổng quát hóa tốt khi thay đổi thiết bị, người dùng hoặc bối cảnh thu thập.
 
-Các kiến trúc Deep Learning đã chứng minh hiệu quả vượt trội cho bài toán HAR nhờ khả năng tự động học đặc trưng từ dữ liệu thô. CNN có thể trích xuất các mẫu cục bộ (local patterns) trong chuỗi cảm biến, trong khi RNN/LSTM khai thác được phụ thuộc thời gian giữa các bước trong chuỗi \cite{ordonez2016deep}. Bi-LSTM kết hợp ưu điểm của LSTM với khả năng xử lý hai chiều, đặc biệt phù hợp khi ngữ cảnh xung quanh thời điểm hiện tại đều có ý nghĩa — ví dụ, chuyển đổi giữa ``đứng'' và ``đi bộ'' được nhận dạng chính xác hơn khi mô hình nhìn được cả bước trước và bước sau.
+Các kiến trúc Deep Learning khắc phục đáng kể các hạn chế trên nhờ khả năng học biểu diễn trực tiếp từ dữ liệu cảm biến thô \cite{ordonez2016deep, chen2021deep}. CNN phù hợp để học mẫu cục bộ (local patterns), trong khi RNN/LSTM nắm bắt phụ thuộc thời gian. Bi-LSTM mở rộng thêm ngữ cảnh hai chiều, giúp nhận dạng ổn định hơn tại các pha chuyển tiếp hoạt động (ví dụ giữa ``đứng'' và ``đi bộ''). Trong phạm vi khóa luận, module HAR sử dụng Stacked Bi-LSTM để tối đa hóa chất lượng nhãn ngữ cảnh trước khi đưa vào mô hình dự đoán stress.
 
 % ============================================================
 
@@ -394,41 +394,57 @@ Phương pháp cơ bản nhất — tính hệ số tương quan Pearson giữa 
 
 Sử dụng mô hình Random Forest \cite{breiman2001random} để xấp xỉ (surrogate) hành vi của mô hình LSTM — mô hình ``hộp đen'' — rồi trích xuất tầm quan trọng đặc trưng từ Random Forest. Phương pháp này dựa trên nguyên lý: mỗi cây quyết định trong Random Forest đo mức giảm tạp chất (impurity decrease) khi chia dữ liệu theo từng đặc trưng. Cách phương pháp hoạt động: huấn luyện Random Forest với đầu vào là các đặc trưng gốc và đầu ra là dự đoán của mô hình LSTM, sau đó tính tầm quan trọng dựa trên mức giảm tạp chất trung bình qua tất cả các cây.
 
-\textbf{Tổng hợp hạng (Rank Aggregation).} Mỗi phương pháp có ưu nhược điểm riêng, do đó khóa luận sử dụng cách tiếp cận tổng hợp: xếp hạng các đặc trưng theo từng phương pháp, sau đó tính hạng trung bình pour đưa ra đánh giá tổng thể. Phương pháp này giúp giảm thiên lệch từ bất kỳ phương pháp đơn lẻ nào.
+\textbf{Tổng hợp hạng (Rank Aggregation).} Mỗi phương pháp có ưu nhược điểm riêng, do đó khóa luận sử dụng cách tiếp cận tổng hợp: xếp hạng các đặc trưng theo từng phương pháp, sau đó tính hạng trung bình để đưa ra đánh giá tổng thể. Phương pháp này giúp giảm thiên lệch từ bất kỳ phương pháp đơn lẻ nào.
 
 % ============================================================
 
 \section{Nghiên cứu liên quan về dự đoán stress}
 \label{sec:related_work}
 
-Bảng \ref{tab:related_work} tổng hợp các công trình nghiên cứu tiêu biểu trong lĩnh vực phát hiện và dự đoán stress dựa trên dữ liệu cảm biến.
+Nghiên cứu dự đoán stress từ dữ liệu cảm biến có thể chia thành ba hướng chính: (i) hướng truyền thống dựa trên luật/ngưỡng sinh lý và mô hình thống kê; (ii) hướng học máy cổ điển (SVM, Random Forest, LDA); (iii) hướng học sâu khai thác dữ liệu chuỗi đa cảm biến \cite{garciaceja2018stress, dalmeida2021stress, rashid2024stress}. Để tránh cách trình bày liệt kê thuần túy, phần này sử dụng khung so sánh thống nhất nhằm chỉ ra rõ ràng điểm mạnh, điểm yếu và khoảng trống nghiên cứu.
+
+\subsection{Tiêu chí so sánh công trình liên quan}
+
+Các nghiên cứu được đối chiếu theo năm tiêu chí:
+\begin{enumerate}
+    \item \textbf{Loại mô hình:} truyền thống, học máy cổ điển hay học sâu chuỗi thời gian.
+    \item \textbf{Mức độ tích hợp ngữ cảnh hoạt động:} có hoặc không mô hình hóa hoạt động (HAR/context).
+    \item \textbf{Dạng đầu ra:} phân loại rời rạc hay hồi quy liên tục.
+    \item \textbf{Giá trị thực nghiệm:} mức hiệu năng báo cáo trong bối cảnh dữ liệu tương ứng.
+    \item \textbf{Hạn chế cốt lõi:} điểm nghẽn còn tồn tại, làm cơ sở xác định research gap.
+\end{enumerate}
 
 \begin{table}[H]
 \centering
-\caption{Tổng hợp các nghiên cứu liên quan về dự đoán stress}
+\caption{So sánh nghiên cứu liên quan theo tiêu chí phương pháp và khoảng trống}
 \label{tab:related_work}
-\small
-\begin{tabular}{|p{3cm}|p{2.5cm}|p{3cm}|p{2cm}|p{2.5cm}|}
+\scriptsize
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.3cm}|p{2.2cm}|p{1.8cm}|p{1.8cm}|p{2.7cm}|p{2.8cm}|}
 \hline
-\textbf{Nghiên cứu} & \textbf{Dữ liệu} & \textbf{Phương pháp} & \textbf{Bài toán} & \textbf{Kết quả} \\
+\textbf{Nghiên cứu} & \textbf{Kỹ thuật chính} & \textbf{Ngữ cảnh hoạt động} & \textbf{Dạng đầu ra} & \textbf{Giá trị thực nghiệm} & \textbf{Hạn chế cốt lõi} \\
 \hline
-Hovsepian et al. \cite{hovsepian2015cstress} & ECG, hô hấp & SVM, Regression & Nhị phân & F1 = 0.72 \\
+Kusserow et al. \cite{kusserow2013monitoring} & Luật/ngưỡng sinh lý trong môi trường thực & Không tường minh & Nhị phân & Chứng minh tính khả thi giám sát stress ngoài phòng thí nghiệm & Dễ nhiễu theo cá nhân; khó mở rộng cho mô hình dự đoán liên tục \\
 \hline
-Schmidt et al. \cite{schmidt2018wesad} & ECG, EDA, nhiệt độ, gia tốc & Random Forest, LDA, AdaBoost & 3 lớp & Acc = 80\% \\
+Hovsepian et al. \cite{hovsepian2015cstress} & Đa đặc trưng sinh lý + SVM/regression pipeline & Không tường minh & Nhị phân & F1 = 0.72 trong bối cảnh mobile sensing & Chưa tích hợp HAR; mất thông tin mức độ stress giữa các ngưỡng \\
 \hline
-Can et al. \cite{can2019stress} & EDA, BVP, nhiệt độ & CNN, LSTM & Nhị phân & Acc = 83.5\% \\
+Schmidt et al. \cite{schmidt2018wesad} & Random Forest, LDA, AdaBoost trên WESAD & Gián tiếp (gia tốc kế) & 3 lớp & Acc xấp xỉ 80\% & Chủ yếu bối cảnh phòng thí nghiệm; chưa có cơ chế diễn giải ngữ cảnh hoạt động trong suy luận stress \\
 \hline
-Rashid et al. \cite{rashid2024stress} & Đa cảm biến + hành vi & DL ensemble & Đa lớp & Acc = 88\% \\
+Can et al. \cite{can2019stress} & CNN/LSTM trên tín hiệu đeo tay & Không tường minh & Nhị phân & Acc = 83.5\% trong kịch bản thực địa có kiểm soát & Chưa xử lý rõ nhập nhằng sinh lý do khác biệt hoạt động; đầu ra vẫn rời rạc \\
 \hline
-\textbf{Khóa luận này} & \textbf{Gia tốc kế + hành vi + HAR} & \textbf{Stacked Bi-LSTM} & \textbf{Hồi quy (1--9)} & $\boldsymbol{R^2 = 0.9555}$ \\
+\textbf{Khóa luận này} & \textbf{HAR + Context-Stress Modifiers + Stacked Bi-LSTM + Bayesian Optimization} & \textbf{Tường minh (HAR + context-aware)} & \textbf{Hồi quy liên tục (1--9)} & $\boldsymbol{R^2 = 0.9555}$, MAE thấp trên tập kiểm tra & Cần kiểm chứng thêm trên bộ dữ liệu stress thu thập hoàn toàn thực địa quy mô lớn \\
 \hline
 \end{tabular}
 \end{table}
 
-Phân tích các công trình trên cho thấy ba khoảng trống nghiên cứu mà khóa luận này hướng đến:
+Từ so sánh trên, khóa luận xác định bốn khoảng trống nghiên cứu trọng tâm:
 
-\textbf{Khoảng trống 1 — Mô hình hóa liên tục:} Hầu hết các nghiên cứu đều tiếp cận bài toán stress dưới dạng phân loại (nhị phân hoặc đa lớp), khiến mất thông tin về mức độ stress giữa các ngưỡng. Khóa luận này sử dụng bài toán hồi quy trên thang 1--9, cho phép dự đoán chính xác hơn sự biến thiên liên tục của stress.
+\textbf{Khoảng trống G1 — Bài toán thường bị rời rạc hóa:} Phần lớn nghiên cứu vẫn dự đoán stress theo nhãn rời rạc (nhị phân/đa lớp), trong khi stress biến thiên liên tục theo thời gian. Điều này làm giảm khả năng theo dõi biến động vi mô của trạng thái tâm lý.
 
-\textbf{Khoảng trống 2 — Tích hợp ngữ cảnh hoạt động:} Chưa có công trình nào trong bảng trên kết hợp module nhận dạng hoạt động (HAR) với dự đoán stress thông qua cơ chế Context-Stress Modifiers. Cơ chế này cho phép giải mã đúng ý nghĩa sinh lý của tín hiệu — ví dụ, nhịp tim 120 bpm khi chạy bộ (bình thường) khác biệt hoàn toàn với nhịp tim 120 bpm khi ngồi (dấu hiệu stress cao).
+\textbf{Khoảng trống G2 — Thiếu mô hình hóa ngữ cảnh hoạt động tường minh:} Nhiều hệ thống dùng tín hiệu sinh lý trực tiếp mà không gắn với hoạt động đang diễn ra, dẫn tới nhập nhằng sinh lý. Khoảng trống này được kiểm chứng qua \textbf{RQ1/H1} trong khóa luận.
 
-\textbf{Khoảng trống 3 — Kiến trúc hai chiều cho chuỗi thời gian stress:} Các công trình sử dụng Deep Learning chủ yếu dùng CNN hoặc LSTM đơn chiều. Khóa luận đề xuất Stacked Bi-LSTM — khai thác ngữ cảnh hai chiều trong chuỗi thời gian, kết hợp với tối ưu siêu tham số bằng Bayesian Optimization để đạt hiệu năng cao nhất.
+\textbf{Khoảng trống G3 — Thiếu benchmark kiến trúc chuỗi thời gian có kiểm soát:} Một số công trình dùng LSTM/CNN nhưng thiếu so sánh hệ thống giữa mô hình chuỗi và phi chuỗi trong cùng pipeline dữ liệu. Khoảng trống này được xử lý qua \textbf{RQ2/H2}.
+
+\textbf{Khoảng trống G4 — Thiếu quy trình tối ưu và diễn giải nhất quán:} Nhiều nghiên cứu báo cáo hiệu năng nhưng chưa kết nối đầy đủ giữa tối ưu siêu tham số, phân tích đóng góp đặc trưng và tính tin cậy của kết luận. Khoảng trống này được giải quyết thông qua \textbf{RQ3/H3} và \textbf{RQ4/H4}.
+
+Như vậy, đóng góp của khóa luận không chỉ nằm ở một điểm số hiệu năng cao, mà ở việc xây dựng chuỗi lập luận nghiên cứu nhất quán: \textit{research gap} $\rightarrow$ giả thuyết $\rightarrow$ thiết kế thực nghiệm $\rightarrow$ bằng chứng định lượng. Chương tiếp theo trình bày chi tiết cách thiết kế dữ liệu, mô hình và quy trình đánh giá để kiểm chứng các giả thuyết này.
