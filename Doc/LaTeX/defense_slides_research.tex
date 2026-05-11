@@ -1,0 +1,787 @@
+% ============================================================
+% SLIDES BAO VE KHOA LUAN - PHIEN BAN NGHIEN CUU NANG CAO
+% ============================================================
+\documentclass[11pt]{beamer}
+
+% Theme
+\usetheme{Hannover}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% Custom colors for emphasis
+\definecolor{breakthroughgreen}{RGB}{34, 139, 34}
+\definecolor{alertred}{RGB}{204, 0, 0}
+\definecolor{insightblue}{RGB}{0, 102, 204}
+
+% Packages
+\usepackage[T5]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{xcolor}
+
+% Metadata
+\title[Stress Prediction]{Khung Đa Phương Thức Nhận Thức Ngữ Cảnh\\cho Dự Đoán Mức Độ Stress Liên Tục}
+\author{[Họ và tên sinh viên]}
+\institute{[Khoa/Trường] \\ GVHD: [Tên giảng viên hướng dẫn]}
+\date{[Ngày bảo vệ]}
+
+\begin{document}
+
+% ============================================================
+% SLIDE 1: TRANG BÌA
+% ============================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ============================================================
+% SLIDE 2: NỘI DUNG TRÌNH BÀY
+% ============================================================
+\begin{frame}{Nội dung trình bày}
+\tableofcontents
+\end{frame}
+
+% ============================================================
+\section{Đặt vấn đề và mục tiêu nghiên cứu}
+
+% ============================================================
+% SLIDE 3: ĐỘNG LỰC NGHIÊN CỨU
+% ============================================================
+\begin{frame}{Động lực nghiên cứu}
+\small
+\textbf{Vấn đề thực tế:}
+\begin{itemize}
+    \item WHO: đại dịch COVID-19 tăng \textbf{25\%} rối loạn lo âu và trầm cảm toàn cầu.
+    \item Stress kéo dài gây bệnh tim mạch, suy giảm miễn dịch, trầm cảm.
+    \item Phương pháp đánh giá hiện tại: bảng hỏi hồi cứu — \textit{chủ quan, không liên tục, gây gián đoạn}.
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{3 khoảng trống cốt lõi:}
+\begin{enumerate}
+    \item Phân loại stress rời rạc $\neq$ theo dõi cường độ liên tục
+    \item \textcolor{alertred}{Nhập nhằng sinh lý}: HR = 120 bpm -- chạy bộ hay stress cao?
+    \item Chưa khai thác phụ thuộc thời gian dài hạn (tích lũy stress)
+\end{enumerate}
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Mục tiêu:} Dự đoán stress liên tục (1--9) bằng pipeline context-aware có thể giải thích được}}
+\end{frame}
+
+% ============================================================
+% SLIDE 4: KHOẢNG TRỐNG NGHIÊN CỨU
+% ============================================================
+\begin{frame}{Khoảng trống nghiên cứu}
+\small
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.8cm}p{3.5cm}p{5.0cm}}
+\toprule
+\textbf{Gap} & \textbf{Xu hướng phổ biến} & \textbf{Hướng tiếp cận của khóa luận} \\
+\midrule
+G1 & Phân loại stress rời rạc & \textbf{Hồi quy stress liên tục (1--9)} \\
+G2 & HAR và stress xử lý tách rời & \textbf{Pipeline thống nhất 5 module} với Context-Stress Modifier \\
+G3 & So sánh mô hình chưa công bằng & \textbf{Benchmark 5 kiến trúc} trên cùng pipeline \\
+G4 & Giải thích kết quả hạn chế & \textbf{4 phương pháp} phân tích đặc trưng + phân tích lỗi đa chiều \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+\textbf{Logic nghiên cứu xuyên suốt:}
+\[
+\text{Câu hỏi nghiên cứu} \rightarrow \text{Thiết kế phương pháp} \rightarrow \text{Bằng chứng thực nghiệm} \rightarrow \text{Kết luận khoa học}
+\]
+\end{frame}
+
+% ============================================================
+% SLIDE 5: CÂU HỎI NGHIÊN CỨU VÀ GIẢ THUYẾT
+% ============================================================
+\begin{frame}{Câu hỏi nghiên cứu và giả thuyết}
+\small
+\begin{table}[h]
+\centering
+\begin{tabular}{p{1.2cm}p{5.5cm}p{3.0cm}}
+\toprule
+\textbf{RQ/H} & \textbf{Nội dung} & \textbf{Kiểm chứng bằng} \\
+\midrule
+RQ1/H1 & Context-aware có giúp diễn giải tín hiệu sinh lý tốt hơn? & Context-Stress Modifier \\
+RQ2/H2 & Mô hình chuỗi có vượt mô hình phi chuỗi? & So sánh MLP vs LSTM \\
+RQ3/H3 & Bayesian Optimization có tạo khác biệt đáng kể? & Baseline vs Tuned \\
+RQ4/H4 & Nhóm đặc trưng nào đóng góp chính? & 4 phương pháp FI \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+\textit{Toàn bộ phương pháp và thực nghiệm đều được thiết kế để trả lời trực tiếp 4 câu hỏi này.}
+\end{frame}
+
+% ============================================================
+\section{Phương pháp đề xuất}
+
+% ============================================================
+% SLIDE 6: KIẾN TRÚC TỔNG THỂ
+% ============================================================
+\begin{frame}{Kiến trúc tổng thể hệ thống (5 module)}
+\small
+\begin{enumerate}
+    \item \textbf{HAR Module:} nhận dạng 6 hoạt động từ WISDM bằng Stacked Bi-LSTM $\rightarrow$ 96.19\% accuracy.
+    \item \textbf{Data Generation:} sinh 54,448 mẫu đa phương thức có Context-Stress Modifier.
+    \item \textbf{Feature Selection:} 44 trường $\rightarrow$ \textbf{13 đặc trưng} (domain knowledge + RF importance).
+    \item \textbf{Data Pipeline:} Split $\rightarrow$ Encode $\rightarrow$ Normalize $\rightarrow$ Sequence (chống leakage).
+    \item \textbf{Model \& Evaluation:} huấn luyện, tuning, so sánh 5 kiến trúc.
+\end{enumerate}
+
+\vspace{0.15cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Điểm then chốt:} Nhãn hoạt động từ Module 1 là đầu vào bắt buộc cho Module 2 --- \textit{tạo nên tính nhận thức ngữ cảnh của toàn hệ thống}}}
+\end{frame}
+
+% ---- Module 1: Nhận dạng hoạt động (HAR) ----
+
+% ============================================================
+% SLIDE 7: MODULE 1 — KẾT QUẢ HAR
+% ============================================================
+\begin{frame}{Module 1 --- Kết quả HAR trên WISDM v1.1}
+\small
+\textbf{Mô hình:} Stacked Bi-LSTM (2 lớp) trên 1,098,207 bản ghi gia tốc kế, 6 hoạt động.
+
+\vspace{0.15cm}
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Kết quả phân loại:}
+\begin{itemize}
+    \item Accuracy: \textbf{96.19\%} (vượt mục tiêu 90\%)
+    \item Jogging: F1 = 0.99 \quad Sitting: F1 = 0.99
+    \item Walking: F1 = 0.96 \quad Standing: F1 = 0.98
+    \item Upstairs / Downstairs: F1 $\approx$ 0.90--0.91
+\end{itemize}
+
+\column{0.46\textwidth}
+\textbf{Nhận xét:}
+\begin{itemize}
+    \item Hoạt động tĩnh và Jogging rất đặc trưng.
+    \item Upstairs/Downstairs tín hiệu tương tự nhưng vẫn $\geq$ 88\%.
+    \item Nhãn hoạt động đủ tin cậy làm đầu vào Module 2.
+\end{itemize}
+\end{columns}
+
+\vspace{0.15cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Vai trò:} Nhãn hoạt động từ Module 1 là đầu vào bắt buộc của Module 2 --- tạo nên tính \textit{nhận thức ngữ cảnh} cho toàn hệ thống}}
+\end{frame}
+
+% ---- Module 2: Tạo tập dữ liệu đa phương thức ----
+
+% ============================================================
+% SLIDE 8: TẠO DỮ LIỆU ĐA PHƯƠNG THỨC
+% ============================================================
+\begin{frame}{Tạo dữ liệu đa phương thức: 54,448 mẫu}
+\small
+\begin{itemize}
+    \item Mô phỏng lịch trình 30 ngày: home, commute, work, gym, social, outdoor.
+    \item Kết hợp sự kiện đặc biệt (6\%/ngày: deadline, ốm, thi cử) + chu kỳ tuần/tháng.
+    \item Tổng hợp 5 nhóm: \textit{sensor, temporal, physiological, behavioral, contextual}.
+    \item Tần suất 2 mẫu/phút $\approx$ 1,815 mẫu/ngày $\times$ 30 ngày $= $ \textbf{54,448 mẫu}.
+\end{itemize}
+
+\vspace{0.15cm}
+\textbf{Tại sao dùng dữ liệu bán mô phỏng?}
+\begin{itemize}
+    \item Kiểm soát biến thực nghiệm có hệ thống
+    \item Kiểm chứng giả thuyết về Context-Stress Modifier
+    \item Dữ liệu gia tốc kế \textit{thực} từ WISDM + hành vi \textit{mô phỏng có cơ sở khoa học}
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 9: LỊCH TRÌNH CHI TIẾT
+% ============================================================
+\begin{frame}{Chi tiết lịch trình mô phỏng trong 1 ngày}
+\small
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{p{1.8cm}p{2.8cm}p{1.7cm}p{2.7cm}}
+\toprule
+\textbf{Khung giờ} & \textbf{Hoạt động chính} & \textbf{Vị trí} & \textbf{Ý nghĩa với stress} \\
+\midrule
+06:00--08:00 & Thức dậy, sinh hoạt cá nhân & Home & Trạng thái hồi phục \\
+08:00--09:00 & Di chuyển đi làm & Commute & Tăng nhẹ do giao thông \\
+09:00--12:00 & Làm việc buổi sáng & Work & Áp lực tăng dần \\
+12:00--13:00 & Nghỉ trưa & Work/Outdoor & Giảm tạm thời \\
+13:00--17:00 & Làm việc buổi chiều & Work & Áp lực cao nhất ngày \\
+17:00--18:00 & Di chuyển về nhà & Commute & Chuyển pha stress \\
+18:00--20:00 & Ăn tối/tập luyện & Home/Gym & Phục hồi dần \\
+20:00--22:30 & Giải trí, nghỉ ngơi & Home & Giảm stress rõ rệt \\
+22:30--06:00 & Ngủ & Home & Reset sinh lý ngày hôm sau \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.05cm}
+\begin{itemize}
+    \item 2 mẫu/phút trong khung thức tạo khoảng \textbf{1,815 mẫu/ngày}.
+    \item Mô phỏng 30 ngày tạo \textbf{54,448 mẫu}, giữ được cả nhịp ngày và tích lũy theo tuần/tháng.
+\end{itemize}
+\end{frame}
+
+% ============================================================
+% SLIDE 10: NHIỄU VÀ BIẾN THIÊN
+% ============================================================
+\begin{frame}{Nhiễu và biến thiên: tránh dữ liệu ``quá sạch''}
+\small
+\begin{equation*}
+S_0(d)=S_{\text{base}}+\eta_{\text{daily}}+\eta_{\text{weekly}}+\eta_{\text{monthly}}+\eta_{\text{event}}
+\end{equation*}
+
+\begin{columns}[T]
+\column{0.56\textwidth}
+\begin{itemize}
+    \item \textbf{Life events} xảy ra ngẫu nhiên với xác suất \textbf{6\%/ngày}, kéo dài 1--4 ngày (deadline, ốm, thi cử, thăm gia đình).
+    \item \textbf{Daily noise} trên sleep/mood/energy/workload để phản ánh dao động tự nhiên từng ngày.
+    \item \textbf{Chu kỳ tuần}: stress thường tăng dần trong tuần làm việc, cao nhất thứ 5--6, giảm cuối tuần.
+    \item \textbf{Chu kỳ tháng}: biến thiên theo chu kỳ 28 ngày.
+\end{itemize}
+
+\column{0.40\textwidth}
+\begin{itemize}
+    \item Nhiễu nhịp tim: $\varepsilon \sim \mathcal{U}(-4,+4)$ bpm.
+    \item Ràng buộc sinh lý: $HR \in [HR_{\text{rest}}-10, HR_{\max}]$.
+    \item Stress đầu ra luôn clip trong \textbf{[1,9]}.
+\end{itemize}
+\end{columns}
+
+\vspace{0.05cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Mục tiêu của nhiễu:} tạo dữ liệu đủ chân thực để học tổng quát, nhưng vẫn có cấu trúc để kiểm chứng giả thuyết nghiên cứu.}}
+\end{frame}
+
+% ============================================================
+% SLIDE 11: LỒNG GHÉP WISDM
+% ============================================================
+\begin{frame}{Từ WISDM gốc đến tập dữ liệu 44 trường}
+\small
+\begin{enumerate}
+    \item \textbf{Nạp WISDM thực}: 1,098,207 bản ghi gia tốc kế, 36 người dùng, 6 hoạt động.
+    \item \textbf{Tạo kho mẫu theo hoạt động}: Sitting/Standing/Walking/Jogging/Upstairs/Downstairs.
+    \item \textbf{Sinh lịch 30 ngày}: mỗi timestamp có nhãn hoạt động $a_t$ từ ScheduleGenerator.
+    \item \textbf{WisdmDataLoader ghép dữ liệu}: lấy mẫu gia tốc kế thực phù hợp với $a_t$ và gán vào Accelerometer\_X/Y/Z.
+    \item \textbf{Orchestrator hợp nhất}: sensor thực + biến sinh lý/hành vi/ngữ cảnh mô phỏng $\rightarrow$ 44 trường dữ liệu.
+\end{enumerate}
+
+\vspace{0.05cm}
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{lcccc}
+\toprule
+\textbf{HAR kiểm chứng trên dữ liệu sinh} & Jogging & Walking & Upstairs & Trung bình \\
+\midrule
+\textbf{Accuracy (\%)} & 100.0 & 80.1 & 34.4 & 86.2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.05cm}
+\textit{Thông điệp: gia tốc kế trong tập cuối là tín hiệu thực từ WISDM; phần hành vi-sinh lý được mô phỏng có kiểm soát để kiểm chứng cơ chế context-aware.}
+\end{frame}
+
+% ============================================================
+% SLIDE 12: MÔ HÌNH HÓA NHỊP TIM
+% ============================================================
+\begin{frame}{Mô hình hóa nhịp tim theo bối cảnh}
+\small
+\begin{equation*}
+\boxed{HR(t) = HR_{\text{rest}} + \Delta HR_{\text{activity}} + \Delta HR_{\text{stress}} + \Delta HR_{\text{fatigue}} + \varepsilon}
+\end{equation*}
+
+\begin{itemize}
+    \item $HR_{\text{rest}}$: theo Tanaka et al. (2001) --- $HR_{\max} = 208 - 0.7 \times \text{Age}$
+    \item $\Delta HR_{\text{activity}}$: dựa trên giá trị MET (Ainsworth, 2011)
+    \begin{itemize}
+        \scriptsize
+        \item Sitting: +0 bpm | Walking: +18 bpm | Jogging: \textbf{+40 bpm}
+    \end{itemize}
+    \item $\Delta HR_{\text{stress}} = (\text{StressLevel} - 4) \times 3$ bpm --- phản ứng hệ giao cảm
+    \item $\Delta HR_{\text{fatigue}} = (1 - E) \times 5$ bpm --- bù trừ khi kiệt sức
+\end{itemize}
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Ý nghĩa:} Nhịp tim không phải giá trị tĩnh --- mà là tổng hợp từ hoạt động, stress, mệt mỏi và nhiễu sinh lý}}
+\end{frame}
+
+% ============================================================
+% SLIDE 13: CÔNG THỨC STRESS ĐA YẾU TỐ
+% ============================================================
+\begin{frame}{Công thức stress đa yếu tố}
+\small
+\begin{equation*}
+\boxed{S_{\text{base}}(t) = S_0 + \Delta S_{\text{time}} + \Delta S_{\text{activity}} + \Delta S_{\text{location}} + \Delta S_{\text{work}} + \Delta S_{\text{HR}} + \Delta S_{\text{sleep}} + \Delta S_{\text{momentum}}}
+\end{equation*}
+
+\vspace{0.1cm}
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Cơ sở lý thuyết:}
+\begin{itemize}
+    \scriptsize
+    \item $\Delta S_{\text{time}}$: nhịp cortisol (Chrousos, 2009)
+    \item $\Delta S_{\text{activity}}$: endorphin khi vận động (Salmon, 2001)
+    \item $\Delta S_{\text{location}}$: mô hình Demand-Control (Karasek, 1979)
+\end{itemize}
+
+\column{0.50\textwidth}
+\textbf{Tính quán tính stress:}
+\begin{itemize}
+    \scriptsize
+    \item $\Delta S_{\text{sleep}}$: thiếu ngủ $\rightarrow$ +2 stress (McEwen, 2008)
+    \item $\Delta S_{\text{momentum}} = (\bar{S}_{\text{recent}} - 4) \times 0.3$
+    \item Allostatic load: stress tích lũy theo thời gian
+\end{itemize}
+\end{columns}
+
+\vspace{0.15cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Điểm quan trọng:} Mô hình không học từ một biến đơn lẻ --- mà từ \textit{tương tác đa yếu tố} có căn cứ khoa học}}
+\end{frame}
+
+% ============================================================
+% SLIDE 14: CONTEXT-STRESS MODIFIER
+% ============================================================
+\begin{frame}{Context-Stress Modifier --- Đột phá cốt lõi}
+\small
+\begin{equation*}
+\boxed{S_{\text{modified}}(t) = S_{\text{base}}(t) + \delta(a,l,c) \times A_{\text{sleep}} + \delta_{\text{env}} + \delta_{\text{social}} + \varepsilon}
+\end{equation*}
+
+\vspace{0.1cm}
+\textbf{Ý tưởng then chốt} (Lazarus \& Folkman, 1984): \textit{Cùng một tín hiệu sinh lý, ý nghĩa stress hoàn toàn khác nhau tùy ngữ cảnh.}
+
+\vspace{0.1cm}
+\begin{table}[h]
+\centering
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+\textbf{Tình huống} & \textbf{HR} & $\boldsymbol{\delta}$ & \textbf{Diễn giải stress} \\
+\midrule
+\textcolor{alertred}{Sitting + Work + chiều + deadline} & 95 bpm & \textcolor{alertred}{\textbf{+2.0}} & \textcolor{alertred}{\textbf{Stress rất cao}} \\
+\textcolor{breakthroughgreen}{Jogging + Outdoor + sáng cuối tuần} & 140 bpm & \textcolor{breakthroughgreen}{\textbf{$-$1.5}} & \textcolor{breakthroughgreen}{\textbf{Stress thấp}} \\
+Walking + Commute + sáng ngày thường & 100 bpm & +0.8 & Stress nhẹ \\
+\textcolor{breakthroughgreen}{Sitting + Home + tối + nghỉ ngơi} & 68 bpm & \textcolor{breakthroughgreen}{\textbf{$-$1.5}} & \textcolor{breakthroughgreen}{\textbf{Thư giãn}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{$A_{\text{sleep}}$}: ngủ kém khuếch đại phản ứng stress ($\times 1.3$) --- chỉ khi $\delta > 0$ (McEwen, 2008)}}
+\end{frame}
+
+% ---- Module 3+4: Lựa chọn đặc trưng & Pipeline ----
+
+% ============================================================
+% SLIDE 15: PIPELINE CHỐNG RÒ RỈ
+% ============================================================
+\begin{frame}{Pipeline chống rò rỉ dữ liệu}
+\small
+\textbf{Nguyên tắc bắt buộc cho chuỗi thời gian:}
+\[
+\boxed{\text{Split} \rightarrow \text{Encode} \rightarrow \text{Normalize} \rightarrow \text{Sequence}}
+\]
+
+\begin{itemize}
+    \item Chia dữ liệu \textbf{theo thứ tự thời gian} 70/15/15 (không shuffle).
+    \item Fit encoder/scaler \textbf{chỉ trên train}; transform cho val/test.
+    \item Tạo sequence 60 bước $\times$ 13 đặc trưng $\rightarrow$ dự đoán stress bước kế tiếp.
+\end{itemize}
+
+\vspace{0.1cm}
+\textbf{Bài học thực tế từ nghiên cứu:}
+\begin{itemize}
+    \item Thử nghiệm 17 đặc trưng kỹ thuật (rolling features) $\Rightarrow$ \textcolor{alertred}{training loss = 10.23} thay vì 0.92
+    \item \textbf{Nguyên nhân}: rolling window rò rỉ thông tin tương lai $\rightarrow$ data leakage
+    \item \textbf{Giải pháp}: loại bỏ rolling features, giữ 13 đặc trưng ``sạch''
+\end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Thực nghiệm và kết quả}
+
+% ---- Module 5: Mô hình & Đánh giá ----
+
+% ============================================================
+% SLIDE 16: THIẾT LẬP THỰC NGHIỆM
+% ============================================================
+\begin{frame}{Thiết lập thực nghiệm}
+\small
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Môi trường:}
+\begin{itemize}
+    \item CPU Intel Core, 16GB RAM
+    \item Python 3.12.4
+    \item TensorFlow 2.16.1
+    \item scikit-learn, SHAP, Keras Tuner
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Nguyên tắc công bằng:}
+\begin{itemize}
+    \item Cùng dữ liệu, cùng pipeline
+    \item Cùng callbacks, batch size
+    \item Cùng protocol đánh giá
+    \item Seed cố định (42)
+\end{itemize}
+\end{columns}
+
+\vspace{0.2cm}
+\textbf{Metrics:} MAE, RMSE, $R^2$ cho bài toán hồi quy | Accuracy, F1 cho HAR
+\end{frame}
+
+% ============================================================
+% SLIDE 17: STRESS BASELINE
+% ============================================================
+\begin{frame}{Stress Baseline: Bi-LSTM chưa tối ưu}
+\small
+\textbf{Kiến trúc baseline:} Stacked Bi-LSTM, dropout = 0.3, lr = 0.001, 320K tham số.
+
+\vspace{0.1cm}
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Kết quả baseline:}
+\begin{itemize}
+    \item $R^2 = 0.9245$ (giải thích 92.5\%)
+    \item MAE $= 0.6855$
+    \item RMSE $= 0.8723$
+    \item Tổng 320,129 tham số
+\end{itemize}
+$\Rightarrow$ \textit{Tốt nhưng còn dư địa cải thiện}
+
+\column{0.46\textwidth}
+\textbf{Chẩn đoán:}
+\begin{itemize}
+    \item Dropout = 0.3 quá lớn $\rightarrow$ underfitting
+    \item Learning rate = 0.001 $\rightarrow$ hội tụ chậm
+    \item 320K params $\rightarrow$ over-parameterized
+\end{itemize}
+$\Rightarrow$ \textit{Cần Bayesian Optimization}
+\end{columns}
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Câu hỏi:} Có thể cải thiện đáng kể chỉ bằng tuning mà không đổi kiến trúc?}}
+\end{frame}
+
+% ============================================================
+% SLIDE 18: BAYESIAN OPTIMIZATION
+% ============================================================
+\begin{frame}{Bayesian Optimization: hiệu quả vượt kỳ vọng}
+\small
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Baseline} & \textbf{Tuned} & \textbf{Cải thiện} \\
+\midrule
+MAE & 0.686 & \textbf{0.529} & \textcolor{breakthroughgreen}{\textbf{$-$22.8\%}} \\
+RMSE & 0.872 & \textbf{0.748} & \textcolor{breakthroughgreen}{\textbf{$-$14.2\%}} \\
+$R^2$ & 0.924 & \textbf{0.944} & \textcolor{breakthroughgreen}{\textbf{$+$2.2\%}} \\
+\midrule
+Tổng params & 320K & \textbf{164K} & \textcolor{breakthroughgreen}{\textbf{$-$48.9\%}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Thay đổi quan trọng nhất:}
+\begin{itemize}
+    \item Dropout: 0.3 $\rightarrow$ \textbf{0.1} --- giải phóng năng lực biểu diễn
+    \item Learning rate: 0.001 $\rightarrow$ \textbf{0.01} --- thoát local minima nhanh hơn
+    \item LSTM units lớp 1: 128 $\rightarrow$ \textbf{64} --- mô hình ``gọn hơn mà khỏe hơn''
+\end{itemize}
+
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Insight:} Mô hình nhỏ hơn 49\% nhưng chính xác hơn 23\% $\Rightarrow$ baseline bị \textit{over-parameterized}}}
+\end{frame}
+
+% ============================================================
+% SLIDE 19: SO SÁNH 5 MÔ HÌNH
+% ============================================================
+\begin{frame}{So sánh 5 mô hình trên cùng điều kiện}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.95\linewidth]{../../results/model_comparison/model_comparison.png}
+\end{figure}
+\vspace{-0.2cm}
+\footnotesize
+\textbf{Kết quả:} Bi-LSTM Tuned đạt \textbf{$R^2 = 0.956$, MAE = 0.441} --- tốt nhất trong 5 kiến trúc.\\
+MLP ($R^2=0.833$) vs Simple LSTM ($R^2=0.943$): temporal dependency đóng góp $\sim$11\% $R^2$.
+\end{frame}
+
+% ============================================================
+% SLIDE 20: BÀI HỌC QUAN TRỌNG NHẤT
+% ============================================================
+\begin{frame}{Bài học quan trọng nhất từ so sánh mô hình}
+\small
+
+\begin{center}
+\large\textbf{``Tối ưu siêu tham số quan trọng hơn thay đổi kiến trúc''}
+\end{center}
+
+\vspace{0.2cm}
+\textbf{Bằng chứng:} cùng kiến trúc Stacked Bi-LSTM, chỉ khác hyperparameters:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\toprule
+& \textbf{Bi-LSTM Baseline} & \textbf{Bi-LSTM Tuned} & \textbf{Cải thiện} \\
+\midrule
+MAE & 0.716 & \textbf{0.441} & \textcolor{breakthroughgreen}{\textbf{$-$38.4\%}} \\
+$R^2$ & 0.907 & \textbf{0.956} & \textcolor{breakthroughgreen}{\textbf{$+$5.4\%}} \\
+Params & 320K & \textbf{164K} & \textcolor{breakthroughgreen}{\textbf{$-$48.9\%}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+\textbf{Phát hiện bất ngờ:} Simple LSTM 1 lớp ($R^2=0.943$) \textit{tốt hơn} Bi-LSTM Baseline ($R^2=0.907$) --- vì baseline bị over-parameterized + underfitting. Sau tuning, Bi-LSTM mới thể hiện đúng tiềm năng.
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Ý nghĩa:} Kiến trúc tốt + siêu tham số xấu $<$ Kiến trúc đơn giản + siêu tham số phù hợp}}
+\end{frame}
+
+% ============================================================
+% SLIDE 21: PHÂN TÍCH LỖI
+% ============================================================
+\begin{frame}{Phân tích lỗi: tuned cải thiện ở nơi quan trọng nhất}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.98\linewidth]{../../results/error_analysis_13features_tuned/error_comparison_baseline_vs_tuned.png}
+\end{figure}
+\vspace{-0.25cm}
+\footnotesize
+
+\begin{columns}[T]
+\column{0.50\textwidth}
+\textbf{Cải thiện theo mức stress:}
+\begin{itemize}
+    \scriptsize
+    \item Very High (8--9): \textcolor{breakthroughgreen}{\textbf{$-$46.1\% MAE}}
+    \item Medium (4--5): $-$14.1\% MAE
+    \item Sitting: $-$31.2\% MAE
+\end{itemize}
+
+\column{0.50\textwidth}
+\textbf{Tổng thể:}
+\begin{itemize}
+    \scriptsize
+    \item 82.7\% dự đoán sai < 1 điểm
+    \item Median AE: 0.547 $\rightarrow$ \textbf{0.340}
+    \item Bias: +0.295 $\rightarrow$ $-$0.150
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ============================================================
+% SLIDE 22: FEATURE IMPORTANCE
+% ============================================================
+\begin{frame}{Feature importance: 4 phương pháp đồng thuận}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.92\linewidth]{../../results/feature_importance_13features/feature_importance_13features.png}
+\end{figure}
+\vspace{-0.25cm}
+\footnotesize
+\textbf{2 đặc trưng nhất quán top-2:} Mood\_Score (hạng TB: 1.75) và Heart\_Rate (hạng TB: 2.25)\\
+Hành vi smartphone (Screen\_Usage, Phone\_Event) cũng đóng vai trò quan trọng --- gợi mở digital phenotyping.
+\end{frame}
+
+% ============================================================
+% SLIDE 23: SO SÁNH HẠNG ĐẶC TRƯNG
+% ============================================================
+\begin{frame}{So sánh thứ hạng đặc trưng giữa các phương pháp}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{../../results/feature_importance_13features/ranking_comparison_13features.png}
+\end{figure}
+\vspace{-0.2cm}
+\footnotesize
+\textbf{Insight:} Location hạng 1 ở RF nhưng hạng 8 ở Permutation/SHAP --- vì Decision Tree khai thác biến categorical tốt, còn LSTM nắm bắt interaction phức tạp hơn. Tổng hợp hạng (rank aggregation) giúp giảm thiên lệch từ phương pháp đơn lẻ.
+\end{frame}
+
+% ============================================================
+% SLIDE 24: TỔNG HỢP THEO RQ
+% ============================================================
+\begin{frame}{Tổng hợp kết quả theo câu hỏi nghiên cứu}
+\small
+\begin{itemize}
+    \item \textbf{RQ1 --- Context-aware:} Mô hình học theo \textit{tổ hợp ngữ cảnh} (5 đặc trưng ngữ cảnh/hành vi trong top-8), không dựa vào sinh lý đơn biến. $\checkmark$
+
+    \vspace{0.1cm}
+    \item \textbf{RQ2 --- Chuỗi vs phi chuỗi:} MLP $R^2 = 0.833$ vs Simple LSTM $R^2 = 0.943$ $\Rightarrow$ phụ thuộc thời gian đóng góp \textbf{$\sim$11\% $R^2$}. $\checkmark$
+
+    \vspace{0.1cm}
+    \item \textbf{RQ3 --- Bayesian Optimization:} Cùng Bi-LSTM: MAE $-$38.4\%, params $-$48.9\%. \textbf{Tuning $>$ thay kiến trúc.} $\checkmark$
+
+    \vspace{0.1cm}
+    \item \textbf{RQ4 --- Đặc trưng cốt lõi:} Mood\_Score + Heart\_Rate nhất quán top-2 ở cả 4 phương pháp. Nhóm sinh lý-hành vi-ngữ cảnh là \textit{cốt lõi}. $\checkmark$
+\end{itemize}
+
+\vspace{0.1cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{4/4 câu hỏi nghiên cứu đều có bằng chứng thực nghiệm trả lời.}}}
+\end{frame}
+
+% ============================================================
+\section{Đóng góp, hạn chế và hướng phát triển}
+
+% ============================================================
+% SLIDE 25: KẾT QUẢ NỔI BẬT (TÓM TẮT SAU KHI TRÌNH BÀY)
+% ============================================================
+\begin{frame}{Kết quả nổi bật của khóa luận}
+
+\begin{center}
+\Large\textbf{3 đột phá chính}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{columns}[T]
+\column{0.32\textwidth}
+\centering
+\textbf{\textcolor{insightblue}{$R^2 = 0.956$}}\\[0.1cm]
+\small Giải thích \textbf{95.6\%}\\phương sai stress\\trên thang 1--9
+
+\column{0.32\textwidth}
+\centering
+\textbf{\textcolor{breakthroughgreen}{$-$46.1\% MAE}}\\[0.1cm]
+\small Cải thiện mạnh nhất\\ở nhóm stress rất cao\\(\textit{quan trọng cho cảnh báo sớm})
+
+\column{0.32\textwidth}
+\centering
+\textbf{\textcolor{alertred}{$-$48.9\% params}}\\[0.1cm]
+\small Mô hình nhỏ hơn\\nhưng chính xác hơn\\nhờ Bayesian Optimization
+\end{columns}
+
+\vspace{0.3cm}
+\begin{center}
+\small\textit{``Tối ưu siêu tham số quan trọng hơn thay đổi kiến trúc''}\\
+\small -- Bài học cốt lõi từ so sánh 5 kiến trúc trên cùng pipeline
+\end{center}
+\end{frame}
+
+% ============================================================
+% SLIDE 26: ĐÓNG GÓP HỌC THUẬT
+% ============================================================
+\begin{frame}{Đóng góp học thuật theo 3 tầng}
+\small
+\begin{enumerate}
+    \item \textbf{Tầng bài toán:}\\
+    Chuyển từ phân loại stress rời rạc $\rightarrow$ \textbf{hồi quy liên tục (1--9)} --- biểu diễn cường độ mịn hơn, phù hợp cảnh báo sớm.
+
+    \vspace{0.15cm}
+    \item \textbf{Tầng phương pháp:}\\
+    Đề xuất \textbf{Context-Stress Modifier} --- lớp điều chỉnh stress dựa trên bộ ba (hoạt động $\times$ vị trí $\times$ thời gian). Giải quyết trực tiếp vấn đề nhập nhằng sinh lý.
+
+    \vspace{0.15cm}
+    \item \textbf{Tầng bằng chứng:}\\
+    Benchmark \textbf{5 kiến trúc} + \textbf{4 phương pháp} giải thích + phân tích lỗi đa chiều (theo stress/hoạt động/thời gian). Chuỗi lập luận khép kín: RQ $\rightarrow$ phương pháp $\rightarrow$ bằng chứng $\rightarrow$ kết luận.
+\end{enumerate}
+\end{frame}
+
+% ============================================================
+% SLIDE 27: HẠN CHẾ
+% ============================================================
+\begin{frame}{Hạn chế nghiên cứu (khung validity)}
+\small
+\begin{itemize}
+    \item \textbf{Construct validity:} Nhãn stress bán mô phỏng (semi-synthetic), chưa phải nhãn lâm sàng đo trực tiếp. $R^2$ cao phần nào phản ánh tính nhất quán của bộ sinh dữ liệu.
+
+    \item \textbf{Internal validity:} Pipeline chống leakage đầy đủ, nhưng chưa có ablation test cho từng thành phần Context-Stress Modifier.
+
+    \item \textbf{External validity:} Chưa kiểm chứng trên dữ liệu thực địa đa đối tượng (khác giới, tuổi, nghề).
+
+    \item \textbf{Conclusion validity:} Cần bổ sung kiểm định thống kê (paired test, bootstrap CI) qua nhiều lần chạy.
+
+    \item \textbf{Hạn chế bổ sung:} Chưa so sánh Transformer/TCN; tài nguyên CPU giới hạn số trial.
+\end{itemize}
+
+\vspace{0.1cm}
+\textit{Trình bày hạn chế không giảm giá trị --- mà giúp xác định phạm vi áp dụng và hướng kiểm chứng tiếp.}
+\end{frame}
+
+% ============================================================
+% SLIDE 28: HƯỚNG PHÁT TRIỂN
+% ============================================================
+\begin{frame}{Hướng phát triển}
+\small
+\textbf{Ngắn hạn (3--6 tháng):}
+\begin{itemize}
+    \item Thu thập dữ liệu thực tế smartphone/wearable kết hợp EMA.
+    \item Mở rộng benchmark: Transformer, Temporal Convolutional Networks.
+    \item Thí nghiệm ablation: bật/tắt Context-Stress Modifier.
+\end{itemize}
+
+\textbf{Trung hạn (6--18 tháng):}
+\begin{itemize}
+    \item Triển khai suy luận gần real-time trên mobile.
+    \item Cá nhân hóa mô hình (transfer learning / meta-learning).
+    \item Federated Learning cho bảo mật dữ liệu sức khỏe.
+\end{itemize}
+
+\textbf{Dài hạn:}
+\begin{itemize}
+    \item Mở rộng đa cảm biến sinh học (EDA, HRV, EEG).
+    \item Predict-to-intervene: tự động đề xuất can thiệp dựa trên stress dự đoán.
+\end{itemize}
+\end{frame}
+
+% ============================================================
+\section{Kết luận}
+
+% ============================================================
+% SLIDE 29: KẾT LUẬN
+% ============================================================
+\begin{frame}{Kết luận}
+\small
+\begin{center}
+\large\textbf{Khóa luận đã xây dựng thành công:}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{enumerate}
+    \item \textbf{Hệ thống context-aware end-to-end} từ dữ liệu cảm biến đến dự đoán stress liên tục --- với $R^2 = 0.956$ và MAE = 0.441.
+
+    \vspace{0.1cm}
+    \item \textbf{Context-Stress Modifier} giải quyết trực tiếp vấn đề nhập nhằng sinh lý --- cùng HR nhưng ý nghĩa khác biệt tùy bối cảnh.
+
+    \vspace{0.1cm}
+    \item \textbf{Bài học transferable}: Tuning cải thiện 38.4\% MAE --- chứng minh rằng \textit{tối ưu siêu tham số thường quan trọng hơn thay đổi kiến trúc}.
+\end{enumerate}
+
+\vspace{0.2cm}
+\fbox{\parbox{0.92\textwidth}{\centering\small\textbf{Giá trị cốt lõi:} Không chỉ metric cao, mà \textit{chuỗi lập luận khoa học nhất quán} từ câu hỏi đến kết luận.}}
+
+\vspace{0.25cm}
+\centering
+\Large Xin cảm ơn Hội đồng!
+\end{frame}
+
+% ============================================================
+% SLIDE 30: Q&A
+% ============================================================
+\begin{frame}{Q\&A}
+\centering
+\Huge Cảm ơn thầy cô và các bạn!
+
+\vspace{0.3cm}
+\normalsize
+\textit{Em sẵn sàng trao đổi về: thiết kế Context-Stress Modifier, tính hợp lệ của dữ liệu bán mô phỏng, và kế hoạch kiểm chứng trên dữ liệu thực địa.}
+\end{frame}
+
+\end{document}
+

@@ -5,6 +5,17 @@
 \chapter{Cơ sở lý thuyết}
 \label{chap:theory}
 
+\section{Nền tảng lý thuyết cho các hướng tiếp cận truyền thống}
+\label{sec:traditional_foundations}
+
+Trước khi đi vào các mô hình học sâu sẽ dùng trong khóa luận, cần làm rõ nền tảng lý thuyết của các hướng tiếp cận cũ trong dự đoán stress. Về bản chất, stress là hiện tượng tâm sinh lý đa yếu tố: cùng một phản ứng sinh lý có thể mang ý nghĩa khác nhau tùy theo hoạt động, thời điểm và bối cảnh môi trường. Các lý thuyết stress kinh điển nhấn mạnh tính động của quá trình này, trong đó trạng thái hiện tại chịu ảnh hưởng đồng thời bởi tác nhân tức thời và tải tích lũy theo thời gian \cite{chrousos2009stress, mcewen2008central}.
+
+Từ góc nhìn mô hình hóa, các kỹ thuật truyền thống thường xuất phát từ hai hướng. Hướng thứ nhất là \textit{rule-based/threshold-based}: đặt ngưỡng cho nhịp tim, HRV hoặc các chỉ số hành vi để cảnh báo stress. Hướng thứ hai là \textit{feature-based machine learning}: trích xuất đặc trưng thủ công (thống kê thời gian/tần số, đặc trưng ngữ cảnh đơn giản) rồi đưa vào các bộ phân lớp hoặc hồi quy cổ điển như Logistic Regression, SVM, Random Forest. Các phương pháp này có ưu điểm là dễ triển khai, dễ diễn giải ở mức cục bộ, và không yêu cầu hạ tầng tính toán lớn.
+
+Tuy nhiên, các tiếp cận cũ cũng có ba hạn chế lý thuyết đáng chú ý. Thứ nhất, chúng phụ thuộc mạnh vào chất lượng đặc trưng thủ công nên khó ổn định khi thay đổi thiết bị hoặc người dùng. Thứ hai, khả năng nắm bắt phụ thuộc thời gian dài còn hạn chế, đặc biệt khi stress biến thiên theo chuỗi hành vi liên tiếp. Thứ ba, nhiều hệ thống vẫn diễn giải stress theo nhãn rời rạc, trong khi nhu cầu ứng dụng thường cần theo dõi cường độ liên tục.
+
+Các hạn chế trên là lý do chương này sẽ lần lượt trình bày nền tảng của nhóm mô hình chuỗi thời gian (RNN/LSTM/Bi-LSTM/GRU), các kỹ thuật huấn luyện-tối ưu, và phương pháp phân tích đặc trưng để khắc phục điểm yếu của hướng truyền thống.
+
 \section{Mạng nơ ron nhân tạo}
 \label{sec:ann}
 Mạng nơ ron hay mạng nơ ron nhân tạo là một trong những công nghệ cốt lõi trong học sâu. Cái tên mạng nơ ron được lấy cảm hứng từ bộ não của con người, mô phỏng cách mà các nơ ron sinh học truyền tín hiệu tới nhau. Mạng nơ-ron là một hệ thống các nút kết nối với nhau, qua đó xử lý và truyền tải thông tin để giải quyết các bài toán phức tạp như nhận dạng hình ảnh, xử lý ngôn ngữ tự nhiên, và nhiều ứng dụng khác. Mạng nơ ron bao gồm các lớp chứa các nút, bao gồm ba loại lớp là lớp đầu vào, lớp ẩn, lớp đầu ra như trong hình:
@@ -398,53 +409,16 @@ Sử dụng mô hình Random Forest \cite{breiman2001random} để xấp xỉ (s
 
 % ============================================================
 
-\section{Nghiên cứu liên quan về dự đoán stress}
+\section{Nghiên cứu liên quan cho bài toán dự đoán stress}
 \label{sec:related_work}
 
-Nghiên cứu dự đoán stress từ dữ liệu cảm biến có thể chia thành ba hướng chính: (i) hướng truyền thống dựa trên luật/ngưỡng sinh lý và mô hình thống kê; (ii) hướng học máy cổ điển (SVM, Random Forest, LDA); (iii) hướng học sâu khai thác dữ liệu chuỗi đa cảm biến \cite{garciaceja2018stress, dalmeida2021stress, rashid2024stress}. Để tránh cách trình bày liệt kê thuần túy, phần này sử dụng khung so sánh thống nhất nhằm chỉ ra rõ ràng điểm mạnh, điểm yếu và khoảng trống nghiên cứu.
+Dự đoán stress là một chủ đề quan trọng trong phân tích hành vi và sức khỏe số, với mục tiêu suy luận trạng thái căng thẳng từ dữ liệu cảm biến và ngữ cảnh sinh hoạt hằng ngày. Bài toán này tương tự nhiều nhiệm vụ khai thác tín hiệu thời gian: thông tin đầu vào vừa có thành phần sinh lý, vừa có thành phần hành vi-ngữ cảnh, và mối quan hệ giữa các biến thường không tuyến tính. Vì vậy, tiến trình nghiên cứu trong lĩnh vực thường đi từ các mô hình đơn giản dựa trên luật đến các mô hình học sâu khai thác chuỗi thời gian.
 
-\subsection{Tiêu chí so sánh công trình liên quan}
+Các công trình giai đoạn đầu chủ yếu tập trung vào đặc trưng sinh lý và thuật toán học máy cổ điển. Kusserow et al. \cite{kusserow2013monitoring} cho thấy tính khả thi của giám sát stress ngoài phòng thí nghiệm bằng cảm biến đeo, nhưng vẫn phụ thuộc mạnh vào thiết kế chỉ báo và ngưỡng. Hovsepian et al. \cite{hovsepian2015cstress} đề xuất pipeline cStress dựa trên đa đặc trưng sinh lý và báo cáo F1 = 0.72 trong kịch bản mobile sensing. Tiếp theo, Schmidt et al. \cite{schmidt2018wesad} so sánh các bộ phân lớp như Random Forest, LDA, AdaBoost trên WESAD và đạt mức chính xác xấp xỉ 80\%. Các kết quả này xác nhận tiềm năng của học máy cổ điển, nhưng đồng thời bộc lộ giới hạn khi phải tự thiết kế đặc trưng thủ công và khó nắm bắt phụ thuộc dài hạn.
 
-Các nghiên cứu được đối chiếu theo năm tiêu chí:
-\begin{enumerate}
-    \item \textbf{Loại mô hình:} truyền thống, học máy cổ điển hay học sâu chuỗi thời gian.
-    \item \textbf{Mức độ tích hợp ngữ cảnh hoạt động:} có hoặc không mô hình hóa hoạt động (HAR/context).
-    \item \textbf{Dạng đầu ra:} phân loại rời rạc hay hồi quy liên tục.
-    \item \textbf{Giá trị thực nghiệm:} mức hiệu năng báo cáo trong bối cảnh dữ liệu tương ứng.
-    \item \textbf{Hạn chế cốt lõi:} điểm nghẽn còn tồn tại, làm cơ sở xác định research gap.
-\end{enumerate}
+Khi học sâu phát triển, các nghiên cứu chuyển sang mô hình hóa chuỗi cảm biến theo hướng tự học biểu diễn. Can et al. \cite{can2019stress} áp dụng CNN/LSTM trên tín hiệu đeo tay và cho thấy cải thiện hiệu suất so với hướng truyền thống trong bối cảnh thực địa có kiểm soát. Các tổng quan gần đây \cite{garciaceja2018stress, dalmeida2021stress, rashid2024stress} cũng ghi nhận xu hướng dùng mô hình chuỗi thời gian đa cảm biến nhằm học quan hệ phức tạp giữa sinh lý, hành vi và thời điểm. Tuy nhiên, phần lớn nghiên cứu vẫn thiên về đầu ra rời rạc (binary/multi-class), trong khi stress thực tế biến thiên liên tục theo cường độ.
 
-\begin{table}[H]
-\centering
-\caption{So sánh nghiên cứu liên quan theo tiêu chí phương pháp và khoảng trống}
-\label{tab:related_work}
-\scriptsize
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular}{|p{2.3cm}|p{2.2cm}|p{1.8cm}|p{1.8cm}|p{2.7cm}|p{2.8cm}|}
-\hline
-\textbf{Nghiên cứu} & \textbf{Kỹ thuật chính} & \textbf{Ngữ cảnh hoạt động} & \textbf{Dạng đầu ra} & \textbf{Giá trị thực nghiệm} & \textbf{Hạn chế cốt lõi} \\
-\hline
-Kusserow et al. \cite{kusserow2013monitoring} & Luật/ngưỡng sinh lý trong môi trường thực & Không tường minh & Nhị phân & Chứng minh tính khả thi giám sát stress ngoài phòng thí nghiệm & Dễ nhiễu theo cá nhân; khó mở rộng cho mô hình dự đoán liên tục \\
-\hline
-Hovsepian et al. \cite{hovsepian2015cstress} & Đa đặc trưng sinh lý + SVM/regression pipeline & Không tường minh & Nhị phân & F1 = 0.72 trong bối cảnh mobile sensing & Chưa tích hợp HAR; mất thông tin mức độ stress giữa các ngưỡng \\
-\hline
-Schmidt et al. \cite{schmidt2018wesad} & Random Forest, LDA, AdaBoost trên WESAD & Gián tiếp (gia tốc kế) & 3 lớp & Acc xấp xỉ 80\% & Chủ yếu bối cảnh phòng thí nghiệm; chưa có cơ chế diễn giải ngữ cảnh hoạt động trong suy luận stress \\
-\hline
-Can et al. \cite{can2019stress} & CNN/LSTM trên tín hiệu đeo tay & Không tường minh & Nhị phân & Acc = 83.5\% trong kịch bản thực địa có kiểm soát & Chưa xử lý rõ nhập nhằng sinh lý do khác biệt hoạt động; đầu ra vẫn rời rạc \\
-\hline
-\textbf{Khóa luận này} & \textbf{HAR + Context-Stress Modifiers + Stacked Bi-LSTM + Bayesian Optimization} & \textbf{Tường minh (HAR + context-aware)} & \textbf{Hồi quy liên tục (1--9)} & $\boldsymbol{R^2 = 0.9555}$, MAE thấp trên tập kiểm tra & Cần kiểm chứng thêm trên bộ dữ liệu stress thu thập hoàn toàn thực địa quy mô lớn \\
-\hline
-\end{tabular}
-\end{table}
+Một hạn chế quan trọng khác là mức tích hợp ngữ cảnh hoạt động còn chưa tường minh. Nhiều hệ thống sử dụng trực tiếp tín hiệu sinh lý mà chưa mô hình hóa rõ ràng hoạt động đang diễn ra, dẫn đến nhập nhằng khi diễn giải (ví dụ nhịp tim cao do vận động và nhịp tim cao do căng thẳng tâm lý). Bên cạnh đó, không phải nghiên cứu nào cũng thực hiện benchmark có kiểm soát giữa mô hình chuỗi và phi chuỗi trên cùng pipeline dữ liệu, hoặc kết nối nhất quán giữa tối ưu siêu tham số và phân tích khả năng giải thích.
 
-Từ so sánh trên, khóa luận xác định bốn khoảng trống nghiên cứu trọng tâm:
+Từ tổng quan trên, khóa luận định vị khoảng trống nghiên cứu theo bốn điểm: (i) cần chuyển từ dự đoán rời rạc sang hồi quy stress liên tục; (ii) cần tích hợp ngữ cảnh hoạt động theo cách tường minh; (iii) cần so sánh kiến trúc có kiểm soát trong cùng pipeline; và (iv) cần kết hợp tối ưu siêu tham số với phân tích đặc trưng để tăng độ tin cậy của kết luận. Các nội dung này là cơ sở để thiết kế phương pháp đề xuất ở Chương 3 và kiểm chứng thực nghiệm ở Chương 4.
 
-\textbf{Khoảng trống G1 — Bài toán thường bị rời rạc hóa:} Phần lớn nghiên cứu vẫn dự đoán stress theo nhãn rời rạc (nhị phân/đa lớp), trong khi stress biến thiên liên tục theo thời gian. Điều này làm giảm khả năng theo dõi biến động vi mô của trạng thái tâm lý.
-
-\textbf{Khoảng trống G2 — Thiếu mô hình hóa ngữ cảnh hoạt động tường minh:} Nhiều hệ thống dùng tín hiệu sinh lý trực tiếp mà không gắn với hoạt động đang diễn ra, dẫn tới nhập nhằng sinh lý. Khoảng trống này được kiểm chứng qua \textbf{RQ1/H1} trong khóa luận.
-
-\textbf{Khoảng trống G3 — Thiếu benchmark kiến trúc chuỗi thời gian có kiểm soát:} Một số công trình dùng LSTM/CNN nhưng thiếu so sánh hệ thống giữa mô hình chuỗi và phi chuỗi trong cùng pipeline dữ liệu. Khoảng trống này được xử lý qua \textbf{RQ2/H2}.
-
-\textbf{Khoảng trống G4 — Thiếu quy trình tối ưu và diễn giải nhất quán:} Nhiều nghiên cứu báo cáo hiệu năng nhưng chưa kết nối đầy đủ giữa tối ưu siêu tham số, phân tích đóng góp đặc trưng và tính tin cậy của kết luận. Khoảng trống này được giải quyết thông qua \textbf{RQ3/H3} và \textbf{RQ4/H4}.
-
-Như vậy, đóng góp của khóa luận không chỉ nằm ở một điểm số hiệu năng cao, mà ở việc xây dựng chuỗi lập luận nghiên cứu nhất quán: \textit{research gap} $\rightarrow$ giả thuyết $\rightarrow$ thiết kế thực nghiệm $\rightarrow$ bằng chứng định lượng. Chương tiếp theo trình bày chi tiết cách thiết kế dữ liệu, mô hình và quy trình đánh giá để kiểm chứng các giả thuyết này.
