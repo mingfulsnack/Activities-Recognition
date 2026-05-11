@@ -42,10 +42,10 @@ class ModelComparator:
         
     def load_reduced_metrics(self, metrics_file='results/feature_comparison/metrics_10features.txt'):
         """Load metrics from 10-feature model."""
-        print(f"📂 Loading reduced model metrics from: {metrics_file}")
+        print(f" Loading reduced model metrics from: {metrics_file}")
         
         if not os.path.exists(metrics_file):
-            print(f"❌ Error: Metrics file not found: {metrics_file}")
+            print(f" Error: Metrics file not found: {metrics_file}")
             print(f"  Please run train_lstm_10features.py first.")
             return False
         
@@ -68,7 +68,7 @@ class ModelComparator:
             'rmse': metrics.get('rmse', 0)
         }
         
-        print(f"✓ Loaded metrics:")
+        print(f" Loaded metrics:")
         print(f"  R²:   {self.reduced_metrics['r2']:.4f}")
         print(f"  MAE:  {self.reduced_metrics['mae']:.4f}")
         print(f"  RMSE: {self.reduced_metrics['rmse']:.4f}")
@@ -77,7 +77,7 @@ class ModelComparator:
         
     def create_comparison_table(self):
         """Create comparison table."""
-        print("\n📊 Creating comparison table...")
+        print("\n Creating comparison table...")
         
         # Calculate differences
         r2_diff = self.reduced_metrics['r2'] - self.baseline_metrics['r2']
@@ -131,7 +131,7 @@ class ModelComparator:
         
     def create_comparison_visualizations(self):
         """Create comparison visualizations."""
-        print("\n📊 Creating comparison visualizations...")
+        print("\n Creating comparison visualizations...")
         
         # Create figure with subplots
         fig = plt.figure(figsize=(16, 10))
@@ -313,7 +313,7 @@ Benefits of 10-Feature Model:
         
     def generate_final_report(self):
         """Generate detailed comparison report."""
-        print("\n📝 Generating final report...")
+        print("\n Generating final report...")
         
         # Calculate metrics
         r2_diff = self.reduced_metrics['r2'] - self.baseline_metrics['r2']
@@ -465,7 +465,7 @@ def main():
     
     # Load reduced model metrics
     if not comparator.load_reduced_metrics():
-        print("\n❌ Cannot proceed without 10-feature model metrics.")
+        print("\n Cannot proceed without 10-feature model metrics.")
         print("  Please run train_lstm_10features.py first.")
         return
     
@@ -481,7 +481,7 @@ def main():
         print(f"\nResults saved to: {comparator.results_dir}")
         
     except Exception as e:
-        print(f"\n❌ Error during comparison: {str(e)}")
+        print(f"\n Error during comparison: {str(e)}")
         import traceback
         traceback.print_exc()
 

@@ -13,7 +13,7 @@ Advantages over 17-feature version:
 - Evidence-based core + ML-selected importance
 
 PIPELINE FIX (Feb 13, 2026):
-✅ FIXED data leakage bug - encoding now happens AFTER train/test split
+   Encoding now happens AFTER train/test split
    Correct order: Load → Split RAW → Encode (fit train, transform val/test) → Normalize → Sequences
    Previous bug: Load → Encode ALL → Split (leaked test info into train encoders)
 
@@ -62,7 +62,7 @@ class DataPreprocessor:
         
     def split_data(self, test_size=0.15, val_size=0.15, random_state=42):
         """Split RAW data into train/val/test sets (BEFORE encoding)."""
-        print(f"\n✂️  Splitting RAW data (before encoding)...")
+        print(f"\n Splitting RAW data (before encoding)...")
         
         # Separate features and target
         X = self.df.drop('Stress_Level', axis=1)
@@ -87,7 +87,7 @@ class DataPreprocessor:
         
     def encode_categorical_features(self, X_train, X_val, X_test):
         """Encode categorical features AFTER split (fit on train, transform on val/test)."""
-        print("\n🔢 Encoding categorical features (AFTER split)...")
+        print("\n Encoding categorical features (AFTER split)...")
         
         # Make copies to avoid modifying originals
         X_train = X_train.copy()
@@ -113,14 +113,14 @@ class DataPreprocessor:
                 mapping = dict(zip(encoder.classes_, encoder.transform(encoder.classes_)))
                 print(f"    {col} mapping: {mapping}")
         
-        print(f"\n✓ Encoded {len(self.categorical_features)} categorical features")
+        print(f"\n Encoded {len(self.categorical_features)} categorical features")
         print("✓ NO DATA LEAKAGE: Fitted on train only, transformed val/test")
         
         return X_train, X_val, X_test
         
     def normalize_features(self, X_train, X_val, X_test):
         """Normalize features using StandardScaler (fit on train only)."""
-        print("\n📏 Normalizing features...")
+        print("\n Normalizing features...")
         
         # Convert DataFrames to numpy arrays if needed
         if hasattr(X_train, 'values'):
@@ -160,13 +160,13 @@ class DataPreprocessor:
         scaler_path = os.path.join(save_dir, 'scaler_13features.pkl')
         with open(scaler_path, 'wb') as f:
             pickle.dump(self.scaler, f)
-        print(f"\n💾 Saved scaler to: {scaler_path}")
+        print(f"\n Saved scaler to: {scaler_path}")
         
         for col, encoder in self.label_encoders.items():
             encoder_path = os.path.join(save_dir, f'label_encoder_13features_{col}.pkl')
             with open(encoder_path, 'wb') as f:
                 pickle.dump(encoder, f)
-            print(f"💾 Saved {col} encoder to: {encoder_path}")
+            print(f" Saved {col} encoder to: {encoder_path}")
 
 
 class LSTMModel:
@@ -179,7 +179,7 @@ class LSTMModel:
         
     def build_model(self, lstm_units=[128, 64], dropout=0.3):
         """Build stacked Bi-LSTM model (same architecture as baseline for fair comparison)."""
-        print("\n🏗️  Building model...")
+        print("\n  Building model...")
         
         self.model = Sequential([
             Input(shape=self.input_shape),
@@ -209,7 +209,7 @@ class LSTMModel:
         
         # Count params
         total_params = self.model.count_params()
-        print(f"\n✓ Model built:")
+        print(f"\n Model built:")
         print(f"  Architecture: Stacked Bi-LSTM ({lstm_units[0]} → {lstm_units[1]})")
         print(f"  Parameters: {total_params:,} ({total_params/1e6:.2f}M)")
         print(f"  Model size: ~{total_params * 4 / 1024**2:.2f} MB")
@@ -219,7 +219,7 @@ class LSTMModel:
     def train(self, X_train, y_train, X_val, y_val, 
               epochs=50, batch_size=32, patience=10):
         """Train model with early stopping."""
-        print("\n🚀 Starting training...")
+        print("\n Starting training...")
         print(f"  Epochs: {epochs}")
         print(f"  Batch size: {batch_size}")
         print(f"  Patience: {patience}")
@@ -267,7 +267,7 @@ class LSTMModel:
         
     def evaluate(self, X_test, y_test):
         """Evaluate model on test set."""
-        print("\n📊 Evaluating on test set...")
+        print("\n Evaluating on test set...")
         
         y_pred = self.model.predict(X_test, verbose=0).flatten()
         
@@ -283,12 +283,12 @@ class LSTMModel:
         
         # Validation verdict
         if r2 >= 0.93 and mae <= 0.55:
-            print(f"\n✅ VALIDATION SUCCESS: 17 features achieve excellent performance!")
+            print(f"\n VALIDATION SUCCESS: 17 features achieve excellent performance!")
             print(f"   Expected improvements in temporal/activity context modeling")
         elif r2 >= 0.90:
-            print(f"\n⚠️  GOOD PERFORMANCE: R²={r2:.4f}, but room for improvement")
+            print(f"\n  GOOD PERFORMANCE: R²={r2:.4f}, but room for improvement")
         else:
-            print(f"\n❌ PERFORMANCE CONCERN: R²={r2:.4f} below expectations")
+            print(f"\n PERFORMANCE CONCERN: R²={r2:.4f} below expectations")
         
         return {
             'mae': mae,
@@ -312,7 +312,7 @@ class LSTMModel:
             f.write(f"R²:   {metrics['r2']:.4f}\n")
             f.write(f"\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
         
-        print(f"\n💾 Metrics saved to: {metrics_path}")
+        print(f"\n Metrics saved to: {metrics_path}")
         
         return self
 
@@ -330,7 +330,7 @@ def main():
     
     # Check data
     if not os.path.exists(data_path):
-        print(f"❌ Error: Dataset not found: {data_path}")
+        print(f" Error: Dataset not found: {data_path}")
         print(f"   Run feature_engineering.py first!")
         return
     
@@ -358,7 +358,7 @@ def main():
         )
         
         # 5. Create sequences
-        print(f"\n🔄 Creating sequences (length={seq_length})...")
+        print(f"\n Creating sequences (length={seq_length})...")
         X_train_seq, y_train_seq = preprocessor.create_sequences(
             X_train_scaled, y_train, seq_length
         )
@@ -376,7 +376,7 @@ def main():
         
         # 6. Build and train model
         n_features = X_train_seq.shape[2]  # Get feature count from sequences
-        print(f"\n🔢 Number of features: {n_features}")
+        print(f"\n Number of features: {n_features}")
         
         model = LSTMModel(input_shape=(seq_length, n_features))
         model.build_model(lstm_units=[128, 64], dropout=0.3)
@@ -407,7 +407,7 @@ def main():
         print(f"\nNext step: python stress_prediction/comparison_analysis_13.py")
         
     except Exception as e:
-        print(f"\n❌ Error: {str(e)}")
+        print(f"\n Error: {str(e)}")
         import traceback
         traceback.print_exc()
 

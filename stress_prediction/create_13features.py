@@ -33,18 +33,18 @@ def create_simplified_dataset():
     input_file = 'generate_and_verify_data/Data generator/data/optimized_health_data_23features.csv'
     output_file = 'data/optimized_health_data_13features.csv'
     
-    print(f"📂 Loading data from: {input_file}")
+    print(f" Loading data from: {input_file}")
     df = pd.read_csv(input_file)
-    print(f"✓ Loaded {len(df):,} samples with {len(df.columns)} columns")
+    print(f" Loaded {len(df):,} samples with {len(df.columns)} columns")
     
     # Extract Hour and Day_of_Week from Timestamp if not present
     if 'Timestamp' in df.columns and 'Hour' not in df.columns:
-        print(f"\n⚙️  Extracting Hour and Day_of_Week from Timestamp...")
+        print(f"\n  Extracting Hour and Day_of_Week from Timestamp...")
         df['Timestamp'] = pd.to_datetime(df['Timestamp'])
         df['Hour'] = df['Timestamp'].dt.hour
         df['Day_of_Week'] = df['Timestamp'].dt.dayofweek
-        print(f"  ✓ Extracted Hour (range: {df['Hour'].min()}-{df['Hour'].max()})")
-        print(f"  ✓ Extracted Day_of_Week (range: {df['Day_of_Week'].min()}-{df['Day_of_Week'].max()})")
+        print(f"   Extracted Hour (range: {df['Hour'].min()}-{df['Hour'].max()})")
+        print(f"   Extracted Day_of_Week (range: {df['Day_of_Week'].min()}-{df['Day_of_Week'].max()})")
     
     # Select 13 features
     SELECTED_FEATURES = [
@@ -74,7 +74,7 @@ def create_simplified_dataset():
     missing = [f for f in SELECTED_FEATURES if f not in df.columns]
     
     if missing:
-        print(f"\n⚠️  Missing features: {missing}")
+        print(f"\n  Missing features: {missing}")
         return
     
     # Create dataset
@@ -88,7 +88,7 @@ def create_simplified_dataset():
         print(f"    {i:2d}. {feat}")
     
     # Check data quality
-    print(f"\n🔍 Data Quality Check:")
+    print(f"\n Data Quality Check:")
     nan_count = df_final.isnull().sum().sum()
     inf_count = np.isinf(df_final.select_dtypes(include=[np.number])).sum().sum()
     
@@ -96,23 +96,23 @@ def create_simplified_dataset():
     print(f"  Inf values: {inf_count}")
     
     if nan_count == 0 and inf_count == 0:
-        print(f"  ✅ Data quality: GOOD")
+        print(f"   Data quality: GOOD")
     else:
-        print(f"  ⚠️  Data quality issues detected")
+        print(f"    Data quality issues detected")
     
     # Target statistics
-    print(f"\n📊 Target Statistics:")
+    print(f"\n Target Statistics:")
     print(f"  Range: [{df_final['Stress_Level'].min():.2f}, {df_final['Stress_Level'].max():.2f}]")
     print(f"  Mean: {df_final['Stress_Level'].mean():.4f}")
     print(f"  Std:  {df_final['Stress_Level'].std():.4f}")
     
     # Save
-    print(f"\n💾 Saving to: {output_file}")
+    print(f"\n Saving to: {output_file}")
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
     df_final.to_csv(output_file, index=False)
     
     file_size = os.path.getsize(output_file) / 1024**2
-    print(f"✓ Saved successfully!")
+    print(f" Saved successfully!")
     print(f"  File size: {file_size:.2f} MB")
     
     # Create report
@@ -124,13 +124,13 @@ def create_simplified_dataset():
         f.write("1. RATIONALE\n")
         f.write("-" * 80 + "\n")
         f.write("After testing 17 features with complex feature engineering:\n")
-        f.write("  ⚠️  Problem: Rolling features caused data leakage + scaling issues\n")
-        f.write("  ⚠️  Result: Training loss ~10.23 (vs ~0.92 expected)\n")
+        f.write("    Problem: Rolling features caused data leakage + scaling issues\n")
+        f.write("    Result: Training loss ~10.23 (vs ~0.92 expected)\n")
         f.write("\n")
         f.write("Simplified approach:\n")
-        f.write("  ✓ Use only essential features (no rolling windows)\n")
-        f.write("  ✓ Combine domain knowledge (core 7) + ML insights (high-importance 6)\n")
-        f.write("  ✓ Simpler = more interpretable + more robust\n")
+        f.write("   Use only essential features (no rolling windows)\n")
+        f.write("   Combine domain knowledge (core 7) + ML insights (high-importance 6)\n")
+        f.write("   Simpler = more interpretable + more robust\n")
         f.write("\n")
         
         f.write("2. FEATURE CATEGORIES\n")
@@ -167,13 +167,13 @@ def create_simplified_dataset():
         f.write("4. DEFENSIBILITY\n")
         f.write("-" * 80 + "\n")
         f.write("For medical presentation:\n")
-        f.write("  ✓ Core features: All backed by published papers\n")
-        f.write("  ✓ Additional features: Selected by ML importance (interpretable)\n")
-        f.write("  ✓ No complex engineering: Reduces overfitting risk\n")
-        f.write("  ✓ HAR integration: Full accelerometer + activity preserved\n")
+        f.write("   Core features: All backed by published papers\n")
+        f.write("   Additional features: Selected by ML importance (interpretable)\n")
+        f.write("   No complex engineering: Reduces overfitting risk\n")
+        f.write("   HAR integration: Full accelerometer + activity preserved\n")
         f.write("\n")
     
-    print(f"💾 Report saved to: {report_path}")
+    print(f" Report saved to: {report_path}")
     
     print("\n" + "=" * 80)
     print("✓ 13-FEATURE DATASET CREATED!")

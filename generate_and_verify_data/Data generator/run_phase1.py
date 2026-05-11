@@ -20,7 +20,7 @@ def main():
     ], capture_output=False)
     
     if result.returncode != 0:
-        print("\n❌ Generation failed!")
+        print("\n Generation failed!")
         return
     
     # Step 2: Apply feature selection
@@ -34,11 +34,11 @@ def main():
     ], capture_output=False)
     
     if result.returncode != 0:
-        print("\n❌ Feature selection failed!")
+        print("\n Feature selection failed!")
         return
     
     print("\n" + "="*70)
-    print("✅ Phase 1 completed successfully!")
+    print(" Phase 1 completed successfully!")
     print("="*70)
     print("\nGenerated files:")
     print("  1. data/quota_balanced_health_data_30days.csv (44 fields)")

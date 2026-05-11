@@ -23,14 +23,14 @@ def main():
     
     # Verify paths exist
     if not model_path.exists():
-        print(f"\n❌ ERROR: Model not found at {model_path}")
+        print(f"\n ERROR: Model not found at {model_path}")
         return
     
     if not data_path.exists():
-        print(f"\n❌ ERROR: Data not found at {data_path}")
+        print(f"\n ERROR: Data not found at {data_path}")
         return
     
-    print("\n✅ All files found. Starting analysis...")
+    print("\n All files found. Starting analysis...")
     
     # Run analysis
     analyzer = ErrorAnalyzer(
@@ -42,7 +42,7 @@ def main():
     analyzer.run_full_analysis()
     
     print("\n" + "="*70)
-    print("  ✅ ANALYSIS COMPLETE!")
+    print("   ANALYSIS COMPLETE!")
     print("="*70)
     print(f"\nResults saved to: {results_dir}")
     print("\nNext steps:")

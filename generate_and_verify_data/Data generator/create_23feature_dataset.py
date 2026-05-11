@@ -15,7 +15,7 @@ def create_23feature_dataset():
     
     # Load 44-field dataset (has everything)
     df_full = pd.read_csv('data/quota_balanced_health_data_30days_v2.csv')
-    print(f"\n✅ Loaded full dataset: {df_full.shape}")
+    print(f"\n Loaded full dataset: {df_full.shape}")
     
     # 23 Selected Features
     SELECTED_23_FEATURES = [
@@ -54,14 +54,14 @@ def create_23feature_dataset():
     # Select features
     df_23 = df_full[SELECTED_23_FEATURES].copy()
     
-    print(f"\n📊 Created 23-feature dataset: {df_23.shape}")
-    print(f"📉 Reduction: 44 → 23 features (47.7% reduction)")
+    print(f"\n Created 23-feature dataset: {df_23.shape}")
+    print(f" Reduction: 44 → 23 features (47.7% reduction)")
     
     # Save
     output_path = 'data/optimized_health_data_23features.csv'
     df_23.to_csv(output_path, index=False)
     
-    print(f"\n✅ Saved to: {output_path}")
+    print(f"\n Saved to: {output_path}")
     
     # Show stats
     print("\n" + "="*70)
@@ -84,10 +84,10 @@ def create_23feature_dataset():
     print("\n" + "="*70)
     print("Feature Groups")
     print("="*70)
-    print("✅ Sensor Data: 3 features")
-    print("✅ Core Features: 9 features")
-    print("✅ Behavioral: 7 features")
-    print("✅ Environmental: 4 features")
+    print(" Sensor Data: 3 features")
+    print(" Core Features: 9 features")
+    print(" Behavioral: 7 features")
+    print(" Environmental: 4 features")
     print("="*70)
     print("TOTAL: 23 features")
     
@@ -98,11 +98,11 @@ if __name__ == "__main__":
     df = create_23feature_dataset()
     
     print("\n" + "="*70)
-    print("✅ 23-Feature Dataset Ready!")
+    print(" 23-Feature Dataset Ready!")
     print("="*70)
-    print("\n📌 Use cases:")
+    print("\n Use cases:")
     print("  1. End-to-end learning: X,Y,Z → Stress")
     print("  2. Multi-task learning: X,Y,Z → Activity + Stress")
     print("  3. Two-stage: X,Y,Z → Activity → Stress")
     print("  4. Flexible: Can use with or without Activity label")
-    print("\n🎯 This is the RECOMMENDED dataset for research!")
+    print("\n This is the RECOMMENDED dataset for research!")

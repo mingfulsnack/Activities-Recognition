@@ -26,19 +26,19 @@ class AccelerometerValidator:
         self.model = tf.keras.models.load_model(self.model_path)
         self.scaler = StandardScaler()
         
-        print(f"✅ Loaded HAR model from: {self.model_path}")
-        print(f"📊 Model input shape: {self.model.input_shape}")
-        print(f"🎯 Model classes: {LABELS_NAMES}")
+        print(f" Loaded HAR model from: {self.model_path}")
+        print(f" Model input shape: {self.model.input_shape}")
+        print(f" Model classes: {LABELS_NAMES}")
 
     def prepare_data_for_har(self, df):
         """
         Chuẩn bị data theo định dạng HAR model expects
         """
-        print(f"\n🔧 === PREPARING DATA FOR HAR VALIDATION ===")
+        print(f"\n === PREPARING DATA FOR HAR VALIDATION ===")
         
         # Sort by timestamp to ensure proper sequence
         df_sorted = df.sort_values('Timestamp').copy()
-        print(f"📊 Total samples: {len(df_sorted)}")
+        print(f" Total samples: {len(df_sorted)}")
         
         # Create HAR format dataframe
         har_data = pd.DataFrame({
@@ -50,16 +50,16 @@ class AccelerometerValidator:
             'z-axis': df_sorted['Accelerometer_Z']
         })
         
-        print(f"✅ Created HAR format data")
+        print(f" Created HAR format data")
         return har_data
 
     def create_segments(self, data):
         """
         Tạo segments theo sliding window như HAR model training
         """
-        print(f"\n📐 === CREATING HAR SEGMENTS ===")
-        print(f"🔧 SEGMENT_TIME_SIZE: {SEGMENT_TIME_SIZE}")
-        print(f"🔧 TIME_STEP: {TIME_STEP}")
+        print(f"\n === CREATING HAR SEGMENTS ===")
+        print(f" SEGMENT_TIME_SIZE: {SEGMENT_TIME_SIZE}")
+        print(f" TIME_STEP: {TIME_STEP}")
         
         data_segments = []
         labels = []
@@ -70,7 +70,7 @@ class AccelerometerValidator:
         
         for activity, group in activity_groups:
             if len(group) < SEGMENT_TIME_SIZE:
-                print(f"⚠️  Skipping {activity}: only {len(group)} samples (need {SEGMENT_TIME_SIZE})")
+                print(f"  Skipping {activity}: only {len(group)} samples (need {SEGMENT_TIME_SIZE})")
                 continue
                 
             # Create segments within this activity group
@@ -100,13 +100,13 @@ class AccelerometerValidator:
         # One-hot encode labels
         y = one_hot_encode(labels)
         
-        print(f"✅ Created {len(X)} segments")
-        print(f"📊 Segment shape: {X.shape}")
-        print(f"🏷️  Labels shape: {y.shape}")
+        print(f" Created {len(X)} segments")
+        print(f" Segment shape: {X.shape}")
+        print(f"  Labels shape: {y.shape}")
         
         # Show segment distribution
         unique_labels, counts = np.unique(labels, return_counts=True)
-        print(f"\n📈 Segment distribution:")
+        print(f"\n Segment distribution:")
         for label, count in zip(unique_labels, counts):
             print(f"  {label}: {count} segments")
             
@@ -114,7 +114,7 @@ class AccelerometerValidator:
 
     def normalize_data(self, X):
         """Normalize data như training process"""
-        print(f"\n🔧 === NORMALIZING DATA ===")
+        print(f"\n === NORMALIZING DATA ===")
         
         # Reshape to 2D for StandardScaler
         original_shape = X.shape
@@ -126,9 +126,9 @@ class AccelerometerValidator:
         # Reshape back
         X_normalized = X_normalized.reshape(original_shape)
         
-        print(f"✅ Normalized data shape: {X_normalized.shape}")
-        print(f"📊 Mean after normalization: {np.mean(X_normalized, axis=(0,1))}")
-        print(f"📊 Std after normalization: {np.std(X_normalized, axis=(0,1))}")
+        print(f" Normalized data shape: {X_normalized.shape}")
+        print(f" Mean after normalization: {np.mean(X_normalized, axis=(0,1))}")
+        print(f" Std after normalization: {np.std(X_normalized, axis=(0,1))}")
         
         return X_normalized
 
@@ -136,7 +136,7 @@ class AccelerometerValidator:
         """
         Validate với HAR model và tính accuracy
         """
-        print(f"\n🎯 === HAR MODEL VALIDATION ===")
+        print(f"\n === HAR MODEL VALIDATION ===")
         
         # Make predictions
         predictions = self.model.predict(X, verbose=0)
@@ -149,10 +149,10 @@ class AccelerometerValidator:
         correct_predictions = sum(1 for actual, pred in zip(actual_labels, predicted_labels) if actual == pred)
         overall_accuracy = correct_predictions / len(actual_labels)
         
-        print(f"🏆 OVERALL ACCURACY: {overall_accuracy:.3f} ({overall_accuracy*100:.1f}%)")
+        print(f" OVERALL ACCURACY: {overall_accuracy:.3f} ({overall_accuracy*100:.1f}%)")
         
         # Per-activity accuracy
-        print(f"\n📊 === PER-ACTIVITY ACCURACY ===")
+        print(f"\n === PER-ACTIVITY ACCURACY ===")
         activity_stats = {}
         
         for activity in LABELS_NAMES:
@@ -172,7 +172,7 @@ class AccelerometerValidator:
             print(f"  {activity:12}: {activity_correct:3d}/{len(activity_indices):3d} = {activity_accuracy:.3f} ({activity_accuracy*100:.1f}%)")
         
         # Confusion matrix analysis
-        print(f"\n🔍 === DETAILED PREDICTION ANALYSIS ===")
+        print(f"\n === DETAILED PREDICTION ANALYSIS ===")
         
         # Show some examples
         print(f"\nSample predictions (first 10):")
@@ -185,7 +185,7 @@ class AccelerometerValidator:
             print(f"  {status} Actual: {actual:12} | Predicted: {predicted:12} | Confidence: {confidence:.3f}")
         
         # Find most problematic cases
-        print(f"\n🚨 === MOST PROBLEMATIC CASES ===")
+        print(f"\n === MOST PROBLEMATIC CASES ===")
         wrong_predictions = []
         for i, (actual, predicted) in enumerate(zip(actual_labels, predicted_labels)):
             if actual != predicted:
@@ -214,7 +214,7 @@ class AccelerometerValidator:
         """
         Phân tích chất lượng data accelerometer
         """
-        print(f"\n📈 === ACCELEROMETER DATA QUALITY ANALYSIS ===")
+        print(f"\n === ACCELEROMETER DATA QUALITY ANALYSIS ===")
         
         # Basic statistics
         for axis in ['Accelerometer_X', 'Accelerometer_Y', 'Accelerometer_Z']:
@@ -225,7 +225,7 @@ class AccelerometerValidator:
             print(f"  Outliers (>3σ): {len(values[abs(values - values.mean()) > 3 * values.std()])}")
         
         # Per-activity statistics
-        print(f"\n📊 === PER-ACTIVITY ACCELEROMETER STATS ===")
+        print(f"\n === PER-ACTIVITY ACCELEROMETER STATS ===")
         for activity in df['Activity'].unique():
             activity_data = df[df['Activity'] == activity]
             magnitude = np.sqrt(
@@ -237,29 +237,29 @@ class AccelerometerValidator:
 
 def main():
     """Main validation function"""
-    print("🔍 === HAR MODEL VALIDATION FOR GENERATED ACCELEROMETER DATA ===")
+    print(" === HAR MODEL VALIDATION FOR GENERATED ACCELEROMETER DATA ===")
     
     # Load generated dataset - USE 23-FIELD VERSION (has accelerometer + optimized features)
     data_path = 'data/optimized_health_data_23features.csv'
-    print(f"📂 Loading data from: {data_path}")
-    print(f"ℹ️  Using 23-field dataset (Accelerometer X,Y,Z + 20 optimized features)")
-    print(f"ℹ️  This is the RECOMMENDED dataset for research")
+    print(f" Loading data from: {data_path}")
+    print(f"  Using 23-field dataset (Accelerometer X,Y,Z + 20 optimized features)")
+    print(f"  This is the RECOMMENDED dataset for research")
     
     try:
         df = pd.read_csv(data_path)
-        print(f"✅ Loaded {len(df)} samples")
-        print(f"📊 Date range: {df['Timestamp'].min()} to {df['Timestamp'].max()}")
-        print(f"🏃 Activities: {df['Activity'].unique()}")
+        print(f" Loaded {len(df)} samples")
+        print(f" Date range: {df['Timestamp'].min()} to {df['Timestamp'].max()}")
+        print(f" Activities: {df['Activity'].unique()}")
         
     except Exception as e:
-        print(f"❌ Error loading data: {e}")
+        print(f" Error loading data: {e}")
         return
     
     # Initialize validator
     try:
         validator = AccelerometerValidator()
     except Exception as e:
-        print(f"❌ Error loading HAR model: {e}")
+        print(f" Error loading HAR model: {e}")
         return
     
     # Analyze data quality
@@ -273,11 +273,11 @@ def main():
         X, y, labels, segment_info = validator.create_segments(har_data)
         
         if len(X) == 0:
-            print("❌ No valid segments created. Check data continuity.")
+            print(" No valid segments created. Check data continuity.")
             return
             
     except Exception as e:
-        print(f"❌ Error creating segments: {e}")
+        print(f" Error creating segments: {e}")
         return
     
     # Normalize data
@@ -289,26 +289,26 @@ def main():
             X_normalized, y, labels, segment_info
         )
         
-        print(f"\n🎯 === FINAL ASSESSMENT ===")
+        print(f"\n === FINAL ASSESSMENT ===")
         if accuracy >= 0.85:
-            print(f"🎉 EXCELLENT: {accuracy:.1%} accuracy - Generated data is HAR-compatible!")
+            print(f" EXCELLENT: {accuracy:.1%} accuracy - Generated data is HAR-compatible!")
         elif accuracy >= 0.70:
-            print(f"✅ GOOD: {accuracy:.1%} accuracy - Generated data is acceptable for HAR")
+            print(f" GOOD: {accuracy:.1%} accuracy - Generated data is acceptable for HAR")
         elif accuracy >= 0.50:
-            print(f"⚠️  FAIR: {accuracy:.1%} accuracy - Generated data needs improvement")
+            print(f"  FAIR: {accuracy:.1%} accuracy - Generated data needs improvement")
         else:
-            print(f"❌ POOR: {accuracy:.1%} accuracy - Generated data has significant issues")
+            print(f" POOR: {accuracy:.1%} accuracy - Generated data has significant issues")
             
-        print(f"\n📋 === RECOMMENDATIONS ===")
+        print(f"\n === RECOMMENDATIONS ===")
         if accuracy >= 0.85:
-            print("✅ Data is ready for advanced stress prediction modeling")
-            print("✅ Accelerometer patterns are realistic and HAR-compatible")
+            print(" Data is ready for advanced stress prediction modeling")
+            print(" Accelerometer patterns are realistic and HAR-compatible")
         else:
-            print("🔧 Consider improving accelerometer generation logic")
-            print("🔧 Check for activity-specific acceleration patterns")
+            print(" Consider improving accelerometer generation logic")
+            print(" Check for activity-specific acceleration patterns")
             
     except Exception as e:
-        print(f"❌ Error during validation: {e}")
+        print(f" Error during validation: {e}")
         return
 
 if __name__ == "__main__":

@@ -66,7 +66,7 @@ class FeatureSelector:
         
     def load_data(self):
         """Load original dataset."""
-        print(f"📂 Loading original dataset from: {self.input_file}")
+        print(f" Loading original dataset from: {self.input_file}")
         self.df_original = pd.read_csv(self.input_file)
         print(f"✓ Loaded {len(self.df_original):,} samples with {len(self.df_original.columns)} features")
         print(f"  Original features: {list(self.df_original.columns)}")
@@ -74,12 +74,12 @@ class FeatureSelector:
         
     def select_features(self):
         """Select top 10 features + target."""
-        print(f"\n🎯 Selecting top 10 features...")
+        print(f"\n Selecting top 10 features...")
         
         # Check if all features exist
         missing_features = [f for f in TOP_10_FEATURES if f not in self.df_original.columns]
         if missing_features:
-            print(f"⚠️  Missing features: {missing_features}")
+            print(f"  Missing features: {missing_features}")
             print(f"  Available features: {list(self.df_original.columns)}")
             raise ValueError(f"Some features are missing in dataset: {missing_features}")
         
@@ -95,7 +95,7 @@ class FeatureSelector:
         
     def analyze_reduction(self):
         """Analyze data reduction statistics."""
-        print(f"\n📊 Reduction Analysis:")
+        print(f"\n Reduction Analysis:")
         print(f"  Original features: {len(self.df_original.columns) - 1}")  # -1 for target
         print(f"  Reduced features: {len(TOP_10_FEATURES)}")
         print(f"  Reduction: {len(self.df_original.columns) - 1} → {len(TOP_10_FEATURES)} "
@@ -108,7 +108,7 @@ class FeatureSelector:
               f"({(1 - reduced_memory/original_memory)*100:.1f}% reduction)")
         
         # Statistical summary
-        print(f"\n📈 Feature Statistics (Reduced Dataset):")
+        print(f"\n Feature Statistics (Reduced Dataset):")
         print(self.df_reduced.describe())
         
         return self
@@ -116,9 +116,9 @@ class FeatureSelector:
     def save_reduced_dataset(self, filename='optimized_health_data_10features.csv'):
         """Save reduced dataset to CSV."""
         output_path = os.path.join(self.output_dir, filename)
-        print(f"\n💾 Saving reduced dataset to: {output_path}")
+        print(f"\n Saving reduced dataset to: {output_path}")
         self.df_reduced.to_csv(output_path, index=False)
-        print(f"✓ Saved successfully!")
+        print(f"  Saved successfully!")
         print(f"  Samples: {len(self.df_reduced):,}")
         print(f"  Features: {len(self.df_reduced.columns) - 1}")
         print(f"  File size: {os.path.getsize(output_path) / 1024**2:.2f} MB")
@@ -127,7 +127,7 @@ class FeatureSelector:
         
     def create_comparison_report(self):
         """Create comparison report between original and reduced dataset."""
-        print(f"\n📄 Creating Comparison Report...")
+        print(f"\n Creating Comparison Report...")
         
         report = []
         report.append("=" * 80)
@@ -209,7 +209,7 @@ class FeatureSelector:
         report_path = os.path.join(self.output_dir, 'feature_selection_report.txt')
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_text)
-        print(f"\n✓ Report saved to: {report_path}")
+        print(f"\n Report saved to: {report_path}")
         
         return self
 
@@ -227,7 +227,7 @@ def main():
     
     # Check if input file exists
     if not os.path.exists(input_file):
-        print(f"❌ Error: Input file not found: {input_file}")
+        print(f" Error: Input file not found: {input_file}")
         print(f"  Please ensure the 23-feature dataset exists.")
         return
     
@@ -243,12 +243,12 @@ def main():
          .create_comparison_report())
         
         print("\n" + "=" * 80)
-        print("✓ FEATURE SELECTION COMPLETED SUCCESSFULLY!")
+        print(" FEATURE SELECTION COMPLETED SUCCESSFULLY!")
         print("=" * 80)
         print("\nNext step: Run train_lstm_10features.py to train model with reduced dataset")
         
     except Exception as e:
-        print(f"\n❌ Error during feature selection: {str(e)}")
+        print(f"\n Error during feature selection: {str(e)}")
         import traceback
         traceback.print_exc()
 

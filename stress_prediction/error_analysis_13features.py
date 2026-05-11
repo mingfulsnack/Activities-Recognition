@@ -33,11 +33,11 @@ class ErrorAnalyzer13Features:
         self.results_dir.mkdir(parents=True, exist_ok=True)
         
         # Load model
-        print(f"📂 Loading model from {model_path}...")
+        print(f" Loading model from {model_path}...")
         self.model = keras.models.load_model(model_path)
         
         # Load preprocessors
-        print("📂 Loading preprocessors...")
+        print(" Loading preprocessors...")
         model_dir = self.model_path.parent
         with open(model_dir / 'scaler_13features.pkl', 'rb') as f:
             self.scaler = pickle.load(f)
@@ -47,11 +47,11 @@ class ErrorAnalyzer13Features:
             self.location_encoder = pickle.load(f)
         
         # Load and prepare data
-        print(f"📂 Loading data from {data_path}...")
+        print(f" Loading data from {data_path}...")
         self.prepare_data()
         
         # Calculate metrics
-        print("\n📊 Calculating metrics...")
+        print("\n Calculating metrics...")
         self.metrics = {
             'MAE': mean_absolute_error(self.y_true, self.y_pred),
             'MSE': mean_squared_error(self.y_true, self.y_pred),
@@ -59,7 +59,7 @@ class ErrorAnalyzer13Features:
             'R2': r2_score(self.y_true, self.y_pred)
         }
         
-        print(f"\n✅ Test Metrics (13-Feature Model):")
+        print(f"\n Test Metrics (13-Feature Model):")
         print(f"  MAE:  {self.metrics['MAE']:.4f}")
         print(f"  RMSE: {self.metrics['RMSE']:.4f}")
         print(f"  R²:   {self.metrics['R2']:.4f}")
@@ -106,7 +106,7 @@ class ErrorAnalyzer13Features:
         print(f"  Sequences created: {X_test_seq.shape}")
         
         # Make predictions
-        print("🔮 Making predictions...")
+        print(" Making predictions...")
         self.y_true = y_test_seq
         self.y_pred = self.model.predict(X_test_seq, verbose=0).flatten()
         
@@ -151,9 +151,9 @@ class ErrorAnalyzer13Features:
         _, p_value = stats.normaltest(self.errors)
         print(f"\n  Normality test p-value: {p_value:.4f}")
         if p_value > 0.05:
-            print("  → Errors appear normally distributed ✓")
+            print("   Errors appear normally distributed ")
         else:
-            print("  → Errors may not be normally distributed ⚠")
+            print("   Errors may not be normally distributed ")
         
         # Save
         pd.DataFrame([stats_dict]).to_csv(self.results_dir / 'error_statistics.csv', index=False)
@@ -322,7 +322,7 @@ class ErrorAnalyzer13Features:
         
         plt.tight_layout()
         plt.savefig(self.results_dir / 'error_analysis_comprehensive.png', dpi=300, bbox_inches='tight')
-        print(f"  ✅ Saved: error_analysis_comprehensive.png")
+        print(f"   Saved: error_analysis_comprehensive.png")
         plt.close()
         
         # Q-Q plot
@@ -332,7 +332,7 @@ class ErrorAnalyzer13Features:
         ax.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.savefig(self.results_dir / 'qq_plot.png', dpi=300, bbox_inches='tight')
-        print(f"  ✅ Saved: qq_plot.png")
+        print(f"   Saved: qq_plot.png")
         plt.close()
     
     def generate_report(self):
@@ -360,7 +360,7 @@ class ErrorAnalyzer13Features:
         # Save
         with open(self.results_dir / 'ERROR_ANALYSIS_REPORT.md', 'w', encoding='utf-8') as f:
             f.write('\n'.join(report))
-        print(f"  ✅ Saved: ERROR_ANALYSIS_REPORT.md")
+        print(f"   Saved: ERROR_ANALYSIS_REPORT.md")
     
     def run_full_analysis(self):
         """Run complete error analysis"""
@@ -376,7 +376,7 @@ class ErrorAnalyzer13Features:
         self.generate_report()
         
         print("\n" + "="*70)
-        print("  ✅ ERROR ANALYSIS COMPLETE")
+        print("   ERROR ANALYSIS COMPLETE")
         print("="*70)
         print(f"\nResults: {self.results_dir}/")
 

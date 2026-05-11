@@ -8,17 +8,17 @@ import numpy as np
 
 def analyze_current_distribution():
     """Analyze current activity distribution"""
-    print("📊 === CURRENT ACTIVITY DISTRIBUTION ANALYSIS ===")
+    print(" === CURRENT ACTIVITY DISTRIBUTION ANALYSIS ===")
     
     # Load current dataset
     df = pd.read_csv('data/quota_balanced_health_data_30days.csv')
-    print(f"✅ Loaded {len(df)} samples")
+    print(f" Loaded {len(df)} samples")
     
     # Activity distribution
     activity_counts = df['Activity'].value_counts()
     activity_percentages = df['Activity'].value_counts(normalize=True) * 100
     
-    print(f"\n📈 Current Activity Distribution:")
+    print(f"\n Current Activity Distribution:")
     print(f"{'Activity':<12} {'Count':<8} {'Percentage':<10} {'Hours/Day':<10}")
     print("-" * 50)
     
@@ -36,7 +36,7 @@ def analyze_current_distribution():
         print(f"{activity:<12} {count:<8} {percentage:<9.1f}% {daily_hours:<9.1f}h {status}")
     
     # HAR Segment Analysis
-    print(f"\n🔍 === HAR SEGMENT ANALYSIS ===")
+    print(f"\n === HAR SEGMENT ANALYSIS ===")
     
     # Calculate segments needed for each activity (minimum for HAR)
     segment_size = 180  # samples per segment
@@ -47,7 +47,7 @@ def analyze_current_distribution():
     print(f"  Minimum segments per activity: {min_segments_per_activity}")
     print(f"  Minimum samples per activity: {min_segments_per_activity * segment_size}")
     
-    print(f"\n📊 Current HAR Readiness:")
+    print(f"\n Current HAR Readiness:")
     print(f"{'Activity':<12} {'Samples':<8} {'Segments':<10} {'Status':<15}")
     print("-" * 50)
     
@@ -56,21 +56,21 @@ def analyze_current_distribution():
         segments = count // segment_size
         
         if segments >= min_segments_per_activity:
-            status = "✅ GOOD"
+            status = " GOOD"
         elif segments >= 20:
-            status = "⚠️ ACCEPTABLE"
+            status = " ACCEPTABLE"
         else:
-            status = "❌ INSUFFICIENT"
+            status = " INSUFFICIENT"
             
         print(f"{activity:<12} {count:<8} {segments:<10} {status:<15}")
     
     # Identify problems
-    print(f"\n🚨 === IDENTIFIED PROBLEMS ===")
+    print(f"\n === IDENTIFIED PROBLEMS ===")
     
     # Problem 1: Sitting dominance
     sitting_pct = activity_percentages.get('Sitting', 0)
     if sitting_pct > 50:
-        print(f"1. ❌ SITTING DOMINANCE: {sitting_pct:.1f}% (should be ~25-35%)")
+        print(f"1.  SITTING DOMINANCE: {sitting_pct:.1f}% (should be ~25-35%)")
     
     # Problem 2: Insufficient minor activities
     minor_activities = ['Jogging', 'Upstairs', 'Downstairs']
@@ -84,7 +84,7 @@ def analyze_current_distribution():
                 insufficient_activities.append(f"{activity} ({segments} segments)")
     
     if insufficient_activities:
-        print(f"2. ❌ INSUFFICIENT SEQUENCES: {', '.join(insufficient_activities)}")
+        print(f"2.  INSUFFICIENT SEQUENCES: {', '.join(insufficient_activities)}")
     
     # Problem 3: Poor distribution
     target_distribution = {
@@ -96,7 +96,7 @@ def analyze_current_distribution():
         'Downstairs': 7   # 7%
     }
     
-    print(f"\n🎯 === TARGET vs CURRENT COMPARISON ===")
+    print(f"\n === TARGET vs CURRENT COMPARISON ===")
     print(f"{'Activity':<12} {'Current':<8} {'Target':<8} {'Diff':<8} {'Action':<15}")
     print("-" * 60)
     
@@ -105,11 +105,11 @@ def analyze_current_distribution():
         diff = current_pct - target_pct
         
         if diff > 5:
-            action = "🔻 REDUCE"
+            action = " REDUCE"
         elif diff < -5:
-            action = "🔺 INCREASE"
+            action = " INCREASE"
         else:
-            action = "✅ OK"
+            action = " OK"
             
         print(f"{activity:<12} {current_pct:<7.1f}% {target_pct:<7.1f}% {diff:<+7.1f}% {action:<15}")
     
@@ -117,7 +117,7 @@ def analyze_current_distribution():
 
 def calculate_required_changes(target_distribution, current_percentages):
     """Calculate specific changes needed"""
-    print(f"\n📋 === REQUIRED CHANGES FOR 85-95% HAR ACCURACY ===")
+    print(f"\n === REQUIRED CHANGES FOR 85-95% HAR ACCURACY ===")
     
     total_samples = 54163  # current dataset size
     samples_per_day = total_samples / 30
@@ -125,7 +125,7 @@ def calculate_required_changes(target_distribution, current_percentages):
     print(f"Current dataset: {total_samples} samples over 30 days")
     print(f"Samples per day: {samples_per_day:.0f}")
     
-    print(f"\n🎯 Required Daily Time Allocation:")
+    print(f"\n Required Daily Time Allocation:")
     print(f"{'Activity':<12} {'Current':<8} {'Target':<8} {'Change':<10}")
     print("-" * 45)
     
@@ -141,8 +141,8 @@ def calculate_required_changes(target_distribution, current_percentages):
         change_str = f"{change_hours:+.1f}h"
         print(f"{activity:<12} {current_hours:<7.1f}h {target_hours:<7.1f}h {change_str:<10}")
     
-    print(f"\n🔧 === IMPLEMENTATION STRATEGY ===")
-    print("1. 🕰️ Daily Activity Quotas:")
+    print(f"\n === IMPLEMENTATION STRATEGY ===")
+    print("1.  Daily Activity Quotas:")
     print("   - Sitting: Max 4.8h/day (currently ~12h)")
     print("   - Walking: Min 4.0h/day (currently ~1.5h)")
     print("   - Standing: Min 3.2h/day (currently ~1.0h)")
@@ -157,7 +157,7 @@ def calculate_required_changes(target_distribution, current_percentages):
         target_segments = target_samples // segment_size
         print(f"   - {activity}: {target_segments} segments ({target_samples} samples)")
     
-    print("\n3. 🔄 Generation Improvements:")
+    print("\n3.  Generation Improvements:")
     print("   - Anti-sitting logic: Force movement every 2 hours")
     print("   - Activity quotas: Ensure minimum daily time per activity")
     print("   - Segment continuity: Longer durations for better HAR")
@@ -165,7 +165,7 @@ def calculate_required_changes(target_distribution, current_percentages):
 
 def main():
     """Main analysis function"""
-    print("🔍 === ACTIVITY DISTRIBUTION OPTIMIZATION ANALYSIS ===")
+    print(" === ACTIVITY DISTRIBUTION OPTIMIZATION ANALYSIS ===")
     print("Goal: Fix 75% Sitting imbalance to achieve 85-95% HAR accuracy\n")
     
     # Analyze current distribution
@@ -174,8 +174,8 @@ def main():
     # Calculate required changes
     calculate_required_changes(target_dist, current_dist)
     
-    print(f"\n🎯 === EXPECTED OUTCOME ===")
-    print("✅ With balanced distribution:")
+    print(f"\n === EXPECTED OUTCOME ===")
+    print(" With balanced distribution:")
     print("   - HAR accuracy: 85-95% (currently 81.3%)")
     print("   - All activities: >50 segments each")
     print("   - Upstairs accuracy: 0% → 70%+")

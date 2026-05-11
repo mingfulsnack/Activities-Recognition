@@ -57,7 +57,7 @@ class DataPreprocessor:
         
     def load_data(self):
         self.df = pd.read_csv(self.data_path)
-        print(f"✓ Loaded {len(self.df):,} samples, {len(self.df.columns)} columns")
+        print(f" Loaded {len(self.df):,} samples, {len(self.df.columns)} columns")
         return self
         
     def split_data(self):
@@ -163,7 +163,7 @@ def build_model(hp):
 
 def prepare_data(seq_length=60):
     """Prepare data with correct pipeline."""
-    print("\n📂 Preparing data...")
+    print("\n Preparing data...")
     
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_path = os.path.join(base_dir, 'data', 'optimized_health_data_13features.csv')
@@ -210,10 +210,10 @@ def run_tuning(X_train, y_train, X_val, y_val, max_trials=20, epochs_per_trial=3
         overwrite=True
     )
     
-    print(f"\n📊 Search space summary:")
+    print(f"\n Search space summary:")
     tuner.search_space_summary()
     
-    print(f"\n🔍 Starting search ({max_trials} trials, {epochs_per_trial} epochs each)...")
+    print(f"\n Starting search ({max_trials} trials, {epochs_per_trial} epochs each)...")
     print(f"   Estimated time: ~{max_trials * 3:.0f} minutes\n")
     
     # Callbacks for each trial
@@ -246,7 +246,7 @@ def run_tuning(X_train, y_train, X_val, y_val, max_trials=20, epochs_per_trial=3
     
     total_time = time.time() - start_time
     
-    print(f"\n✅ Tuning completed in {total_time/60:.1f} minutes")
+    print(f"\n Tuning completed in {total_time/60:.1f} minutes")
     
     return tuner
 
@@ -261,7 +261,7 @@ def evaluate_best_model(tuner, X_test, y_test, X_train, y_train, X_val, y_val, p
     # Get best hyperparameters
     best_hp = tuner.get_best_hyperparameters(num_trials=1)[0]
     
-    print("\n🏆 Best Hyperparameters:")
+    print("\n Best Hyperparameters:")
     best_params = {}
     for param in ['lstm_units_1', 'lstm_units_2', 'dropout_rate', 'dense_units', 'learning_rate']:
         val = best_hp.get(param)
@@ -269,7 +269,7 @@ def evaluate_best_model(tuner, X_test, y_test, X_train, y_train, X_val, y_val, p
         print(f"  {param}: {val}")
     
     # Retrain best model with more epochs
-    print("\n🔄 Retraining best model with full epochs...")
+    print("\n Retraining best model with full epochs...")
     
     best_model = tuner.hypermodel.build(best_hp)
     
@@ -324,13 +324,13 @@ def evaluate_best_model(tuner, X_test, y_test, X_train, y_train, X_val, y_val, p
         'actuals': y_test.tolist()
     }
     
-    print(f"\n📊 TUNED MODEL - Test Performance:")
+    print(f"\n TUNED MODEL - Test Performance:")
     print(f"  MAE:  {mae:.4f}")
     print(f"  RMSE: {rmse:.4f}")
     print(f"  R²:   {r2:.4f}")
     
     # Compare with baseline
-    print(f"\n📈 Comparison with Baseline:")
+    print(f"\n Comparison with Baseline:")
     print(f"  {'Metric':<8} {'Baseline':>10} {'Tuned':>10} {'Change':>10}")
     print(f"  {'-'*40}")
     
@@ -378,14 +378,14 @@ def save_results(results, history):
     
     with open(metrics_path, 'w') as f:
         json.dump(save_data, f, indent=2)
-    print(f"\n💾 Results saved: {metrics_path}")
+    print(f"\n Results saved: {metrics_path}")
     
     # Save training history
     history_path = os.path.join(results_dir, 'tuned_training_history.json')
     history_data = {k: [float(v) for v in vals] for k, vals in history.history.items()}
     with open(history_path, 'w') as f:
         json.dump(history_data, f, indent=2)
-    print(f"💾 History saved: {history_path}")
+    print(f" History saved: {history_path}")
     
     # Save metrics text file
     metrics_txt_path = os.path.join(base_dir, 'results', 'metrics_13features_tuned.txt')
@@ -399,7 +399,7 @@ def save_results(results, history):
         for k, v in results['best_params'].items():
             f.write(f"  {k}: {v}\n")
         f.write(f"\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-    print(f"💾 Metrics saved: {metrics_txt_path}")
+    print(f" Metrics saved: {metrics_txt_path}")
     
     # Save preprocessor artifacts
     model_dir = os.path.join(base_dir, 'models')
@@ -433,7 +433,7 @@ def main():
         tuner = run_tuning(X_train, y_train, X_val, y_val, MAX_TRIALS, EPOCHS_PER_TRIAL)
         
         # 3. Get top 3 results
-        print("\n📊 Top 3 Trials:")
+        print("\n Top 3 Trials:")
         top_hps = tuner.get_best_hyperparameters(num_trials=3)
         for i, hp in enumerate(top_hps):
             print(f"\n  #{i+1}:")
@@ -459,7 +459,7 @@ def main():
                 pickle.dump(enc, f)
         
         print("\n" + "=" * 70)
-        print("  ✅ HYPERPARAMETER TUNING COMPLETE!")
+        print("   HYPERPARAMETER TUNING COMPLETE!")
         print("=" * 70)
         print(f"\n  Best params: {results['best_params']}")
         print(f"  R²:   {results['r2']:.4f} (baseline: 0.9271)")
@@ -469,7 +469,7 @@ def main():
         print(f"  Results: results/hp_tuning/")
         
     except Exception as e:
-        print(f"\n❌ Error: {str(e)}")
+        print(f"\n Error: {str(e)}")
         import traceback
         traceback.print_exc()
 

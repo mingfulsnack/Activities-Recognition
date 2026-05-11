@@ -19,10 +19,10 @@ class WisdmDataLoader:
         wisdm_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'WISDM_ar_v1.1_raw.txt')
         
         if not os.path.exists(wisdm_path):
-            print(f"⚠️ WISDM data not found: {wisdm_path}")
+            print(f" WISDM data not found: {wisdm_path}")
             return {}
         
-        print("📂 Loading real WISDM accelerometer data...")
+        print(" Loading real WISDM accelerometer data...")
         
         data_by_activity = {}
         
@@ -55,7 +55,7 @@ class WisdmDataLoader:
             return data_by_activity
             
         except Exception as e:
-            print(f"❌ Error loading WISDM: {e}")
+            print(f" Error loading WISDM: {e}")
             return {}
 
     def get_real_accelerometer_sample(self, activity, add_noise=True):

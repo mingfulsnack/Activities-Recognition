@@ -39,7 +39,7 @@ class AccelerometerPatternAnalyzer:
                 wisdm_data[col] = pd.to_numeric(wisdm_data[col], errors='coerce')
             wisdm_data = wisdm_data.dropna()
             
-            print(f"✅ Loaded {len(wisdm_data)} WISDM samples")
+            print(f" Loaded {len(wisdm_data)} WISDM samples")
             
             # Analyze patterns by activity
             patterns = {}
@@ -48,7 +48,7 @@ class AccelerometerPatternAnalyzer:
                 activity_data = wisdm_data[wisdm_data['activity'] == activity]
                 
                 if len(activity_data) == 0:
-                    print(f"⚠️  No data for {activity}")
+                    print(f"  No data for {activity}")
                     continue
                     
                 # Calculate statistics
@@ -84,7 +84,7 @@ class AccelerometerPatternAnalyzer:
                     }
                 }
                 
-                print(f"\n📊 {activity} ({patterns[activity]['count']} samples):")
+                print(f"\n {activity} ({patterns[activity]['count']} samples):")
                 print(f"  X: {patterns[activity]['x_stats']['mean']:.2f} ± {patterns[activity]['x_stats']['std']:.2f}")
                 print(f"  Y: {patterns[activity]['y_stats']['mean']:.2f} ± {patterns[activity]['y_stats']['std']:.2f}")
                 print(f"  Z: {patterns[activity]['z_stats']['mean']:.2f} ± {patterns[activity]['z_stats']['std']:.2f}")
@@ -93,7 +93,7 @@ class AccelerometerPatternAnalyzer:
             return patterns
             
         except Exception as e:
-            print(f"❌ Error loading WISDM: {e}")
+            print(f" Error loading WISDM: {e}")
             return None
 
     def generate_improved_patterns(self, patterns):
@@ -101,14 +101,14 @@ class AccelerometerPatternAnalyzer:
         print(f"\n🔧 === GENERATING IMPROVED PATTERNS ===")
         
         if not patterns:
-            print("❌ No patterns available")
+            print(" No patterns available")
             return None
             
         improved_patterns = {}
         
         for activity in self.activities:
             if activity not in patterns:
-                print(f"⚠️  Skipping {activity} - no WISDM data")
+                print(f"  Skipping {activity} - no WISDM data")
                 continue
                 
             stats = patterns[activity]
@@ -128,7 +128,7 @@ class AccelerometerPatternAnalyzer:
                 'magnitude_var': stats['magnitude_stats']['std']
             }
             
-            print(f"✅ {activity}: X({improved_patterns[activity]['x_base']:.2f}±{improved_patterns[activity]['x_var']:.2f}), "
+            print(f" {activity}: X({improved_patterns[activity]['x_base']:.2f}±{improved_patterns[activity]['x_var']:.2f}), "
                   f"Y({improved_patterns[activity]['y_base']:.2f}±{improved_patterns[activity]['y_var']:.2f}), "
                   f"Z({improved_patterns[activity]['z_base']:.2f}±{improved_patterns[activity]['z_var']:.2f})")
         
@@ -136,10 +136,10 @@ class AccelerometerPatternAnalyzer:
 
     def update_wisdm_loader(self, improved_patterns):
         """Update wisdm_loader.py với improved patterns"""
-        print(f"\n📝 === UPDATING WISDM_LOADER.PY ===")
+        print(f"\n === UPDATING WISDM_LOADER.PY ===")
         
         if not improved_patterns:
-            print("❌ No improved patterns to update")
+            print(" No improved patterns to update")
             return
             
         # Read current file
@@ -155,13 +155,13 @@ class AccelerometerPatternAnalyzer:
             
             start_idx = content.find(start_marker)
             if start_idx == -1:
-                print("❌ Cannot find patterns section in wisdm_loader.py")
+                print(" Cannot find patterns section in wisdm_loader.py")
                 return
                 
             # Find the end of the patterns dict
             end_idx = content.find(end_marker, start_idx)
             if end_idx == -1:
-                print("❌ Cannot find end of patterns section")
+                print(" Cannot find end of patterns section")
                 return
             end_idx += len(end_marker)
             
@@ -185,14 +185,14 @@ class AccelerometerPatternAnalyzer:
             with open(wisdm_loader_path, 'w', encoding='utf-8') as f:
                 f.write(new_content)
             
-            print("✅ Updated wisdm_loader.py with improved patterns")
+            print(" Updated wisdm_loader.py with improved patterns")
             
         except Exception as e:
-            print(f"❌ Error updating wisdm_loader.py: {e}")
+            print(f" Error updating wisdm_loader.py: {e}")
 
     def compare_before_after(self, improved_patterns):
         """Compare patterns before and after improvement"""
-        print(f"\n📊 === BEFORE vs AFTER COMPARISON ===")
+        print(f"\n === BEFORE vs AFTER COMPARISON ===")
         
         # Current patterns from wisdm_loader.py
         current_patterns = {
@@ -209,7 +209,7 @@ class AccelerometerPatternAnalyzer:
                 old = current_patterns[activity]
                 new = improved_patterns[activity]
                 
-                print(f"\n🔄 {activity}:")
+                print(f"\n {activity}:")
                 print(f"  X: {old['x_base']:.2f}±{old['x_var']:.2f} → {new['x_base']:.2f}±{new['x_var']:.2f}")
                 print(f"  Y: {old['y_base']:.2f}±{old['y_var']:.2f} → {new['y_base']:.2f}±{new['y_var']:.2f}")
                 print(f"  Z: {old['z_base']:.2f}±{old['z_var']:.2f} → {new['z_base']:.2f}±{new['z_var']:.2f}")
@@ -220,11 +220,11 @@ class AccelerometerPatternAnalyzer:
                 z_change = abs(new['z_base'] - old['z_base']) + abs(new['z_var'] - old['z_var'])
                 
                 if x_change > 2 or y_change > 2 or z_change > 2:
-                    print(f"  🚨 MAJOR CHANGE - expect significant accuracy improvement")
+                    print(f"   MAJOR CHANGE - expect significant accuracy improvement")
 
 def main():
     """Main improvement function"""
-    print("🔧 === ACCELEROMETER PATTERN IMPROVEMENT ===")
+    print(" === ACCELEROMETER PATTERN IMPROVEMENT ===")
     print("Goal: Fix Upstairs (0% accuracy) và Walking (55.3% accuracy)")
     
     analyzer = AccelerometerPatternAnalyzer()
@@ -233,7 +233,7 @@ def main():
     real_patterns = analyzer.load_real_wisdm_patterns()
     
     if not real_patterns:
-        print("❌ Cannot proceed without real WISDM patterns")
+        print(" Cannot proceed without real WISDM patterns")
         return
     
     # Step 2: Generate improved patterns
@@ -245,10 +245,10 @@ def main():
     # Step 4: Update wisdm_loader.py
     analyzer.update_wisdm_loader(improved_patterns)
     
-    print(f"\n🎯 === IMPROVEMENT COMPLETE ===")
-    print("✅ Patterns updated in wisdm_loader.py")
-    print("✅ Ready to regenerate dataset with improved accuracy")
-    print("\n📋 Next steps:")
+    print(f"\n === IMPROVEMENT COMPLETE ===")
+    print(" Patterns updated in wisdm_loader.py")
+    print(" Ready to regenerate dataset with improved accuracy")
+    print("\n Next steps:")
     print("1. Run refactored_health_data_generator.py to create new dataset")
     print("2. Run validate_accelerometer_with_har.py to verify improvements")
     print("3. Expected improvements: Upstairs >50%, Walking >70%")

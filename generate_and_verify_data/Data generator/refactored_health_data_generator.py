@@ -37,7 +37,7 @@ class RefactoredHealthDataGenerator:
         
         # Load WISDM data
         self.wisdm_loader.load_wisdm_data()
-        print(f"🔍 Loaded WISDM data for {len(self.wisdm_loader.get_available_activities())} activities")
+        print(f" Loaded WISDM data for {len(self.wisdm_loader.get_available_activities())} activities")
 
     def calculate_enhanced_daily_metrics(self, date, schedule, day_context):
         """Tính toán các metrics với calories và steps theo giờ thay vì tổng ngày"""
@@ -170,9 +170,9 @@ class RefactoredHealthDataGenerator:
         """
         Tạo dataset với SEQUENTIAL BEHAVIORAL DATA và context-aware stress
         """
-        print(f"🚀 Tạo REFACTORED HEALTH DATASET từ {start_date_str} trong {days} ngày...")
-        print("🧠 Với support cho LSTM sequences: Screen Time, Phone Usage, Social Interaction")
-        print("🔧 Sử dụng refactored architecture với modules tách biệt")
+        print(f" Tạo REFACTORED HEALTH DATASET từ {start_date_str} trong {days} ngày...")
+        print(" Với support cho LSTM sequences: Screen Time, Phone Usage, Social Interaction")
+        print(" Sử dụng refactored architecture với modules tách biệt")
         
         start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
         end_date = start_date + timedelta(days=days-1)
@@ -182,13 +182,13 @@ class RefactoredHealthDataGenerator:
         
         # Generate life events
         self.life_events = self.schedule_generator.generate_life_events(start_date, end_date)
-        print(f"📅 Tạo {len(self.life_events)} life events trong {days} ngày")
+        print(f" Tạo {len(self.life_events)} life events trong {days} ngày")
         
         all_data = []
         current_date = start_date
         
         for day_num in range(days):
-            print(f"📊 Generating day {day_num + 1}/{days}: {current_date.strftime('%Y-%m-%d')}")
+            print(f" Generating day {day_num + 1}/{days}: {current_date.strftime('%Y-%m-%d')}")
             
             # Generate improved schedule for better activity segments
             schedule, day_context = self.schedule_generator.generate_improved_daily_schedule(
@@ -196,7 +196,7 @@ class RefactoredHealthDataGenerator:
             )
             base_metrics = self.calculate_enhanced_daily_metrics(current_date, schedule, day_context)
             
-            print(f"    📋 Generated {len(schedule)} activity segments for improved HAR compatibility")
+            print(f"     Generated {len(schedule)} activity segments for improved HAR compatibility")
             
             # CUMULATIVE TRACKING - Continue from previous day
             if day_num == 0:
@@ -367,29 +367,29 @@ class RefactoredHealthDataGenerator:
         output_filename = filename if filename else f'data/quota_balanced_health_data_{days}days.csv'
         df.to_csv(output_filename, index=False)
         
-        print(f"\n🎉 === REFACTORED DATASET SUMMARY ===")
-        print(f"📈 Tổng số records: {len(df):,}")
-        print(f"📅 Số ngày: {days}")
-        print(f"📊 Records per day trung bình: {len(df)//days:,}")
-        print(f"💾 File saved: {filename}")
+        print(f"\n === REFACTORED DATASET SUMMARY ===")
+        print(f" Tổng số records: {len(df):,}")
+        print(f" Số ngày: {days}")
+        print(f" Records per day trung bình: {len(df)//days:,}")
+        print(f" File saved: {filename}")
         
         # VERIFICATION: Cumulative data quality
-        print(f"\n✅ === CUMULATIVE DATA VERIFICATION ===")
+        print(f"\n === CUMULATIVE DATA VERIFICATION ===")
         sample_day_data = df[df['Timestamp'].str.startswith('2024-01-01')]
         if len(sample_day_data) > 0:
             calories_progression = sample_day_data['Calories'].tolist()
             steps_progression = sample_day_data['Step_Count'].tolist()
-            print(f"📊 Day 1 Calories: {calories_progression[0]} → {calories_progression[-1]} (cumulative)")
-            print(f"👟 Day 1 Steps: {steps_progression[0]} → {steps_progression[-1]} (cumulative)")
+            print(f" Day 1 Calories: {calories_progression[0]} → {calories_progression[-1]} (cumulative)")
+            print(f" Day 1 Steps: {steps_progression[0]} → {steps_progression[-1]} (cumulative)")
             
             # Check if truly cumulative (non-decreasing)
             calories_increasing = all(calories_progression[i] <= calories_progression[i+1] for i in range(len(calories_progression)-1))
             steps_increasing = all(steps_progression[i] <= steps_progression[i+1] for i in range(len(steps_progression)-1))
-            print(f"✅ Calories tăng dần: {'YES' if calories_increasing else 'NO'}")
-            print(f"✅ Steps tăng dần: {'YES' if steps_increasing else 'NO'}")
+            print(f" Calories tăng dần: {'YES' if calories_increasing else 'NO'}")
+            print(f" Steps tăng dần: {'YES' if steps_increasing else 'NO'}")
         
         # VERIFICATION: Activity-Accelerometer consistency
-        print(f"\n✅ === ACTIVITY-ACCELEROMETER CONSISTENCY ===")
+        print(f"\n === ACTIVITY-ACCELEROMETER CONSISTENCY ===")
         for activity in df['Activity'].unique():
             activity_data = df[df['Activity'] == activity]
             magnitudes = np.sqrt(activity_data['Accelerometer_X']**2 + 
@@ -398,53 +398,53 @@ class RefactoredHealthDataGenerator:
             print(f"{activity:10s}: Magnitude {magnitudes.min():.1f} - {magnitudes.max():.1f} (avg: {magnitudes.mean():.1f})")
         
         # Print behavioral features summary
-        print(f"\n🧠 === BEHAVIORAL SEQUENCE FEATURES ===")
+        print(f"\n === BEHAVIORAL SEQUENCE FEATURES ===")
         behavioral_columns = [col for col in df.columns if any(prefix in col for prefix in 
                              ['Screen_Usage', 'Phone_', 'Social_', 'Stress_Current', 'Stress_Velocity'])]
         
-        print(f"📱 Screen Usage Features: {len([c for c in behavioral_columns if 'Screen' in c])}")
-        print(f"📞 Phone Interaction Features: {len([c for c in behavioral_columns if 'Phone' in c])}")  
-        print(f"👥 Social Sequence Features: {len([c for c in behavioral_columns if 'Social' in c])}")
-        print(f"😰 Stress Sequence Features: {len([c for c in behavioral_columns if 'Stress_' in c])}")
+        print(f" Screen Usage Features: {len([c for c in behavioral_columns if 'Screen' in c])}")
+        print(f" Phone Interaction Features: {len([c for c in behavioral_columns if 'Phone' in c])}")  
+        print(f" Social Sequence Features: {len([c for c in behavioral_columns if 'Social' in c])}")
+        print(f" Stress Sequence Features: {len([c for c in behavioral_columns if 'Stress_' in c])}")
         
         # Verify sequential data quality
-        print(f"\n✅ === SEQUENCE DATA QUALITY ===")
-        print(f"📊 Screen Usage Variance: {df['Screen_Usage_Variance'].mean():.4f} (>0 = có variation)")
-        print(f"📱 Phone Events per 30min: {df['Phone_Events_Count_30min'].mean():.2f}")
-        print(f"👥 Social Interaction Trend: {df['Social_Interaction_Trend'].std():.4f} (>0 = có variation)")
-        print(f"😰 Stress Velocity: {df['Stress_Velocity'].std():.4f} (>0 = có changes)")
+        print(f"\n === SEQUENCE DATA QUALITY ===")
+        print(f" Screen Usage Variance: {df['Screen_Usage_Variance'].mean():.4f} (>0 = có variation)")
+        print(f" Phone Events per 30min: {df['Phone_Events_Count_30min'].mean():.2f}")
+        print(f" Social Interaction Trend: {df['Social_Interaction_Trend'].std():.4f} (>0 = có variation)")
+        print(f" Stress Velocity: {df['Stress_Velocity'].std():.4f} (>0 = có changes)")
         
         # Life events summary
         event_days = len(self.life_events)
-        print(f"\n🎭 Life Events: {event_days} ngày có sự kiện đặc biệt ({event_days/days*100:.1f}%)")
+        print(f"\n Life Events: {event_days} ngày có sự kiện đặc biệt ({event_days/days*100:.1f}%)")
         
-        print(f"\n🚀 === REFACTORED ARCHITECTURE BENEFITS ===")
-        print(f"✅ Modular design: Easier maintenance và extension")
-        print(f"✅ Clear separation of concerns: Mỗi module có responsibility riêng")
-        print(f"✅ Reusable components: Có thể tái sử dụng cho projects khác")
-        print(f"✅ Better testability: Có thể test từng module độc lập")
-        print(f"✅ Improved readability: Code dễ hiểu và maintain hơn")
+        print(f"\n === REFACTORED ARCHITECTURE BENEFITS ===")
+        print(f" Modular design: Easier maintenance và extension")
+        print(f" Clear separation of concerns: Mỗi module có responsibility riêng")
+        print(f" Reusable components: Có thể tái sử dụng cho projects khác")
+        print(f" Better testability: Có thể test từng module độc lập")
+        print(f" Improved readability: Code dễ hiểu và maintain hơn")
         
         return df
 
 
 if __name__ == "__main__":
     print("=== REFACTORED HEALTH DATASET GENERATOR V2 ===")
-    print("🔧 Modular architecture with context-aware stress")
-    print("🎯 Improved maintainability and extensibility")
-    print("🧠 Enhanced LSTM sequence modeling")
+    print(" Modular architecture with context-aware stress")
+    print(" Improved maintainability and extensibility")
+    print(" Enhanced LSTM sequence modeling")
     
     generator = RefactoredHealthDataGenerator()
     
     print("\nBắt đầu tạo refactored dataset v2...")
     df = generator.generate_enhanced_dataset("2024-01-01", 30, filename='data/quota_balanced_health_data_30days_v2.csv')
     
-    print("\n📋 === SAMPLE REFACTORED DATA V2 ===")
+    print("\n === SAMPLE REFACTORED DATA V2 ===")
     # Show key improvements in sample
     sample_cols = ['Timestamp', 'Activity', 'Stress_Level', 'Location']
     sample_data = df[sample_cols].head(20)
     print(sample_data)
     
-    print(f"\n🎯 Refactored Dataset ready với improved architecture!")
-    print(f"✅ Modular, maintainable và extensible!")
-    print(f"✅ All features preserved với better organization!")
+    print(f"\n Refactored Dataset ready với improved architecture!")
+    print(f" Modular, maintainable và extensible!")
+    print(f" All features preserved với better organization!")

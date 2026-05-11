@@ -68,7 +68,7 @@ class DataPreprocessor:
         
     def load_data(self):
         """Load 10-feature dataset."""
-        print(f"📂 Loading dataset: {self.config['data_file']}")
+        print(f" Loading dataset: {self.config['data_file']}")
         df = pd.read_csv(self.config['data_file'])
         print(f"✓ Loaded {len(df):,} samples with {len(df.columns)} columns")
         print(f"  Features: {list(df.columns)}")
@@ -103,7 +103,7 @@ class DataPreprocessor:
         
     def normalize_features(self, X_train, X_val, X_test):
         """Normalize features using StandardScaler."""
-        print("\n📊 Normalizing features...")
+        print("\n Normalizing features...")
         
         # Flatten for scaling
         n_train, n_features = X_train.shape
@@ -133,7 +133,7 @@ class DataPreprocessor:
         
     def create_sequences(self, X, y, sequence_length):
         """Create sequences for LSTM."""
-        print(f"\n🔄 Creating sequences (length={sequence_length})...")
+        print(f"\n Creating sequences (length={sequence_length})...")
         
         X_seq, y_seq = [], []
         
@@ -161,7 +161,7 @@ class LSTMModel:
         
     def build_model(self):
         """Build Stacked Bidirectional LSTM (same architecture as baseline)."""
-        print("\n🏗️  Building LSTM model...")
+        print("\n  Building LSTM model...")
         
         model = Sequential([
             # Layer 1: Bidirectional LSTM
@@ -198,14 +198,14 @@ class LSTMModel:
         self.model = model
         
         print("✓ Model built successfully!")
-        print(f"\n📋 Model Architecture:")
+        print(f"\n Model Architecture:")
         model.summary()
         
         return self
         
     def train(self, X_train, y_train, X_val, y_val):
         """Train the model."""
-        print("\n🚀 Training LSTM model...")
+        print("\n Training LSTM model...")
         print(f"  Epochs: {self.config['epochs']}")
         print(f"  Batch size: {self.config['batch_size']}")
         print(f"  Learning rate: {self.config['learning_rate']}")
@@ -253,7 +253,7 @@ class LSTMModel:
         
     def evaluate(self, X_test, y_test):
         """Evaluate model on test set."""
-        print("\n📊 Evaluating model on test set...")
+        print("\n Evaluating model on test set...")
         
         # Make predictions
         y_pred = self.model.predict(X_test, verbose=0).flatten()
@@ -274,16 +274,16 @@ class LSTMModel:
         baseline_r2 = 0.9343
         baseline_mae = 0.5095
         
-        print(f"\n📈 Comparison with Baseline (23 features):")
+        print(f"\n Comparison with Baseline (23 features):")
         print(f"  R² Change:   {baseline_r2:.4f} → {r2:.4f} ({(r2-baseline_r2):.4f}, {(r2-baseline_r2)/baseline_r2*100:+.2f}%)")
         print(f"  MAE Change:  {baseline_mae:.4f} → {mae:.4f} ({(mae-baseline_mae):.4f}, {(mae-baseline_mae)/baseline_mae*100:+.2f}%)")
         
         if r2 >= 0.92:  # Within 1.5% of baseline
-            print(f"\n✅ VALIDATION SUCCESS: 10 features achieve comparable performance!")
+            print(f"\n VALIDATION SUCCESS: 10 features achieve comparable performance!")
         elif r2 >= 0.90:
-            print(f"\n⚠️  ACCEPTABLE: Performance slightly lower but still good (R² ≥ 0.90)")
+            print(f"\n  ACCEPTABLE: Performance slightly lower but still good (R² ≥ 0.90)")
         else:
-            print(f"\n❌ PERFORMANCE DROP: 10 features may not be sufficient (R² < 0.90)")
+            print(f"\n PERFORMANCE DROP: 10 features may not be sufficient (R² < 0.90)")
         
         # Save metrics
         metrics = {
@@ -308,7 +308,7 @@ class LSTMModel:
         
     def plot_training_history(self):
         """Plot training history."""
-        print("\n📊 Plotting training history...")
+        print("\n Plotting training history...")
         
         fig, axes = plt.subplots(1, 2, figsize=(15, 5))
         
@@ -341,7 +341,7 @@ class LSTMModel:
         
     def plot_predictions(self, y_test, y_pred):
         """Plot predictions vs actual."""
-        print("\n📊 Plotting predictions...")
+        print("\n Plotting predictions...")
         
         fig, axes = plt.subplots(1, 2, figsize=(15, 6))
         
@@ -385,7 +385,7 @@ def main():
     
     # Check if data file exists
     if not os.path.exists(CONFIG['data_file']):
-        print(f"❌ Error: Data file not found: {CONFIG['data_file']}")
+        print(f" Error: Data file not found: {CONFIG['data_file']}")
         print(f"  Please run feature_selection.py first to create the 10-feature dataset.")
         return
     
@@ -399,7 +399,7 @@ def main():
     X, y = preprocessor.prepare_features(df)
     
     # Split data (same as baseline)
-    print(f"\n✂️  Splitting data...")
+    print(f"\n  Splitting data...")
     print(f"  Test split: {CONFIG['test_split']*100:.0f}%")
     print(f"  Validation split: {CONFIG['validation_split']*100:.0f}%")
     
@@ -440,14 +440,14 @@ def main():
         X_test_scaled, y_test, CONFIG['sequence_length']
     )
     
-    print(f"\n📦 Final sequence shapes:")
+    print(f"\n Final sequence shapes:")
     print(f"  Train: {X_train_seq.shape} → {y_train_seq.shape}")
     print(f"  Val:   {X_val_seq.shape} → {y_val_seq.shape}")
     print(f"  Test:  {X_test_seq.shape} → {y_test_seq.shape}")
     
     # Build and train model
     n_features = X_train_seq.shape[2]
-    print(f"\n🔢 Number of features: {n_features}")
+    print(f"\n Number of features: {n_features}")
     
     model = LSTMModel(CONFIG, n_features)
     model.build_model()

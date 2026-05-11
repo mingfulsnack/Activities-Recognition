@@ -123,7 +123,7 @@ def analyze_removed_features(input_csv_path):
         # Check if any important features were removed
         high_corr = correlations[correlations > 0.3]
         if len(high_corr) > 0:
-            print("\n⚠️  WARNING: High correlation features removed:")
+            print("\n  WARNING: High correlation features removed:")
             for feat, corr in high_corr.items():
                 print(f"  {feat}: {corr:.3f}")
         else:

@@ -549,7 +549,7 @@ class FeatureImportanceAnalyzer:
         rf_importance = self.analyze_rf_importance()
         
         if skip_permutation:
-            print("\n⚠️ Skipping permutation importance (takes too long)")
+            print("\n Skipping permutation importance (takes too long)")
             # Create dummy permutation importance from RF importance
             perm_importance = rf_importance[['Feature', 'Importance']].copy()
             perm_importance.columns = ['Feature', 'Importance_Mean']

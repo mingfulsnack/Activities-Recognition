@@ -17,16 +17,16 @@ def analyze_context_stress_variations(csv_path):
     
     df = pd.read_csv(csv_path)
     
-    print(f"\n📊 Dataset: {len(df):,} samples, {len(df.columns)} features")
-    print(f"📅 Timespan: {df['Timestamp'].iloc[0]} → {df['Timestamp'].iloc[-1]}")
+    print(f"\n Dataset: {len(df):,} samples, {len(df.columns)} features")
+    print(f" Timespan: {df['Timestamp'].iloc[0]} → {df['Timestamp'].iloc[-1]}")
     
     # 1. Same Activity, Different Location → Stress variation
     print("\n" + "="*70)
-    print("1️⃣  SAME ACTIVITY + DIFFERENT LOCATION → STRESS VARIATION")
+    print("  SAME ACTIVITY + DIFFERENT LOCATION → STRESS VARIATION")
     print("="*70)
     
     for activity in ['Walking', 'Sitting', 'Jogging']:
-        print(f"\n🏃 Activity: {activity}")
+        print(f"\n Activity: {activity}")
         activity_data = df[df['Activity'] == activity]
         
         if len(activity_data) == 0:
@@ -46,13 +46,13 @@ def analyze_context_stress_variations(csv_path):
         print(f"   Stress Range: {stress_range:.2f} (expect > 1.0 for good variation)")
         
         if stress_range > 1.0:
-            print("   ✅ Good variation detected!")
+            print("    Good variation detected!")
         else:
-            print("   ⚠️  Low variation - may need improvement")
+            print("     Low variation - may need improvement")
     
     # 2. Time of Day Impact
     print("\n" + "="*70)
-    print("2️⃣  TIME OF DAY IMPACT ON STRESS")
+    print("  TIME OF DAY IMPACT ON STRESS")
     print("="*70)
     
     df['Hour'] = pd.to_datetime(df['Timestamp']).dt.hour
@@ -71,11 +71,11 @@ def analyze_context_stress_variations(csv_path):
     
     # 3. Context-Specific Examples
     print("\n" + "="*70)
-    print("3️⃣  CONTEXT-SPECIFIC STRESS EXAMPLES")
+    print("  CONTEXT-SPECIFIC STRESS EXAMPLES")
     print("="*70)
     
     # Example 1: Walking at work vs outdoor
-    print("\n📍 Walking at work vs outdoor:")
+    print("\n Walking at work vs outdoor:")
     walking_work = df[(df['Activity'] == 'Walking') & (df['Location'] == 'work')]['Stress_Level'].mean()
     walking_outdoor = df[(df['Activity'] == 'Walking') & (df['Location'] == 'outdoor')]['Stress_Level'].mean()
     
@@ -84,7 +84,7 @@ def analyze_context_stress_variations(csv_path):
     print(f"   Δ = {abs(walking_work - walking_outdoor):.2f}")
     
     # Example 2: Sitting at work vs home
-    print("\n🪑 Sitting at work vs home:")
+    print("\n Sitting at work vs home:")
     sitting_work = df[(df['Activity'] == 'Sitting') & (df['Location'] == 'work')]['Stress_Level'].mean()
     sitting_home = df[(df['Activity'] == 'Sitting') & (df['Location'] == 'home')]['Stress_Level'].mean()
     
@@ -94,7 +94,7 @@ def analyze_context_stress_variations(csv_path):
     
     # 4. Overall Distribution
     print("\n" + "="*70)
-    print("4️⃣  STRESS DISTRIBUTION")
+    print(" STRESS DISTRIBUTION")
     print("="*70)
     
     print("\nStress Statistics:")
@@ -111,7 +111,7 @@ def analyze_context_stress_variations(csv_path):
     
     # 5. Feature Importance Check
     print("\n" + "="*70)
-    print("5️⃣  FEATURE COMPLETENESS CHECK")
+    print("  FEATURE COMPLETENESS CHECK")
     print("="*70)
     
     required_features = [
@@ -124,17 +124,17 @@ def analyze_context_stress_variations(csv_path):
     missing = [f for f in required_features if f not in df.columns]
     
     if missing:
-        print(f"❌ Missing features: {missing}")
+        print(f" Missing features: {missing}")
     else:
-        print(f"✅ All {len(required_features)} required features present")
+        print(f" All {len(required_features)} required features present")
     
     # Check for null values
     null_counts = df[required_features].isnull().sum()
     if null_counts.sum() > 0:
-        print(f"\n⚠️  Null values found:")
+        print(f"\n  Null values found:")
         print(null_counts[null_counts > 0])
     else:
-        print(f"✅ No null values in required features")
+        print(f" No null values in required features")
     
     return df
 
@@ -145,7 +145,7 @@ def create_validation_plots(df, output_dir='validation_plots'):
     output_path.mkdir(exist_ok=True)
     
     print("\n" + "="*70)
-    print("6️⃣  CREATING VALIDATION PLOTS")
+    print("  CREATING VALIDATION PLOTS")
     print("="*70)
     
     # Plot 1: Stress by Activity and Location
@@ -183,7 +183,7 @@ def create_validation_plots(df, output_dir='validation_plots'):
     plt.tight_layout()
     plot_path = output_path / 'phase1_validation.png'
     plt.savefig(plot_path, dpi=150, bbox_inches='tight')
-    print(f"✅ Saved plot: {plot_path}")
+    print(f" Saved plot: {plot_path}")
     plt.close()
 
 
@@ -192,7 +192,7 @@ def main():
     csv_path = 'data/optimized_health_data_20features_v2.csv'
     
     if not Path(csv_path).exists():
-        print(f"❌ File not found: {csv_path}")
+        print(f" File not found: {csv_path}")
         print("Please run data generation first!")
         return
     
@@ -203,7 +203,7 @@ def main():
     create_validation_plots(df)
     
     print("\n" + "="*70)
-    print("✅ Phase 1 Validation Complete!")
+    print(" Phase 1 Validation Complete!")
     print("="*70)
     print("\nSummary:")
     print("  ✓ Dataset generated with 20 optimized features")
