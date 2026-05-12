@@ -3,129 +3,60 @@
 % ============================================================
 % Tiếp nối chapter3_part1.tex (Mục 3.1–3.3)
 
-\section{Module 3: Lựa chọn đặc trưng}
+\section{Module 3: Pipeline xử lý dữ liệu và tập đặc trưng đầu vào}
+\label{sec:data_pipeline}
 \label{sec:feature_selection}
 
-Tập dữ liệu ban đầu gồm 44 trường dữ liệu chứa nhiều đặc trưng dư thừa (derived features) và đặc trưng có tương quan cao. Quá trình lựa chọn đặc trưng được thực hiện qua 3 bước để giảm xuống 13 đặc trưng tối ưu, nhằm cải thiện hiệu suất mô hình, giảm nguy cơ overfitting, và tăng khả năng diễn giải.
+Trong phiên bản huấn luyện cuối cùng, khóa luận không xem lựa chọn đặc trưng như một module độc lập, mà tích hợp trực tiếp vào pipeline xử lý dữ liệu. Lý do là mục tiêu chính của bước này không phải xây dựng một thuật toán feature selection mới, mà là xác định một tập đầu vào gọn, dễ giải thích, phù hợp với bài toán dự đoán stress theo chuỗi thời gian và hạn chế nguy cơ rò rỉ dữ liệu.
 
-\subsection{Bước 1: Giảm từ 44 xuống 23 đặc trưng}
-\label{subsec:step1_44to23}
-
-Bước đầu tiên loại bỏ các trường dữ liệu rõ ràng dư thừa hoặc không phù hợp làm đặc trưng đầu vào:
-
+Pipeline cuối cùng sử dụng \textbf{13 đặc trưng đầu vào}. Các đặc trưng này được chọn dựa trên ba tiêu chí:
 \begin{itemize}
-    \item \textbf{Trường nhận dạng} (identifier): \texttt{Timestamp}, \texttt{User\_ID} — không mang thông tin dự đoán, chỉ dùng để quản lý dữ liệu.
-    \item \textbf{Trường phái sinh} (derived): \texttt{Steps}, \texttt{Calories}, \texttt{Exercise\_Minutes} — có thể suy ra trực tiếp từ \texttt{Activity} và thời gian, gây đa cộng tuyến.
-    \item \textbf{Trường tổng hợp ngày} (daily aggregates): \texttt{Daily\_Avg\_Stress}, \texttt{Daily\_Max\_HR}, \texttt{Daily\_Steps\_Total} — vi phạm tính nhân quả trong dữ liệu chuỗi thời gian (dùng thông tin tương lai để dự đoán hiện tại).
-    \item \textbf{Trường trùng lặp ngữ nghĩa}: \texttt{Is\_Weekend} (có thể suy từ \texttt{Day\_of\_Week}), các trường có Pearson correlation $>0.95$ với trường khác.
+    \item \textbf{Tính liên quan với stress}: bao phủ các nhóm thời gian, hoạt động, cảm biến, sinh lý, hành vi và ngữ cảnh.
+    \item \textbf{Tính khả dụng khi triển khai}: ưu tiên các trường có thể thu thập hoặc suy ra từ smartphone/wearable và nhật ký ngữ cảnh đơn giản.
+    \item \textbf{An toàn cho dữ liệu chuỗi thời gian}: không sử dụng các đặc trưng rolling/aggregate có thể vô tình chứa thông tin tương lai.
 \end{itemize}
 
-Sau bước này, giữ lại 23 đặc trưng gồm: 3 cảm biến (Accelerometer X/Y/Z), 9 đặc trưng lõi (Activity, Location, Heart\_Rate, Sleep\_Duration, Sleep\_Quality, Energy\_Level, Mood\_Score, Hour, Day\_of\_Week), 7 đặc trưng hành vi (Screen\_Usage\_Current, Screen\_Usage\_15min\_Avg, Screen\_Usage\_Trend, Phone\_Usage\_Intensity, Phone\_Event\_Frequency, Social\_Current\_Level, Social\_1hour\_Avg), và 4 đặc trưng môi trường (Ambient\_Light, Noise\_Level, Weather\_Condition, Exercise\_Minutes).
+\subsection{Tập đặc trưng đầu vào sử dụng cho huấn luyện}
+\label{subsec:input_feature_set}
 
-\subsection{Bước 2: Thử nghiệm 17 đặc trưng với Feature Engineering}
-\label{subsec:step2_17features}
-
-Từ 23 đặc trưng, khóa luận tiến hành thêm 6 đặc trưng kỹ thuật (engineered features) dựa trên cơ sở khoa học từ các nghiên cứu liên quan:
+Bảng~\ref{tab:13_features_final} trình bày 13 đặc trưng được sử dụng làm đầu vào cho mô hình dự đoán stress.
 
 \begin{table}[H]
 \centering
-\caption{6 đặc trưng kỹ thuật được thêm vào (Bước 2)}
-\label{tab:engineered_features}
-\small
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Đặc trưng} & \textbf{Công thức} & \textbf{Cơ sở} \\
-\hline
-\texttt{morning\_cortisol\_window} & $\mathbb{1}[\text{Hour} \in [7,9]]$ & Schlotz et al. \cite{schlotz2004cortisol} \\
-\texttt{work\_hours}              & $\mathbb{1}[\text{Hour} \in [8,17]]$ & Temporal context \\
-\texttt{sedentary\_duration}      & Rolling count Sitting/Standing & Garcia-Ceja et al. \cite{garciaceja2018stress} \\
-\texttt{hr\_activity\_ratio}      & $\text{HR} / \text{HR}_{\text{expected}}(\text{Activity})$ & Hovsepian et al. \cite{hovsepian2015cstress} \\
-\texttt{movement\_variability}    & Rolling std(Accel\_X/Y/Z) & Kusserow et al. \cite{kusserow2013monitoring} \\
-\texttt{Sleep\_Duration}          & Số giờ ngủ đêm trước & Recovery indicator \\
-\hline
-\end{tabular}
-\end{table}
-
-Kết hợp 7 đặc trưng lõi (Tier 1) + 4 đặc trưng quan trọng từ RF (Tier 2) + 6 đặc trưng kỹ thuật (Tier 3) = 17 đặc trưng. Tuy nhiên, khi huấn luyện mô hình LSTM trên tập 17 đặc trưng này, \textbf{phát hiện vấn đề nghiêm trọng}:
-
-\begin{itemize}
-    \item Training loss đạt $\sim$10.23 thay vì $\sim$0.92 như kỳ vọng — mô hình không hội tụ.
-    \item \textbf{Nguyên nhân}: Các đặc trưng rolling (\texttt{sedentary\_duration}, \texttt{movement\_variability}) sử dụng cửa sổ trượt trên toàn bộ dữ liệu, bao gồm cả các mẫu sau thời điểm hiện tại. Khi tạo sequence (chuỗi 60 mẫu liên tiếp), thông tin tương lai đã ``rò rỉ'' vào đầu vào — đây là hiện tượng \textbf{data leakage} \cite{kaufman2012leakage}.
-    \item Tương tự, \texttt{hr\_activity\_ratio} chia cho giá trị trung bình ước tính trên toàn bộ tập dữ liệu, vi phạm nguyên tắc phân chia train/test.
-\end{itemize}
-
-Phát hiện này cho thấy feature engineering trên dữ liệu chuỗi thời gian cần đặc biệt cẩn thận — các phép tính rolling window hoặc aggregate statistics phải được thực hiện \textit{sau} khi chia dữ liệu, và chỉ fit trên tập huấn luyện.
-
-\subsection{Bước 3: Giải pháp cuối — 13 đặc trưng}
-\label{subsec:step3_13features}
-
-Thay vì sửa lỗi data leakage trong các đặc trưng kỹ thuật phức tạp, khóa luận chọn phương án đơn giản hóa: kết hợp \textbf{kiến thức chuyên ngành} (domain knowledge) với \textbf{phân tích định lượng} (Random Forest importance) để chọn 13 đặc trưng không chứa phép tính rolling.
-
-\textbf{Phân tích Random Forest Importance:} Huấn luyện mô hình Random Forest (1000 cây, max\_depth=20) trên tập 23 đặc trưng gốc để đánh giá tầm quan trọng tương đối \cite{breiman2001random}. Kết quả cho thấy 10 đặc trưng chiếm 98.09\% tổng importance (Bảng~\ref{tab:rf_importance}).
-
-\begin{table}[H]
-\centering
-\caption{Top-10 đặc trưng theo Random Forest Importance}
-\label{tab:rf_importance}
-\small
-\begin{tabular}{|c|l|r|r|}
-\hline
-\textbf{Hạng} & \textbf{Đặc trưng} & \textbf{Importance (\%)} & \textbf{Tích lũy (\%)} \\
-\hline
-1  & Location                 & 64.98 & 64.98 \\
-2  & Heart\_Rate              & 13.93 & 78.91 \\
-3  & Screen\_Usage\_Current   &  7.46 & 86.37 \\
-4  & Phone\_Event\_Frequency  &  3.35 & 89.72 \\
-5  & Mood\_Score              &  2.55 & 92.27 \\
-6  & Energy\_Level            &  1.99 & 94.26 \\
-7  & Exercise\_Minutes        &  1.09 & 95.35 \\
-8  & Sleep\_Duration          &  1.06 & 96.41 \\
-9  & Screen\_Usage\_15min\_Avg &  1.05 & 97.46 \\
-10 & Sleep\_Quality           &  0.63 & 98.09 \\
-\hline
-\end{tabular}
-\end{table}
-
-\textbf{13 đặc trưng cuối cùng} được xác định bằng cách kết hợp:
-\begin{enumerate}
-    \item \textbf{7 đặc trưng lõi} (domain knowledge): Hour, Day\_of\_Week (temporal patterns — \cite{schlotz2004cortisol}), Activity (HAR output — \cite{garciaceja2018stress}), Accelerometer\_X/Y/Z (sensor data — \cite{kusserow2013monitoring}), Heart\_Rate (physiological marker — \cite{hovsepian2015cstress}).
-    \item \textbf{6 đặc trưng bổ sung} (RF importance): Location (64.98\%), Screen\_Usage\_Current (7.46\%), Phone\_Event\_Frequency (3.35\%), Mood\_Score (2.55\%), Energy\_Level (1.99\%), Sleep\_Duration (1.06\%).
-\end{enumerate}
-
-So với top-10 RF, khóa luận \textit{thay thế} Exercise\_Minutes, Screen\_Usage\_15min\_Avg, Sleep\_Quality bằng Hour, Day\_of\_Week, Activity, Accelerometer\_X/Y/Z — vì nhóm sau mang thông tin temporal và sensor mà RF không đánh giá cao (do tương quan phi tuyến mà Decision Tree không nắm bắt tốt).
-
-\begin{table}[H]
-\centering
-\caption{13 đặc trưng cuối cùng phân theo nhóm}
+\caption{Tập 13 đặc trưng đầu vào sử dụng cho huấn luyện}
 \label{tab:13_features_final}
 \small
-\begin{tabular}{|l|c|l|}
+\begin{tabular}{|l|c|p{8.5cm}|}
 \hline
 \textbf{Nhóm} & \textbf{Số lượng} & \textbf{Đặc trưng} \\
 \hline
-Thời gian (Temporal)     & 2 & Hour, Day\_of\_Week \\
-Hoạt động \& Cảm biến   & 4 & Activity, Accelerometer\_X, Y, Z \\
-Sinh lý (Physiological)  & 1 & Heart\_Rate \\
-Hành vi (Behavioral)     & 3 & Screen\_Usage\_Current, Phone\_Event\_Frequency, Mood\_Score \\
-Ngữ cảnh (Contextual)    & 3 & Location, Energy\_Level, Sleep\_Duration \\
+Thời gian (Temporal) & 2 & \texttt{Hour}, \texttt{Day\_of\_Week} \\
 \hline
-\textbf{Tổng}            & \textbf{13} & -- \\
+Hoạt động và cảm biến & 4 & \texttt{Activity}, \texttt{Accelerometer\_X}, \texttt{Accelerometer\_Y}, \texttt{Accelerometer\_Z} \\
+\hline
+Sinh lý (Physiological) & 1 & \texttt{Heart\_Rate} \\
+\hline
+Hành vi (Behavioral) & 3 & \texttt{Screen\_Usage\_Current}, \texttt{Phone\_Event\_Frequency}, \texttt{Mood\_Score} \\
+\hline
+Ngữ cảnh và phục hồi & 3 & \texttt{Location}, \texttt{Energy\_Level}, \texttt{Sleep\_Duration} \\
+\hline
+\textbf{Tổng} & \textbf{13} & -- \\
 \hline
 \end{tabular}
 \end{table}
 
-Việc giảm từ 44 xuống 13 đặc trưng (giảm 70.5\%) giúp:
+Ý nghĩa của từng nhóm đặc trưng:
 \begin{itemize}
-    \item Loại bỏ hoàn toàn nguy cơ data leakage từ rolling features;
-    \item Giảm số tham số mô hình (ít chiều đầu vào hơn), hạn chế overfitting;
-    \item Tăng tốc độ huấn luyện (ít phép tính hơn mỗi timestep);
-    \item Giữ lại đầy đủ các nhóm thông tin cần thiết: temporal, sensor, physiological, behavioral, contextual.
+    \item \textbf{Thời gian}: \texttt{Hour} và \texttt{Day\_of\_Week} giúp mô hình học nhịp biến thiên stress theo giờ trong ngày và theo ngày trong tuần.
+    \item \textbf{Hoạt động và cảm biến}: \texttt{Activity} cung cấp ngữ cảnh hoạt động, còn ba trục gia tốc kế giữ lại tín hiệu chuyển động thô tương ứng.
+    \item \textbf{Sinh lý}: \texttt{Heart\_Rate} là chỉ số sinh lý trực tiếp, nhưng cần được diễn giải cùng ngữ cảnh hoạt động để tránh nhập nhằng.
+    \item \textbf{Hành vi}: sử dụng điện thoại, tần suất sự kiện điện thoại và tâm trạng phản ánh các mẫu hành vi thường liên quan đến trạng thái căng thẳng.
+    \item \textbf{Ngữ cảnh và phục hồi}: vị trí, năng lượng và thời lượng ngủ giúp mô hình nắm được môi trường hiện tại và khả năng phục hồi của người dùng.
 \end{itemize}
 
-% ============================================================
+Trong quá trình phát triển, khóa luận có khảo sát một tập đặc trưng ứng viên lớn hơn, bao gồm một số đặc trưng phái sinh và đặc trưng tổng hợp. Tuy nhiên, các đặc trưng dạng rolling hoặc aggregate có nguy cơ gây rò rỉ dữ liệu nếu không được xử lý rất chặt chẽ theo từng tập train/validation/test. Vì vậy, pipeline cuối cùng ưu tiên 13 đặc trưng trực tiếp, có khả năng diễn giải rõ và phù hợp hơn với mục tiêu xây dựng một baseline chuỗi thời gian đáng tin cậy.
 
-\section{Module 4: Pipeline xử lý dữ liệu}
-\label{sec:data_pipeline}
+Với cách trình bày này, tập đặc trưng đầu vào được xem là một phần của pipeline huấn luyện, không phải một đóng góp tách biệt. Trọng tâm của chương vì vậy được đặt vào quy trình xử lý dữ liệu chống rò rỉ và kiến trúc mô hình dự đoán stress.
 
 \subsection{Vấn đề rò rỉ dữ liệu trong chuỗi thời gian}
 \label{subsec:data_leakage_problem}
@@ -245,7 +176,7 @@ Với cấu hình trên, các chỉ số MAE/RMSE/$R^2$ ổn định giữa các
 
 % ============================================================
 
-\section{Module 5: Kiến trúc mô hình Stacked Bidirectional LSTM}
+\section{Module 4: Kiến trúc mô hình Stacked Bidirectional LSTM}
 \label{sec:model_architecture}
 
 \subsection{Kiến trúc Baseline}

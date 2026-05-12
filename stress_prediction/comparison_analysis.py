@@ -260,15 +260,15 @@ class ModelComparator:
         # Determine validation result
         r2_threshold = 0.92  # Within 1.5% of baseline
         if self.reduced_metrics['r2'] >= r2_threshold:
-            validation_status = "✅ VALIDATION SUCCESS"
+            validation_status = " VALIDATION SUCCESS"
             status_color = 'green'
             conclusion = "10 features achieve comparable\nperformance with 43% reduction!"
         elif self.reduced_metrics['r2'] >= 0.90:
-            validation_status = "⚠️ ACCEPTABLE"
+            validation_status = " ACCEPTABLE"
             status_color = 'orange'
             conclusion = "Performance slightly lower\nbut still acceptable (R² ≥ 0.90)"
         else:
-            validation_status = "❌ PERFORMANCE DROP"
+            validation_status = " PERFORMANCE DROP"
             status_color = 'red'
             conclusion = "10 features may not be\nsufficient (R² < 0.90)"
         
@@ -328,13 +328,13 @@ Benefits of 10-Feature Model:
         
         # Determine conclusion
         if self.reduced_metrics['r2'] >= 0.92:
-            validation = "✅ VALIDATION SUCCESS"
+            validation = " VALIDATION SUCCESS"
             conclusion = "The feature selection hypothesis is confirmed. Top 10 features (98% cumulative importance) achieve comparable performance with 52% fewer features."
         elif self.reduced_metrics['r2'] >= 0.90:
-            validation = "⚠️ ACCEPTABLE PERFORMANCE"
+            validation = " ACCEPTABLE PERFORMANCE"
             conclusion = "Performance is slightly lower but still acceptable. The 10-feature model provides a good trade-off between simplicity and accuracy."
         else:
-            validation = "❌ PERFORMANCE DROP"
+            validation = " PERFORMANCE DROP"
             conclusion = "The 10-feature model shows significant performance degradation. May need to include more features or investigate feature engineering."
         
         # Create report
@@ -414,17 +414,17 @@ Benefits of 10-Feature Model:
         report.append("RECOMMENDATIONS")
         report.append("-" * 80)
         if self.reduced_metrics['r2'] >= 0.92:
-            report.append("  1. ✅ Use 10-feature model for production")
+            report.append("  1.  Use 10-feature model for production")
             report.append("  2. Continue with GRU/TCN/Transformer comparison using 10 features")
             report.append("  3. Focus feature engineering on top 10 features")
             report.append("  4. Consider further reduction (top 5-7 features) for mobile deployment")
         elif self.reduced_metrics['r2'] >= 0.90:
-            report.append("  1. ⚠️ 10-feature model acceptable for most use cases")
+            report.append("  1. 10-feature model acceptable for most use cases")
             report.append("  2. Keep 23-feature model as backup for high-accuracy requirements")
             report.append("  3. Investigate if performance can be improved with feature engineering")
             report.append("  4. Consider ensemble of 10-feature and 23-feature models")
         else:
-            report.append("  1. ❌ Need to include more features (top 15-20)")
+            report.append("  1.  Need to include more features (top 15-20)")
             report.append("  2. Investigate why performance dropped significantly")
             report.append("  3. Consider feature engineering to compensate for missing features")
             report.append("  4. Re-evaluate feature importance with different methods")
