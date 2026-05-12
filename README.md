@@ -71,7 +71,6 @@ TF: 2.16.1 | NP: 1.26.x | SHAP: 0.46.x
 ├── data/
 │   ├── WISDM_ar_v1.1_raw.txt                    # Dữ liệu gia tốc kế WISDM thô
 │   ├── optimized_health_data_13features.csv      # Tập dữ liệu 13-feature (dùng để train)
-│   ├── optimized_health_data_17features.csv      # Phiên bản 17-feature (thử nghiệm)
 │   └── feature_selection_13features_report.txt   # Báo cáo lựa chọn đặc trưng
 │
 ├── HAR/                                          # Module nhận dạng hoạt động
@@ -85,7 +84,6 @@ TF: 2.16.1 | NP: 1.26.x | SHAP: 0.46.x
 │   └── Data generator/
 │       ├── refactored_health_data_generator.py   # Sinh 54K mẫu 30 ngày
 │       ├── validate_accelerometer_with_har.py    # Xác thực với HAR model
-│       ├── create_23feature_dataset.py           # Giảm 44 → 23 features
 │       └── core/                                 # 7 sub-modules sinh dữ liệu
 │
 ├── stress_prediction/                            # Module dự đoán stress
