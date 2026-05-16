@@ -123,7 +123,7 @@ class DailyScheduleGenerator:
         
         day_context = {
             'sleep_quality': max(0.25, min(1.0, 0.8 + daily_noise['sleep_quality'])),
-            'energy_level': max(0.2, min(1.0, 0.7 + daily_noise['energy'] + event_modifier * 0.3)),
+            'energy_level': max(0.2, min(1.0, 0.7 + daily_noise['energy'] - event_modifier * 0.3)),
             'stress_base': max(1, min(9, 4 + daily_noise['stress_fluctuation'] * 3 + event_modifier * 4)),
             'mood_factor': daily_noise['mood'] + event_modifier * 0.5,
             'has_social_event': random.random() < (0.4 if is_weekend else 0.1),

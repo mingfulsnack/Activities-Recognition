@@ -22,7 +22,7 @@ class RefactoredHealthDataGenerator:
     Tạo dữ liệu theo dõi sức khỏe với SEQUENTIAL BEHAVIORAL DATA
     """
     
-    def __init__(self, age=28, gender='Female'):
+    def __init__(self, age=22, gender='Male'):
         # Initialize core components
         self.user_profile = UserProfile(age, gender)
         self.wisdm_loader = WisdmDataLoader()
@@ -434,7 +434,7 @@ if __name__ == "__main__":
     print(" Improved maintainability and extensibility")
     print(" Enhanced LSTM sequence modeling")
     
-    generator = RefactoredHealthDataGenerator()
+    generator = RefactoredHealthDataGenerator(age=22, gender='Male')
     
     print("\nBắt đầu tạo refactored dataset v2...")
     df = generator.generate_enhanced_dataset("2024-01-01", 30, filename='data/quota_balanced_health_data_30days_v2.csv')

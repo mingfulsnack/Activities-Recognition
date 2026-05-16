@@ -8,7 +8,7 @@
 \section{Tổng quan kiến trúc hệ thống}
 \label{sec:system_overview}
 
-Hệ thống dự đoán stress được thiết kế theo kiến trúc module hóa gồm 5 thành phần chính, được liên kết qua pipeline xử lý dữ liệu tuần tự. Hình \ref{fig:system_architecture} minh họa kiến trúc tổng thể và luồng dữ liệu xuyên suốt hệ thống.
+Hệ thống dự đoán stress được thiết kế theo kiến trúc module hóa gồm 4 thành phần chính, được liên kết qua pipeline xử lý dữ liệu tuần tự. Hình \ref{fig:system_architecture} minh họa kiến trúc tổng thể và luồng dữ liệu xuyên suốt hệ thống.
 
 \begin{figure}[H]
     \centering
@@ -17,21 +17,19 @@ Hệ thống dự đoán stress được thiết kế theo kiến trúc module h
     \label{fig:system_architecture}
 \end{figure}
 
-Năm module chính của hệ thống:
+Bốn module chính của hệ thống:
 
 \begin{enumerate}
     \item \textbf{Module HAR (Nhận dạng hoạt động):} Huấn luyện mô hình Stacked Bi-LSTM trên tập dữ liệu WISDM v1.1 \cite{kwapisz2010activity} để phân loại 6 loại hoạt động từ dữ liệu gia tốc kế. Đầu ra là nhãn hoạt động, cung cấp thông tin ngữ cảnh cho module tiếp theo.
     
-    \item \textbf{Module sinh dữ liệu đa phương thức:} Kết hợp tín hiệu gia tốc kế thực từ WISDM với dữ liệu hành vi mô phỏng (nhịp tim, giấc ngủ, tâm trạng, sử dụng điện thoại, vị trí). Tích hợp cơ chế Context-Stress Modifiers để tính toán mức stress dựa trên bối cảnh hoạt động. Tạo ra tập dữ liệu 44 trường dữ liệu ban đầu.
+    \item \textbf{Module sinh dữ liệu đa phương thức:} Kết hợp tín hiệu gia tốc kế thực từ WISDM với dữ liệu hành vi mô phỏng (nhịp tim, giấc ngủ, tâm trạng, sử dụng điện thoại, vị trí). Tích hợp cơ chế Context-Stress Modifiers để tính toán mức stress dựa trên bối cảnh hoạt động.
     
-    \item \textbf{Module lựa chọn đặc trưng:} Giảm từ 44 trường xuống 13 đặc trưng tối ưu thông qua quy trình hệ thống gồm loại bỏ đặc trưng dư thừa, phân tích tầm quan trọng bằng Random Forest, và kiểm tra rò rỉ dữ liệu.
-    
-    \item \textbf{Module pipeline xử lý dữ liệu:} Thực hiện chia dữ liệu (70/15/15), mã hóa biến phân loại, chuẩn hóa, và tạo chuỗi thời gian (sequences) theo nguyên tắc chống rò rỉ dữ liệu — tất cả bước fit chỉ trên tập huấn luyện.
+    \item \textbf{Module pipeline xử lý dữ liệu và tập đặc trưng đầu vào:} Xác định tập 13 đặc trưng sử dụng cho huấn luyện, sau đó thực hiện chia dữ liệu (70/15/15), mã hóa biến phân loại, chuẩn hóa, và tạo chuỗi thời gian (sequences) theo nguyên tắc chống rò rỉ dữ liệu — tất cả bước fit chỉ trên tập huấn luyện.
     
     \item \textbf{Module mô hình và đánh giá:} Huấn luyện, tối ưu siêu tham số (Bayesian Optimization), so sánh 5 kiến trúc, phân tích tầm quan trọng đặc trưng và phân tích lỗi.
 \end{enumerate}
 
-Luồng dữ liệu đi tuần tự từ Module 1 đến Module 5. Đặc biệt, nhãn hoạt động từ Module 1 trở thành đầu vào bắt buộc cho Module 2 — đây là điểm tạo nên tính ``nhận thức ngữ cảnh'' (context-aware) của toàn hệ thống: mức stress không chỉ phụ thuộc vào các chỉ số sinh lý mà còn được điều chỉnh theo hoạt động đang thực hiện.
+Luồng dữ liệu đi tuần tự từ Module 1 đến Module 4. Đặc biệt, nhãn hoạt động từ Module 1 trở thành đầu vào bắt buộc cho Module 2 — đây là điểm tạo nên tính ``nhận thức ngữ cảnh'' (context-aware) của toàn hệ thống: mức stress không chỉ phụ thuộc vào các chỉ số sinh lý mà còn được điều chỉnh theo hoạt động đang thực hiện.
 
 \subsection{Liên kết câu hỏi nghiên cứu và thiết kế phương pháp}
 \label{subsec:rq_method_mapping}
@@ -53,7 +51,7 @@ RQ2 / H2 & So sánh mô hình chuỗi và phi chuỗi cho dự đoán stress li�
 \hline
 RQ3 / H3 & Định lượng hiệu quả của tối ưu siêu tham số & Xây dựng baseline và quy trình Bayesian Optimization (Mục~\ref{subsec:baseline_architecture}, Mục~\ref{subsec:bayesian_optimization}, Mục~\ref{subsec:tuned_architecture}) để so sánh trước/sau tối ưu. \\
 \hline
-RQ4 / H4 & Xác định nhóm đặc trưng đóng góp chính cho dự đoán stress & Quy trình lựa chọn đặc trưng theo domain knowledge + Random Forest importance (Mục~\ref{sec:feature_selection}) làm nền cho phân tích tầm quan trọng đặc trưng ở Chương~\ref{chap:experiments}. \\
+RQ4 / H4 & Xác định nhóm đặc trưng đóng góp chính cho dự đoán stress & Tập 13 đặc trưng đầu vào được tổ chức theo các nhóm temporal, sensor, physiological, behavioral và contextual (Mục~\ref{sec:feature_selection}), sau đó được phân tích tầm quan trọng bằng nhiều phương pháp ở Chương~\ref{chap:experiments}. \\
 \hline
 \end{tabular}
 \end{table}
@@ -194,6 +192,9 @@ Mục tiêu của module này là tạo tập dữ liệu kết hợp \textit{d�
     \item \textbf{Orchestrator:} Điều phối toàn bộ quá trình sinh dữ liệu, kết hợp đầu ra của tất cả thành phần thành tập dữ liệu hoàn chỉnh.
 \end{enumerate}
 
+\paragraph{Nguyên tắc suy luận hệ số.}
+Các công thức trong Module 2 không được trình bày như các công thức y sinh được lấy nguyên văn từ một bài báo duy nhất. Vai trò của tài liệu tham khảo là cung cấp: (i) cơ chế sinh lý/hành vi cần mô phỏng, (ii) chiều tác động của từng biến, ví dụ stress làm tăng nhịp tim hoặc thiếu ngủ làm tăng phản ứng stress, và (iii) khoảng giá trị hợp lý để không tạo dữ liệu phi thực tế. Từ các cơ sở đó, khóa luận chọn các hệ số như $3$ bpm/đơn vị stress, $0.3$ cho quán tính stress hoặc các giá trị $\pm 1.5$ trong bảng ngữ cảnh như \textit{hệ số heuristic đã chuẩn hóa} cho thang stress 1--9 và thang hành vi $[0,1]$. Nói cách khác, đây là mô hình sinh dữ liệu rule-based có kiểm soát, được neo vào y văn và nghiên cứu wearable/mobile sensing, không phải mô hình lâm sàng dùng để chẩn đoán cá nhân.
+
 \subsection{Mô phỏng lịch trình sinh hoạt}
 \label{subsec:schedule_simulation}
 
@@ -229,12 +230,131 @@ Mỗi ngày được chia thành các khối hoạt động (activity blocks), m
     \item \textbf{Chu kỳ tuần/tháng:} Stress tăng dần trong tuần làm việc (cao nhất thứ 5--6), giảm cuối tuần; biến thiên theo chu kỳ tháng với period 28 ngày.
 \end{itemize}
 
+\subsection{Mô phỏng đặc trưng hành vi và trạng thái cá nhân}
+\label{subsec:behavioral_personal_features}
+
+Bên cạnh nhịp tim và nhãn hoạt động, tập dữ liệu còn chứa các đặc trưng hành vi và trạng thái cá nhân như \texttt{Screen\_Usage\_Current}, \texttt{Mood\_Score} và \texttt{Energy\_Level}. Các trường này không được sinh hoàn toàn ngẫu nhiên, mà được mô phỏng theo các quy tắc có kiểm soát dựa trên ngữ cảnh thời gian, hoạt động, vị trí và mức stress hiện tại. Mục tiêu của nhóm đặc trưng này là mô phỏng các tín hiệu thường gặp trong hướng tiếp cận \textit{mobile sensing} và \textit{digital phenotyping}, nơi hành vi sử dụng điện thoại, vị trí, hoạt động, giấc ngủ và trạng thái cảm xúc được xem là nguồn thông tin bổ sung cho theo dõi sức khỏe tinh thần \cite{lane2010survey, garciaceja2018stress, likamwa2013moodscope, wang2014studentlife}.
+
+\textbf{(1) Mức sử dụng màn hình hiện tại \texttt{Screen\_Usage\_Current}.}
+
+Đặc trưng này được chuẩn hóa trong khoảng $[0,1]$, biểu diễn cường độ sử dụng điện thoại tại thời điểm hiện tại. Hệ thống tính giá trị này theo công thức:
+
+\begin{equation}
+\label{eq:screen_usage_current}
+    U_{\text{screen}}(t) =
+    \text{clip}\left(
+    B_{\text{act}}(a_t)
+    \times M_{\text{loc}}(l_t)
+    \times M_{\text{stress}}(S_t)
+    \times \varepsilon_u,\; 0,\; 1
+    \right)
+\end{equation}
+
+Trong đó $B_{\text{act}}(a_t)$ là cường độ sử dụng điện thoại nền theo hoạt động, $M_{\text{loc}}(l_t)$ là hệ số theo vị trí, $M_{\text{stress}}(S_t)$ là hệ số theo mức stress, và $\varepsilon_u$ là nhiễu nhỏ để tạo biến thiên tự nhiên.
+
+\begin{equation}
+    M_{\text{stress}}(S_t) = 1 + (S_t - 4) \times 0.15
+\end{equation}
+
+Các giả định chính:
+\begin{itemize}
+    \item Khi \texttt{Activity = Sitting}, người dùng có xu hướng sử dụng điện thoại nhiều hơn so với khi \texttt{Walking}, \texttt{Jogging}, \texttt{Upstairs} hoặc \texttt{Downstairs}.
+    \item Khi ở \texttt{home} hoặc \texttt{work}, mức sử dụng điện thoại thường cao hơn so với \texttt{gym}, \texttt{outdoor} hoặc \texttt{social}.
+    \item Khi stress tăng, tần suất kiểm tra điện thoại hoặc tương tác với điện thoại có thể tăng nhẹ, phản ánh một dạng hành vi đối phó hoặc mất tập trung.
+\end{itemize}
+
+Bảng~\ref{tab:screen_usage_factors} trình bày các hệ số chính được sử dụng.
+
+\begin{table}[H]
+\centering
+\caption{Hệ số mô phỏng \texttt{Screen\_Usage\_Current}}
+\label{tab:screen_usage_factors}
+\small
+\begin{tabular}{|l|c|l|c|}
+\hline
+\textbf{Hoạt động} & $\boldsymbol{B_{\text{act}}}$ & \textbf{Vị trí} & $\boldsymbol{M_{\text{loc}}}$ \\
+\hline
+Sitting    & 0.70 & home    & 1.30 \\
+Standing   & 0.40 & work    & 1.10 \\
+Walking    & 0.20 & commute & 0.90 \\
+Jogging    & 0.05 & outdoor & 0.60 \\
+Upstairs   & 0.10 & social  & 0.40 \\
+Downstairs & 0.15 & gym     & 0.30 \\
+\hline
+\end{tabular}
+\end{table}
+
+\textbf{Truy vết cơ sở.} Công thức \eqref{eq:screen_usage_current} lấy ý tưởng từ các nghiên cứu mobile sensing: điện thoại có thể ghi nhận dấu vết hành vi như sử dụng ứng dụng, giao tiếp, vị trí và hoạt động để suy luận trạng thái cá nhân \cite{lane2010survey, likamwa2013moodscope}. Vì vậy, $B_{\text{act}}(a_t)$ được đặt cao nhất ở \texttt{Sitting} và thấp nhất ở \texttt{Jogging}/\texttt{Upstairs}, phản ánh ràng buộc vật lý khi người dùng đang vận động. $M_{\text{loc}}(l_t)$ phản ánh bối cảnh: ở nhà hoặc nơi làm việc có khả năng tương tác với điện thoại cao hơn so với gym/outdoor/social. Thành phần $M_{\text{stress}}(S_t)=1+(S_t-4)\times0.15$ không phải hệ số thực nghiệm từ một paper cụ thể; hệ số $0.15$ được chọn để stress chỉ làm thay đổi mức dùng điện thoại ở mức nhẹ đến vừa, tránh để biến hành vi bị chi phối hoàn toàn bởi nhãn stress.
+
+\textbf{(2) Điểm tâm trạng \texttt{Mood\_Score}.}
+
+\texttt{Mood\_Score} được mô phỏng trên thang $[1,10]$, phản ánh trạng thái cảm xúc tại từng thời điểm. Công thức tổng quát:
+
+\begin{equation}
+\label{eq:mood_score}
+    M(t) =
+    \text{clip}\left(
+    M_0(d)
+    + \Delta M_{\text{time}}
+    + \Delta M_{\text{activity}}
+    + \Delta M_{\text{location}}
+    + \Delta M_{\text{stress}}
+    + \varepsilon_m,\; 1,\; 10
+    \right)
+\end{equation}
+
+Trong đó:
+\begin{equation}
+    M_0(d) = 5 + F_{\text{mood}}(d) \times 3
+\end{equation}
+
+$F_{\text{mood}}(d)$ là yếu tố tâm trạng nền của ngày, được sinh từ nhiễu hàng ngày và sự kiện đặc biệt. Các thành phần còn lại phản ánh:
+\begin{itemize}
+    \item \textbf{Nhịp trong ngày}: tâm trạng tăng dần vào buổi sáng, thường tốt hơn quanh buổi trưa, giảm nhẹ vào buổi chiều và hồi phục vào buổi tối.
+    \item \textbf{Hoạt động}: \texttt{Jogging} và \texttt{Walking} làm tăng điểm tâm trạng do vận động thể chất có liên hệ với giảm lo âu và cải thiện cảm xúc \cite{salmon2001effects}.
+    \item \textbf{Vị trí}: \texttt{outdoor} và \texttt{social} có hệ số tích cực, trong khi \texttt{work} và \texttt{commute} có hệ số tiêu cực hơn do áp lực công việc và di chuyển.
+    \item \textbf{Stress}: stress cao làm giảm tâm trạng theo hệ số:
+\end{itemize}
+
+\begin{equation}
+    \Delta M_{\text{stress}} = -(S_t - 4) \times 0.3
+\end{equation}
+
+Việc đưa yếu tố hoạt động, vị trí và stress vào \texttt{Mood\_Score} phù hợp với quan điểm stress phụ thuộc vào đánh giá nhận thức trong từng bối cảnh cụ thể \cite{lazarus1984stress}; đồng thời phản ánh các kết quả cho thấy môi trường tự nhiên và vận động có thể cải thiện trạng thái cảm xúc \cite{bratman2015nature, salmon2001effects}.
+
+\textbf{Truy vết cơ sở.} $M_0(d)=5+F_{\text{mood}}(d)\times3$ được hiểu là tâm trạng nền trong ngày, đặt quanh trung vị 5 của thang 1--10 và cho phép dao động lên/xuống theo nhiễu ngày hoặc sự kiện. Cách đưa hoạt động, giấc ngủ, workload và hành vi điện thoại vào mood được neo bởi các nghiên cứu như MoodScope và StudentLife, trong đó dữ liệu smartphone được dùng để suy luận mood, stress, sleep, activity và sociability \cite{likamwa2013moodscope, wang2014studentlife}. Hệ số $\Delta M_{\text{stress}}=-(S_t-4)\times0.3$ chỉ là phép ánh xạ tuyến tính có kiểm soát: stress cao hơn trung vị 4 sẽ kéo mood xuống, nhưng mức kéo tối đa vẫn không vượt quá khoảng 1--2 điểm trước khi cộng các yếu tố tích cực khác. Nhờ vậy mô phỏng giữ đúng chiều tác động stress--mood mà không biến \texttt{Mood\_Score} thành bản sao trực tiếp của \texttt{Stress\_Level}.
+
+\textbf{(3) Mức năng lượng \texttt{Energy\_Level}.}
+
+\texttt{Energy\_Level} là đặc trưng cấp ngày, được chuẩn hóa trong khoảng $[0.2,1.0]$. Trường này mô phỏng mức năng lượng/phục hồi tổng quát của người dùng trong ngày, ảnh hưởng đến thời lượng hoạt động, số bước, nhịp tim do mệt mỏi và thời gian phản ứng. Công thức mô phỏng:
+
+\begin{equation}
+\label{eq:energy_level}
+    E(d) = \text{clip}\left(0.7 + \eta_{\text{energy}}(d) + \Delta E_{\text{event}},\; 0.2,\; 1.0\right)
+\end{equation}
+
+Trong đó $\eta_{\text{energy}}(d)$ gồm dao động theo chu kỳ tháng, mệt mỏi tích lũy theo tuần và nhiễu sinh hoạt hằng ngày:
+
+\begin{equation}
+    \eta_{\text{energy}}(d)
+    =
+    0.2 \sin\left(\frac{2\pi \cdot \text{day}(d)}{28}\right)
+    + 0.05 \cdot (\text{week}(d) \bmod 4)
+    + \varepsilon_e
+\end{equation}
+
+Thành phần sự kiện $\Delta E_{\text{event}}$ phản ánh tác động của các sự kiện đặc biệt trong ngày. Trong cách diễn giải của khóa luận, các sự kiện tiêu cực như ốm, deadline hoặc kỳ thi làm giảm khả năng phục hồi/năng lượng, còn các sự kiện tích cực như nghỉ ngơi hoặc tin vui làm tăng năng lượng. Đây là một giả định mô phỏng có kiểm soát, không phải phép đo năng lượng sinh lý trực tiếp.
+
+\textbf{Truy vết cơ sở.} \texttt{Energy\_Level} được dùng như một biến tiềm ẩn về khả năng phục hồi trong ngày, gần với khái niệm fatigue/recovery trong các nghiên cứu stress và allostatic load hơn là một đại lượng sinh lý đo trực tiếp \cite{mcewen2008central, wang2014studentlife}. Giá trị nền $0.7$ biểu diễn trạng thái bình thường, khoảng clip $[0.2,1.0]$ tránh sinh ra ngày ``cạn năng lượng'' tuyệt đối hoặc vượt mức tối đa. Dao động chu kỳ 28 ngày, mệt mỏi tích lũy theo tuần và $\Delta E_{\text{event}}$ là các nhiễu kịch bản để tạo đa dạng dữ liệu 30 ngày; chúng không được khẳng định là chu kỳ sinh học phổ quát, mà là cách mô phỏng biến thiên dài hạn để mô hình học được sự khác biệt giữa ngày nghỉ, ngày deadline, ngày ốm và ngày bình thường.
+
+Tóm lại, ba đặc trưng trên được đưa vào tập dữ liệu để bổ sung góc nhìn hành vi và trạng thái cá nhân cho tín hiệu sinh lý. Tuy nhiên, vì chúng là đặc trưng mô phỏng, khóa luận chỉ sử dụng chúng trong phạm vi kiểm chứng proof-of-concept của framework; việc xác thực trên dữ liệu thu thập thực tế từ smartphone/wearable và khảo sát EMA được xem là hướng phát triển tiếp theo.
+
 \subsection{Tính toán nhịp tim theo hoạt động}
 \label{subsec:heart_rate_calculation}
 
 Nhịp tim là một trong những chỉ số sinh lý quan trọng nhất trong dự đoán stress, nhưng giá trị nhịp tim phải được hiểu trong bối cảnh hoạt động. Theo y văn, nhịp tim tăng khi vận động là đáp ứng sinh lý bình thường, trong khi nhịp tim tăng khi nghỉ ngơi có thể là dấu hiệu của stress tâm lý \cite{chrousos2009stress}.
 
-Hệ thống tính nhịp tim dựa trên 4 thành phần với cơ sở khoa học rõ ràng:
+Hệ thống tính nhịp tim dựa trên 4 thành phần. Cơ chế sinh lý của từng thành phần được neo vào y văn, còn các hệ số cộng bpm được chọn như hệ số mô phỏng để tạo giá trị hợp lý trong phạm vi người trưởng thành khỏe mạnh:
 
 \begin{equation}
 \label{eq:heart_rate}
@@ -243,7 +363,7 @@ Hệ thống tính nhịp tim dựa trên 4 thành phần với cơ sở khoa h�
 
 Trong đó:
 
-\textbf{(1) Nhịp tim nghỉ $HR_{\text{rest}}$} — được tính theo công thức Tanaka et al. (2001) \cite{tanaka2001age} cho nhịp tim tối đa, từ đó ước lượng nhịp tim nghỉ dựa trên giới tính và tuổi:
+\textbf{(1) Nhịp tim nghỉ $HR_{\text{rest}}$} — nhịp tim tối đa được neo theo công thức Tanaka et al. (2001) \cite{tanaka2001age}; nhịp tim nghỉ được ước lượng theo giới tính và tuổi:
 \begin{equation}
     HR_{\max} = 208 - 0.7 \times \text{Age}
 \end{equation}
@@ -255,6 +375,8 @@ Trong đó:
 \end{equation}
 
 Các giá trị $HR_{\text{rest}}$ trung bình cho người trưởng thành khỏe mạnh ($60-80$ bpm) phù hợp với khuyến nghị của American Heart Association \cite{aha2024heart}.
+
+\textbf{Truy vết cơ sở.} Tanaka et al. cung cấp công thức hồi quy cho $HR_{\max}$ từ tuổi, không cung cấp trực tiếp công thức sinh $HR_{\text{rest}}$. Vì vậy, $HR_{\text{rest}}$ trong khóa luận là giá trị nền mô phỏng, được đặt trong vùng nhịp tim nghỉ bình thường do AHA nêu. Trong cài đặt sinh dữ liệu hiện tại, giới hạn trên của nhịp tim dùng proxy phổ biến $220-\text{Age}$ theo bảng target heart rate của AHA \cite{aha2024target}; báo cáo dùng Tanaka làm mốc khoa học thận trọng hơn. Sai khác này chỉ ảnh hưởng biên clip trên, không làm thay đổi logic các hệ số $\Delta HR$.
 
 \textbf{(2) Điều chỉnh theo hoạt động $\Delta HR_{\text{activity}}$} — dựa trên mức tiêu thụ năng lượng (MET — Metabolic Equivalent of Task) từ Compendium of Physical Activities \cite{ainsworth2011compendium}. MET phản ánh cường độ hoạt động so với nghỉ ngơi, và nhịp tim tăng tương ứng:
 
@@ -278,17 +400,23 @@ Jogging    & 7.0--8.0 & $+40$ & Chạy bộ vừa phải (8 km/h) \\
 
 Giá trị $\Delta HR_{\text{activity}}$ được hiệu chỉnh từ dữ liệu MET: ứng với mỗi đơn vị MET tăng thêm, nhịp tim tăng khoảng 5--7 bpm \cite{swain2000energy}. Ví dụ: Jogging (MET $\approx$ 7.0) so với Sitting (MET $\approx$ 1.0) tăng 6 đơn vị MET $\times$ 7 bpm/MET $\approx$ 42 bpm, được làm tròn thành $+40$ bpm.
 
+\textbf{Truy vết cơ sở.} Compendium of Physical Activities cung cấp giá trị MET để xếp hạng cường độ năng lượng của hoạt động, còn AHA nêu nguyên tắc nhịp tim tăng theo cường độ vận động \cite{ainsworth2011compendium, aha2024heart}. Swain và Leutholtz cho thấy heart-rate reserve tương ứng chặt với oxygen-consumption reserve, tức nhịp tim có thể dùng như proxy cường độ vận động \cite{swain2000energy}. Bảng \ref{tab:hr_activity_modifier} vì vậy là bước quy đổi thực dụng từ MET sang bpm, không phải bảng bpm gốc trong Compendium.
+
 \textbf{(3) Điều chỉnh theo stress $\Delta HR_{\text{stress}}$} — stress tâm lý kích hoạt hệ thần kinh giao cảm (sympathetic nervous system), giải phóng catecholamines (adrenaline, noradrenaline), làm tăng nhịp tim \cite{chrousos2009stress}. Hệ số điều chỉnh:
 \begin{equation}
     \Delta HR_{\text{stress}} = (\text{Stress Level} - 4) \times 3 \text{ bpm}
 \end{equation}
-Trong đó Stress Level trên thang 1--9 với trung vị là 4. Hệ số $\pm 3$ bpm/đơn vị stress tương ứng với khoảng biến thiên $\pm 15$ bpm giữa stress thấp nhất và cao nhất — phù hợp với các nghiên cứu cho thấy stress cấp tính có thể tăng nhịp tim 10--20 bpm so với trạng thái nghỉ \cite{hovsepian2015cstress, kim2018stress}.
+Trong đó Stress Level trên thang 1--9 với trung vị là 4. Hệ số $3$ bpm/đơn vị stress được chọn để khi stress tăng từ mức trung vị 4 lên mức rất cao 9, nhịp tim chỉ tăng thêm tối đa khoảng $15$ bpm. Đây là biên tăng vừa phải, phù hợp với cơ chế stress kích hoạt hệ thần kinh tự chủ và với các nghiên cứu wearable cho thấy HR/HRV là nhóm tín hiệu quan trọng trong nhận diện stress \cite{hovsepian2015cstress, schmidt2018wesad, giannakakis2019review}.
+
+\textbf{Truy vết cơ sở.} Công thức $\Delta HR_{\text{stress}}$ không xuất hiện nguyên văn trong các paper. Các paper cung cấp cơ sở rằng stress gây đáp ứng giao cảm và làm thay đổi các tín hiệu tim mạch; khóa luận chọn hệ số $3$ bpm/level để biến stress có ảnh hưởng quan sát được nhưng nhỏ hơn ảnh hưởng của vận động mạnh như \texttt{Jogging} ($+40$ bpm). Việc này giúp mô hình không nhầm mọi nhịp tim cao do chạy bộ thành stress cao.
 
 \textbf{(4) Điều chỉnh theo mệt mỏi $\Delta HR_{\text{fatigue}}$} — khi năng lượng giảm, cơ thể phải bù trừ bằng tăng nhịp tim để duy trì cung cấp oxy:
 \begin{equation}
     \Delta HR_{\text{fatigue}} = (1 - E) \times 5 \text{ bpm}
 \end{equation}
 với $E \in [0, 1]$ là mức năng lượng hiện tại. Khi kiệt sức ($E = 0$), nhịp tim tăng thêm tối đa 5 bpm.
+
+\textbf{Truy vết cơ sở.} Thành phần fatigue là correction nhỏ để phản ánh trạng thái phục hồi kém có thể làm phản ứng sinh lý kém ổn định hơn \cite{mcewen2008central}. Mức trần $5$ bpm được cố ý đặt thấp hơn nhiều so với $\Delta HR_{\text{activity}}$ để năng lượng thấp chỉ tạo nhiễu sinh lý phụ, không thay thế vai trò chính của hoạt động và stress. Hàm \textit{clip} cuối cùng là ràng buộc an toàn, giữ $HR(t)$ trong khoảng cá nhân hóa từ dưới nhịp nghỉ khoảng 10 bpm đến $HR_{\max}$.
 
 \textbf{(5) Nhiễu ngẫu nhiên $\varepsilon$} $\sim \mathcal{U}(-4, +4)$ mô phỏng biến thiên sinh lý tự nhiên giữa các nhịp.
 
@@ -315,9 +443,37 @@ Công thức tổng hợp stress tại thời điểm $t$:
     S_{\text{base}}(t) = S_0 + \Delta S_{\text{time}} + \Delta S_{\text{activity}} + \Delta S_{\text{location}} + \Delta S_{\text{work}} + \Delta S_{\text{HR}} + \Delta S_{\text{sleep}} + \Delta S_{\text{momentum}}
 \end{equation}
 
+\begin{table}[H]
+\centering
+\caption{Truy vết cơ sở lý thuyết cho các thành phần trong $S_{\text{base}}(t)$}
+\label{tab:stress_formula_traceability}
+\small
+\begin{tabular}{|l|p{4.2cm}|p{6.0cm}|}
+\hline
+\textbf{Thành phần} & \textbf{Nguồn ý tưởng} & \textbf{Cách chuyển thành hệ số mô phỏng} \\
+\hline
+$S_0$ & Stress nền chịu ảnh hưởng bởi ngày, giấc ngủ và sự kiện sống & Đặt trong khoảng $[2,7]$ để còn dư địa cho các modifier tăng/giảm và clip về thang 1--9. \\
+\hline
+$\Delta S_{\text{time}}$ & Nhịp cortisol trong ngày và Cortisol Awakening Response \cite{chrousos2009stress} & Gán hệ số dương vào giờ làm việc/cao điểm và âm vào buổi tối/nghỉ, theo chiều biến thiên cortisol và áp lực lịch trình. \\
+\hline
+$\Delta S_{\text{activity}}$ & Vận động aerobic có tác động giảm nhạy cảm stress; gắng sức vật lý có thể tạo arousal tạm thời \cite{salmon2001effects} & Hoạt động thư giãn như walking/jogging nhận hệ số âm; leo cầu thang/gắng sức ngắn nhận hệ số dương nhỏ. \\
+\hline
+$\Delta S_{\text{location}}$ & Ngữ cảnh nơi làm việc, di chuyển, tự nhiên và hỗ trợ xã hội ảnh hưởng stress \cite{karasek1979job, bratman2015nature} & Work/commute tăng stress; home/outdoor/social/gym giảm stress theo vai trò an toàn, phục hồi hoặc hỗ trợ. \\
+\hline
+$\Delta S_{\text{work}}$ & Mô hình Demand-Control: demand cao và control thấp làm tăng strain \cite{karasek1979job} & Deadline/họp quan trọng nhận $+1.5$; ngày không làm việc nhận $-1.0$. \\
+\hline
+$\Delta S_{\text{HR}}$ & HR/HRV là biosignal phổ biến cho stress nhưng bị nhiễu bởi hoạt động \cite{hovsepian2015cstress, giannakakis2019review} & HR cao khi nghỉ tăng stress, nhưng hệ số chỉ ở mức $+0.5$ đến $+1.0$ vì HR đã được điều chỉnh theo activity. \\
+\hline
+$\Delta S_{\text{sleep}}$ & Thiếu ngủ và allostatic load làm giảm khả năng điều hòa stress \cite{mcewen2008central} & $Q_{\text{sleep}}$ càng thấp thì cộng stress càng lớn, tối đa $+2$ để phản ánh tác động mạnh nhưng không áp đảo ngữ cảnh. \\
+\hline
+$\Delta S_{\text{momentum}}$ & Perceived stress có thể tích lũy và decay chậm hơn đáp ứng sinh lý tức thời \cite{plarre2011continuous} & Lấy trung bình 3 mẫu gần nhất và nhân $0.3$ như hệ số damping để tạo quán tính vừa phải. \\
+\hline
+\end{tabular}
+\end{table}
+
 Trong đó:
 
-\textbf{(1) Stress nền $S_0$:} Giá trị stress cơ bản trong ngày, phản ánh trạng thái tổng thể — chịu ảnh hưởng bởi chất lượng giấc ngủ, sự kiện cuộc sống, và biến thiên ngẫu nhiên theo ngày. $S_0 \in [2, 7]$.
+\textbf{(1) Stress nền $S_0$:} Giá trị stress cơ bản trong ngày, phản ánh trạng thái tổng thể — chịu ảnh hưởng bởi chất lượng giấc ngủ, sự kiện cuộc sống, và biến thiên ngẫu nhiên theo ngày. $S_0 \in [2, 7]$. Khoảng này là giả định mô phỏng để stress nền không chạm biên 1 hoặc 9 trước khi cộng các yếu tố ngữ cảnh.
 
 \textbf{(2) Điều chỉnh theo thời gian $\Delta S_{\text{time}}$} — mô phỏng nhịp sinh học cortisol hàng ngày theo Chrousos \cite{chrousos2009stress}:
 
@@ -343,6 +499,8 @@ Sau 20h    & $-0.8$ & Cortisol thấp nhất, chuẩn bị ngủ \\
 
 Mẫu biến thiên này phản ánh Cortisol Awakening Response (CAR) — hiện tượng cortisol tăng 50--75\% trong 30--45 phút đầu sau khi thức dậy, sau đó giảm dần suốt ngày \cite{chrousos2009stress}.
 
+\textbf{Truy vết cơ sở.} Chrousos cung cấp mô tả hệ stress và nhịp hormone stress, nhưng không đưa bảng $\Delta S_{\text{time}}$ cho người làm văn phòng. Vì vậy, các hệ số thời gian được suy luận theo hai lớp: nhịp sinh học cortisol và lịch trình xã hội trong ngày làm việc. Buổi sáng/chiều làm việc nhận hệ số dương vì vừa có cortisol/arousal vừa có demand công việc; tối và sau giờ nghỉ nhận hệ số âm vì mô phỏng giai đoạn phục hồi.
+
 \textbf{(3) Điều chỉnh theo hoạt động $\Delta S_{\text{activity}}$} — dựa trên bằng chứng về tác động của vận động đối với stress:
 
 \begin{table}[H]
@@ -364,6 +522,8 @@ Upstairs   & $+0.4$ & Gắng sức cao, tăng stress tạm thời \\
 \end{table}
 
 Giá trị âm cho Jogging và Walking phản ánh hiệu ứng giảm stress của vận động thể chất — một kết luận được xác nhận rộng rãi trong y văn: vận động aerobic làm giảm cortisol và tăng endorphin \cite{salmon2001effects}.
+
+\textbf{Truy vết cơ sở.} Salmon cung cấp cơ sở rằng luyện tập thể chất có thể giảm lo âu, trầm cảm và độ nhạy với stress, nhưng không gán điểm stress cho từng nhãn WISDM. Vì vậy, các hoạt động aerobic có chủ đích như \texttt{Jogging}/\texttt{Walking} được cho hệ số âm, còn \texttt{Upstairs}/\texttt{Downstairs} được cho hệ số dương nhỏ vì chúng biểu diễn gắng sức tức thời, không nhất thiết là hoạt động phục hồi tâm lý.
 
 \textbf{(4) Điều chỉnh theo vị trí $\Delta S_{\text{location}}$:}
 
@@ -387,6 +547,8 @@ Outdoor  & $-0.7$ & Tiếp xúc tự nhiên giảm cortisol \\
 
 Giá trị cho vị trí Outdoor phản ánh kết quả nghiên cứu của Bratman et al. (2015) về tác động tích cực của môi trường tự nhiên đối với giảm stress và hoạt động vùng trước trán não (subgenual prefrontal cortex) \cite{bratman2015nature}.
 
+\textbf{Truy vết cơ sở.} Bảng vị trí là ánh xạ ngữ cảnh, không phải kết quả đo trực tiếp theo bpm hoặc cortisol. \texttt{Work} được gán dương dựa trên Demand-Control, \texttt{Commute} dương vì là bối cảnh dễ có thời gian gấp và tiếng ồn, còn \texttt{Outdoor}/\texttt{Home}/\texttt{Social} âm vì gắn với phục hồi, an toàn hoặc hỗ trợ xã hội. Mức $+1.5$ cho Work lớn hơn $+1.0$ cho Commute vì trong kịch bản khóa luận, áp lực công việc là stressor chính.
+
 \textbf{(5) Điều chỉnh theo cường độ công việc $\Delta S_{\text{work}}$} — theo mô hình Demand-Control \cite{karasek1979job}:
 
 \begin{equation}
@@ -397,6 +559,8 @@ Giá trị cho vị trí Outdoor phản ánh kết quả nghiên cứu của Bra
         -1.0  & \text{không làm việc (cuối tuần)}
     \end{cases}
 \end{equation}
+
+\textbf{Truy vết cơ sở.} Karasek không đưa công thức cộng điểm stress theo deadline; nghiên cứu này cung cấp nguyên lý rằng job demand cao trong điều kiện kiểm soát thấp tạo mental strain. Vì vậy, khóa luận biến \texttt{work\_intensity} thành biến rời rạc: deadline/họp quan trọng là demand cao nên cộng $+1.5$, workload bình thường là mốc 0, workload thấp hoặc cuối tuần giảm stress nền.
 
 \textbf{(6) Điều chỉnh theo nhịp tim $\Delta S_{\text{HR}}$} — nhịp tim tăng khi nghỉ (resting tachycardia) là dấu hiệu kích hoạt hệ giao cảm, tương quan dương với stress \cite{hovsepian2015cstress}:
 
@@ -409,7 +573,9 @@ Giá trị cho vị trí Outdoor phản ánh kết quả nghiên cứu của Bra
     \end{cases}
 \end{equation}
 
-Các ngưỡng 60, 75, 85 bpm được chọn dựa trên phân loại nhịp tim nghỉ: $< 60$ bpm là bradycardia (nhịp chậm, thường gặp ở người tập thể dục đều đặn), 60--75 bpm là bình thường, $> 85$ bpm là tachycardia nhẹ thường liên quan đến stress hoặc lo lắng \cite{aha2024heart}.
+Các ngưỡng 60, 75, 85 bpm được chọn dựa trên phân loại nhịp tim nghỉ: $< 60$ bpm là bradycardia (nhịp chậm, thường gặp ở người tập thể dục đều đặn), 60--75 bpm là vùng nghỉ bình thường, và giá trị cao hơn vùng nghỉ cá nhân có thể liên quan đến stress, cảm xúc hoặc yếu tố sinh lý khác \cite{aha2024heart}.
+
+\textbf{Truy vết cơ sở.} Thành phần $\Delta S_{\text{HR}}$ chỉ nên được hiểu sau khi đã có nhãn hoạt động. Các nghiên cứu stress wearable dùng HR/HRV như tín hiệu stress, nhưng cũng nhấn mạnh nhiễu do vận động và bối cảnh \cite{hovsepian2015cstress, stojchevska2022context}. Vì vậy, HR chỉ cộng tối đa $+1.0$ vào stress, thấp hơn các modifier công việc/ngữ cảnh, để tránh kết luận sai rằng HR cao do chạy bộ luôn là stress tâm lý.
 
 \textbf{(7) Điều chỉnh theo giấc ngủ $\Delta S_{\text{sleep}}$} — thiếu ngủ làm tăng cortisol ngày hôm sau và giảm khả năng điều hòa cảm xúc \cite{mcewen2008central}:
 \begin{equation}
@@ -417,20 +583,24 @@ Các ngưỡng 60, 75, 85 bpm được chọn dựa trên phân loại nhịp ti
 \end{equation}
 với $Q_{\text{sleep}} \in [0, 1]$ là chất lượng giấc ngủ. Khi ngủ kém ($Q = 0$), stress tăng thêm tối đa 2 đơn vị.
 
-\textbf{(8) Hiệu ứng quán tính $\Delta S_{\text{momentum}}$} — stress có xu hướng duy trì theo thời gian (allostatic persistence) \cite{mcewen2008central}:
+\textbf{Truy vết cơ sở.} McEwen mô tả allostatic load và vai trò của chất lượng sống/giấc ngủ trong gánh nặng stress; StudentLife cũng cho thấy khi workload tăng thì sleep và positive affect giảm trong dữ liệu smartphone theo thời gian \cite{mcewen2008central, wang2014studentlife}. Hệ số tối đa $+2$ được chọn vì thiếu ngủ là yếu tố nền mạnh cho cả ngày, nhưng vẫn cần kết hợp với activity, location và workload để xác định stress tại từng thời điểm.
+
+\textbf{(8) Hiệu ứng quán tính $\Delta S_{\text{momentum}}$} — stress có xu hướng duy trì theo thời gian (allostatic persistence) \cite{mcewen2008central, plarre2011continuous}:
 \begin{equation}
     \Delta S_{\text{momentum}} = (\bar{S}_{\text{recent}} - 4) \times 0.3
 \end{equation}
 với $\bar{S}_{\text{recent}}$ là trung bình stress của 3 mẫu gần nhất. Hệ số 0.3 đảm bảo quán tính vừa phải — stress cao trước đó kéo stress hiện tại lên, nhưng không khống chế hoàn toàn.
+
+\textbf{Truy vết cơ sở.} Plarre et al. tách physiological stress khỏi perceived stress và đề xuất ý tưởng stress cảm nhận có thể tích lũy rồi giảm dần chậm hơn đáp ứng sinh lý tức thời. Công thức trên là phiên bản rút gọn cho bộ sinh dữ liệu: chỉ lấy 3 mẫu gần nhất và nhân hệ số damping $0.3$ để tạo continuity cho chuỗi LSTM, thay vì triển khai đầy đủ mô hình accumulation--decay cá nhân hóa.
 
 \subsection{Cơ chế Context-Stress Modifier}
 \label{subsec:context_stress_modifier}
 
 Sau khi tính được $S_{\text{base}}(t)$ từ công thức \eqref{eq:base_stress}, hệ thống áp dụng thêm lớp \textbf{Context-Stress Modifier} — lớp điều chỉnh dựa trên \textit{tổ hợp ba yếu tố}: hoạt động $\times$ vị trí $\times$ bối cảnh thời gian. Đây là thành phần then chốt giải quyết vấn đề nhập nhằng sinh lý.
 
-\textbf{Cơ sở khoa học.} Theo mô hình Transaction of Stress của Lazarus \& Folkman (1984) \cite{lazarus1984stress}, mức stress không chỉ phụ thuộc vào kích thích bên ngoài (stressor) mà còn phụ thuộc vào \textit{đánh giá nhận thức} (cognitive appraisal) của cá nhân đối với kích thích đó trong bối cảnh cụ thể. Áp dụng vào bài toán dữ liệu cảm biến: cùng một mức nhịp tim ($HR = 120$), ý nghĩa stress hoàn toàn khác nhau tùy vào hoạt động — chạy bộ buổi sáng cuối tuần (stress thấp) so với ngồi họp deadline buổi chiều (stress rất cao).
+\textbf{Cơ sở khoa học.} Theo mô hình Transaction of Stress của Lazarus \& Folkman (1984) \cite{lazarus1984stress}, mức stress không chỉ phụ thuộc vào kích thích bên ngoài (stressor) mà còn phụ thuộc vào \textit{đánh giá nhận thức} (cognitive appraisal) của cá nhân đối với kích thích đó trong bối cảnh cụ thể. Trong stress detection từ wearable, thông tin ngữ cảnh như hoạt động và giấc ngủ cũng giúp giảm nhầm lẫn giữa thay đổi sinh lý do vận động và thay đổi do stress \cite{stojchevska2022context}. Áp dụng vào bài toán dữ liệu cảm biến: cùng một mức nhịp tim ($HR = 120$), ý nghĩa stress hoàn toàn khác nhau tùy vào hoạt động — chạy bộ buổi sáng cuối tuần (stress thấp) so với ngồi họp deadline buổi chiều (stress rất cao).
 
-Hệ số modifier $\delta$ được định nghĩa theo bảng tra cứu (lookup table) dựa trên bộ ba $(a, l, c)$ — hoạt động, vị trí, bối cảnh:
+Hệ số modifier $\delta$ được định nghĩa theo bảng tra cứu (lookup table) dựa trên bộ ba $(a, l, c)$ — hoạt động, vị trí, bối cảnh. Đây là bảng heuristic để mã hóa tri thức ngữ cảnh, không phải bảng hệ số được đo trực tiếp từ một nghiên cứu lâm sàng:
 
 \begin{equation}
 \label{eq:context_modifier}
@@ -467,7 +637,9 @@ Trong đó:
 \end{tabular}
 \end{table}
 
-\textbf{(b) Hệ số khuếch đại giấc ngủ $A_{\text{sleep}}$:} Thiếu ngủ không chỉ tăng stress trực tiếp mà còn \textit{khuếch đại} phản ứng stress đối với các tác nhân bên ngoài \cite{mcewen2008central}. Hệ số khuếch đại:
+\textbf{Truy vết cơ sở.} Các giá trị $\delta$ được xây dựng từ nguyên tắc appraisal: cùng một hoạt động có ý nghĩa khác nhau tùy địa điểm, thời gian và workload. Ví dụ, \texttt{Sitting} tại Work buổi chiều workload cao được gán $+2.0$ vì kết hợp nhiều stressor (công việc, thời điểm cuối ngày, deadline), còn \texttt{Sitting} tại Home buổi tối workload thấp được gán âm vì cùng tư thế ngồi nhưng bối cảnh là nghỉ ngơi. Biên độ khoảng $[-1.5,+2.0]$ được chọn để context đủ mạnh sửa lỗi nhập nhằng sinh lý, nhưng vẫn không vượt toàn bộ thang stress 1--9.
+
+\textbf{(b) Hệ số khuếch đại giấc ngủ $A_{\text{sleep}}$:} Thiếu ngủ không chỉ tăng stress trực tiếp mà còn \textit{khuếch đại} phản ứng stress đối với các tác nhân bên ngoài \cite{mcewen2008central, yoo2007sleep}. Hệ số khuếch đại:
 
 \begin{equation}
     A_{\text{sleep}} = \begin{cases}
@@ -478,7 +650,7 @@ Trong đó:
     \end{cases}
 \end{equation}
 
-Hệ số khuếch đại \textit{chỉ áp dụng khi $\delta > 0$} (bối cảnh gây stress) — ngủ kém làm tăng phản ứng tiêu cực nhưng không ảnh hưởng đến bối cảnh tích cực. Cơ chế này phản ánh phát hiện rằng thiếu ngủ làm tăng phản ứng amygdala (trung tâm cảm xúc) đối với kích thích tiêu cực, nhưng không thay đổi đáng kể phản ứng với kích thích tích cực \cite{mcewen2008central}.
+Hệ số khuếch đại \textit{chỉ áp dụng khi $\delta > 0$} (bối cảnh gây stress) — ngủ kém làm tăng phản ứng tiêu cực nhưng không ảnh hưởng đến bối cảnh tích cực. Cơ chế này phản ánh phát hiện rằng thiếu ngủ làm suy giảm điều hòa cảm xúc và làm phản ứng amygdala với kích thích tiêu cực mạnh hơn \cite{yoo2007sleep}. Các mức 1.3, 1.1, 1.0 và 0.9 là hệ số mô phỏng theo nhóm giờ ngủ, được giới hạn quanh 1 để chỉ khuếch đại bối cảnh xấu thay vì tự tạo stress độc lập.
 
 \textbf{(c) Modifier môi trường $\delta_{\text{env}}$:} Phản ánh ảnh hưởng của môi trường vật lý lên stress:
 \begin{equation}
@@ -490,7 +662,7 @@ Hệ số khuếch đại \textit{chỉ áp dụng khi $\delta > 0$} (bối cả
     \end{cases}
 \end{equation}
 
-Các giá trị dựa trên nghiên cứu về tác động của tiếng ồn đô thị lên cortisol và huyết áp, cũng như hiệu ứng phục hồi (restorative effect) của âm thanh tự nhiên \cite{bratman2015nature}.
+Các giá trị này lấy cảm hứng từ nguyên lý môi trường tự nhiên có tác dụng phục hồi và giảm rumination \cite{bratman2015nature}, kết hợp giả định kịch bản rằng giao thông/đám đông làm tăng kích thích tiêu cực. Đây là modifier môi trường mức nhỏ, không phải công thức đo cortisol hoặc huyết áp theo tiếng ồn.
 
 \textbf{(d) Modifier xã hội $\delta_{\text{social}}$:} Bối cảnh xã hội ảnh hưởng đáng kể đến stress:
 \begin{equation}
@@ -501,6 +673,8 @@ Các giá trị dựa trên nghiên cứu về tác động của tiếng ồn �
         -0.8 & \text{được hỗ trợ}
     \end{cases}
 \end{equation}
+
+\textbf{Truy vết cơ sở.} Modifier xã hội được đưa vào vì stress phụ thuộc vào đánh giá tình huống và quan hệ xã hội, đồng thời các nghiên cứu mobile sensing như StudentLife theo dõi sociability/conversation như một phần của trạng thái tinh thần theo thời gian \cite{lazarus1984stress, wang2014studentlife}. Các hệ số $+1.5$, $-0.4$ và $-0.8$ chỉ biểu diễn mức tăng/giảm tương đối giữa xung đột, hợp tác và hỗ trợ; nếu triển khai trên dữ liệu thật, các hệ số này cần được học hoặc hiệu chỉnh từ EMA/self-report.
 
 Giá trị cuối cùng được giới hạn trong khoảng $[1, 9]$:
 \begin{equation}
@@ -537,11 +711,11 @@ Accuracy trung bình 86.2\% cho thấy dữ liệu gia tốc kế sinh ra duy tr
 \subsection{Mô tả tập dữ liệu đầu ra}
 \label{subsec:dataset_description}
 
-Tập dữ liệu đa phương thức ban đầu gồm 44 trường dữ liệu, được tổ chức thành 5 nhóm:
+Đầu ra đầy đủ của bộ sinh dữ liệu được tổ chức theo nhiều nhóm trường để phục vụ kiểm tra chất lượng, phân tích mô phỏng và huấn luyện mô hình. Trong đó, pipeline huấn luyện chính chỉ sử dụng 13 đặc trưng đầu vào như trình bày ở Mục~\ref{sec:feature_selection}; các trường còn lại đóng vai trò metadata, đặc trưng phụ trợ hoặc biến phái sinh để phân tích.
 
 \begin{table}[H]
 \centering
-\caption{Tổng quan 44 trường dữ liệu ban đầu (theo nhóm)}
+\caption{Tổng quan các nhóm trường trong đầu ra đầy đủ của bộ sinh dữ liệu}
 \label{tab:44_features}
 \small
 \begin{tabular}{|l|c|l|}
@@ -556,9 +730,9 @@ Ngữ cảnh (Contextual)     & 8  & Activity, Location, Weather, Noise\_Level, 
 Phái sinh (Derived)        & 8  & Steps, Calories, Exercise\_Minutes, ... \\
 Mục tiêu (Target)          & 1  & Stress\_Level \\
 \hline
-\textbf{Tổng}              & \textbf{44} & -- \\
+\textbf{Tổng}              & \textbf{44} & Bao gồm cả metadata, biến phụ trợ và target \\
 \hline
 \end{tabular}
 \end{table}
 
-Tập dữ liệu 44 trường này chứa nhiều đặc trưng dư thừa (ví dụ: Calories có thể suy ra từ Activity + Duration, Steps liên hệ chặt với Activity). Quy trình lựa chọn đặc trưng từ 44 xuống 13 sẽ được trình bày chi tiết trong Mục \ref{sec:feature_selection}.
+Việc lưu đầu ra đầy đủ giúp thuận tiện cho kiểm tra dữ liệu và phân tích lỗi, nhưng không có nghĩa toàn bộ 44 trường đều được đưa vào mô hình. Để huấn luyện LSTM, khóa luận sử dụng tập 13 đặc trưng trực tiếp, dễ diễn giải và ít nguy cơ rò rỉ dữ liệu hơn; các trường như \texttt{Timestamp}, \texttt{Calories}, \texttt{Step\_Count} hoặc các thống kê tổng hợp không được dùng làm đầu vào chính.

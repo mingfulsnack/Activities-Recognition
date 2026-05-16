@@ -206,13 +206,13 @@ def main():
     print(" Phase 1 Validation Complete!")
     print("="*70)
     print("\nSummary:")
-    print("  ✓ Dataset generated with 20 optimized features")
-    print("  ✓ Context-aware stress variations implemented")
-    print("  ✓ Same activity + different context → different stress")
-    print("  ✓ Ready for Phase 2: Model Development")
+    print("   Dataset generated with 20 optimized features")
+    print("   Context-aware stress variations implemented")
+    print("   Same activity + different context → different stress")
+    print("   Ready for Phase 2: Model Development")
     print("\nNext Steps:")
-    print("  → Test HAR model compatibility")
-    print("  → Begin stress prediction model comparison")
+    print("   Test HAR model compatibility")
+    print("   Begin stress prediction model comparison")
 
 
 if __name__ == "__main__":

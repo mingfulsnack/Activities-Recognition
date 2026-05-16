@@ -6,7 +6,7 @@ Quản lý thông tin cơ bản của người dùng và tính toán các metric
 class UserProfile:
     """Quản lý thông tin cá nhân và tính toán metrics sinh lý cơ bản"""
     
-    def __init__(self, age=28, gender='Female'):
+    def __init__(self, age=22, gender='Male'):
         self.profile = {
             'Age': age,
             'Gender': gender,
@@ -42,7 +42,7 @@ class UserProfile:
     def calculate_max_heart_rate(self):
         """Tính Maximum Heart Rate dựa trên tuổi"""
         age = self.profile['Age']
-        return 220 - age
+        return 208 - (0.7 * age)
 
     def calculate_resting_heart_rate(self):
         """Tính Resting Heart Rate dựa trên tuổi và giới tính"""

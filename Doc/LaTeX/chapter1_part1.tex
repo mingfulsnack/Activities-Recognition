@@ -116,7 +116,7 @@ Mục tiêu tổng quát của khóa luận là nghiên cứu và xây dựng m�
     
     \item \textbf{Tạo tập dữ liệu đa phương thức:} Xây dựng hệ thống sinh dữ liệu kết hợp hai nguồn: (i) dữ liệu gia tốc kế thực từ WISDM v1.1 để đảm bảo tính chân thực của tín hiệu cảm biến; và (ii) dữ liệu hành vi mô phỏng thực tế theo lịch trình sinh hoạt 30 ngày (nhịp tim, tâm trạng, sử dụng điện thoại, vị trí, giấc ngủ). Điểm then chốt là tích hợp cơ chế Context-Stress Modifiers — điều chỉnh mức stress dựa trên sự tương tác giữa chỉ số sinh lý và hoạt động đang thực hiện.
     
-    \item \textbf{Lựa chọn đặc trưng tối ưu:} Thực hiện quy trình lựa chọn đặc trưng hệ thống từ 44 trường dữ liệu ban đầu xuống tập đặc trưng tối ưu, sử dụng kết hợp phân tích tầm quan trọng (Random Forest Importance), loại bỏ đặc trưng dư thừa, và đảm bảo tránh rò rỉ dữ liệu (data leakage) \cite{kaufman2012leakage}. Mục tiêu là giữ lại các đặc trưng có đóng góp thực sự cho dự đoán stress mà không làm giảm đáng kể hiệu năng mô hình.
+    \item \textbf{Thiết kế pipeline xử lý dữ liệu và tập đặc trưng đầu vào:} Xác định tập 13 đặc trưng sử dụng cho huấn luyện, bao phủ các nhóm thông tin thời gian, hoạt động/cảm biến, sinh lý, hành vi và ngữ cảnh. Đồng thời xây dựng pipeline xử lý dữ liệu chuỗi thời gian theo nguyên tắc chống rò rỉ dữ liệu (data leakage): chia dữ liệu theo thứ tự thời gian, fit encoder/scaler chỉ trên tập huấn luyện, và tạo chuỗi đầu vào cho mô hình LSTM \cite{kaufman2012leakage}.
     
     \item \textbf{Huấn luyện và tối ưu mô hình Stacked Bi-LSTM:} Thiết kế kiến trúc Stacked Bidirectional LSTM cho bài toán hồi quy chuỗi thời gian \cite{hochreiter1997lstm}, bao gồm: (i) huấn luyện mô hình baseline với cấu hình mặc định; (ii) tối ưu siêu tham số (hyperparameter tuning) bằng Bayesian Optimization \cite{snoek2012practical} để tìm cấu hình tối ưu về số lượng units, tỷ lệ dropout, learning rate; và (iii) phân tích tầm quan trọng đặc trưng bằng 4 phương pháp (Permutation Importance, SHAP \cite{lundberg2017shap}, Correlation Analysis, Random Forest Surrogate) để giải thích quyết định của mô hình.
     
@@ -134,9 +134,9 @@ Các chỉ số đánh giá chính bao gồm: Sai số tuyệt đối trung bìn
 
 \textbf{Về dữ liệu:} Hệ thống sử dụng hai nguồn dữ liệu chính. Nguồn thứ nhất là tập dữ liệu gia tốc kế WISDM v1.1 — một tập dữ liệu công khai được thu thập trực tiếp từ cảm biến smartphone, bao gồm 1.098.207 bản ghi từ 36 người dùng thực hiện 6 hoạt động. Nguồn thứ hai là dữ liệu hành vi và sinh lý được mô phỏng theo lịch trình sinh hoạt thực tế trong 30 ngày, bao gồm nhịp tim, tâm trạng, mức sử dụng điện thoại, vị trí, và chất lượng giấc ngủ. Hai nguồn dữ liệu được tích hợp thông qua cơ chế Context-Stress Modifiers để tạo thành tập dữ liệu đa phương thức hoàn chỉnh với 54.448 mẫu.
 
-\textbf{Về phương pháp:} Khóa luận tập trung vào các kiến trúc học sâu (Deep Learning) thuộc họ mạng hồi quy — cụ thể là LSTM và các biến thể (Bidirectional LSTM, GRU). Các phương pháp học máy truyền thống (SVM, Random Forest, XGBoost) không nằm trong phạm vi nghiên cứu chính, mặc dù Random Forest được sử dụng như công cụ phụ trợ trong bước lựa chọn đặc trưng và phân tích tầm quan trọng.
+\textbf{Về phương pháp:} Khóa luận tập trung vào các kiến trúc học sâu (Deep Learning) thuộc họ mạng hồi quy — cụ thể là LSTM và các biến thể (Bidirectional LSTM, GRU). Các phương pháp học máy truyền thống (SVM, Random Forest, XGBoost) không nằm trong phạm vi nghiên cứu chính, mặc dù Random Forest được sử dụng như công cụ phụ trợ trong phân tích tầm quan trọng đặc trưng.
 
-\textbf{Về đầu ra:} Hệ thống dự đoán mức stress dưới dạng giá trị hồi quy liên tục trên thang đo 1--9 điểm, khác biệt với phần lớn nghiên cứu hiện có sử dụng phân loại nhị phân hoặc đa lớp. Đầu vào của mô hình là chuỗi thời gian 60 bước (time steps), mỗi bước chứa 13 đặc trưng đã được lựa chọn.
+\textbf{Về đầu ra:} Hệ thống dự đoán mức stress dưới dạng giá trị hồi quy liên tục trên thang đo 1--9 điểm, khác biệt với phần lớn nghiên cứu hiện có sử dụng phân loại nhị phân hoặc đa lớp. Đầu vào của mô hình là chuỗi thời gian 60 bước (time steps), mỗi bước chứa 13 đặc trưng đầu vào cuối cùng.
 
 % ============================================================
 
@@ -167,7 +167,7 @@ Ngoài phần mở đầu và kết luận, khóa luận được tổ chức th
     
     \item \textbf{Chương 2 — Cơ sở lý thuyết và nghiên cứu liên quan:} Cung cấp nền tảng lý thuyết về nhận dạng hoạt động (HAR), stress và phương pháp đo lường, các kiến trúc mạng nơ-ron hồi quy (RNN, LSTM, Bi-LSTM, GRU), các kỹ thuật tối ưu siêu tham số, phân tích tầm quan trọng đặc trưng, và tổng quan các công trình liên quan.
     
-    \item \textbf{Chương 3 — Phương pháp đề xuất:} Mô tả chi tiết kiến trúc hệ thống tổng thể gồm 5 module (HAR, sinh dữ liệu, tiền xử lý, mô hình Stacked Bi-LSTM, đánh giá), quy trình xử lý dữ liệu chống rò rỉ, thiết kế từng module và luồng xử lý dữ liệu xuyên suốt hệ thống.
+    \item \textbf{Chương 3 — Phương pháp đề xuất:} Mô tả chi tiết kiến trúc hệ thống tổng thể gồm 4 module chính: HAR, sinh dữ liệu đa phương thức, pipeline xử lý dữ liệu/tập đặc trưng đầu vào, và mô hình Stacked Bi-LSTM cùng quy trình đánh giá. Chương này cũng trình bày cơ chế Context-Stress Modifier và luồng xử lý dữ liệu chống rò rỉ.
     
     \item \textbf{Chương 4 — Thực nghiệm và đánh giá:} Trình bày cấu hình thực nghiệm, kết quả đào tạo và đánh giá cho cả module HAR và mô hình dự đoán stress, kết quả tối ưu siêu tham số bằng Bayesian Optimization, phân tích tầm quan trọng đặc trưng, so sánh 5 kiến trúc, và phân tích lỗi chi tiết.
     
