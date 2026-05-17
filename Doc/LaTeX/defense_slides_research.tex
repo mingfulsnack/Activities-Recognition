@@ -363,7 +363,52 @@ Khoảng hợp lý & Hệ số được chuẩn hóa về thang stress 1--9 và 
 \end{frame}
 
 % ============================================================
-% SLIDE 13: MÔ HÌNH HÓA NHỊP TIM
+% SLIDE 13: ĐẶC TRƯNG HÀNH VI VÀ TRẠNG THÁI CÁ NHÂN
+% ============================================================
+\begin{frame}{Mô phỏng Screen Usage, Mood và Energy}
+\scriptsize
+\begin{columns}[T]
+\column{0.32\textwidth}
+\textbf{Screen\_Usage\_Current}
+\[
+U(t)=B_{\text{act}}(a_t)\,M_{\text{loc}}(l_t)\,[1+(S_t-4)0.15]+\varepsilon
+\]
+\begin{itemize}
+    \item Activity quyết định khả năng dùng điện thoại.
+    \item Location điều chỉnh theo bối cảnh.
+    \item Stress chỉ tăng nhẹ, không chi phối toàn bộ feature.
+\end{itemize}
+
+\column{0.34\textwidth}
+\textbf{Mood\_Score}
+\[
+M(t)=M_0(d)+\Delta M_{\text{time}}+\Delta M_{\text{act}}+\Delta M_{\text{loc}}-(S_t-4)0.3+\varepsilon
+\]
+\[
+M_0(d)=5+F_{\text{mood}}(d)\times3
+\]
+\begin{itemize}
+    \item Mood nền dao động theo ngày/sự kiện.
+    \item Stress cao kéo mood xuống vừa phải.
+\end{itemize}
+
+\column{0.30\textwidth}
+\textbf{Energy\_Level}
+\[
+E(d)=\text{clip}(0.7+\eta_{\text{energy}}(d)+\Delta E_{\text{event}},0.2,1.0)
+\]
+\begin{itemize}
+    \item Biến tiềm ẩn về phục hồi/fatigue.
+    \item Bị ảnh hưởng bởi chu kỳ, mệt mỏi tuần và sự kiện.
+\end{itemize}
+\end{columns}
+
+\vspace{0.08cm}
+\fbox{\parbox{0.92\textwidth}{\centering\scriptsize\textbf{Nguồn neo:} Mobile sensing, MoodScope và StudentLife hỗ trợ liên hệ giữa phone usage, mood, sleep, activity; các hệ số vẫn là heuristic chuẩn hóa, không phải công thức lâm sàng.}}
+\end{frame}
+
+% ============================================================
+% SLIDE 14: MÔ HÌNH HÓA NHỊP TIM
 % ============================================================
 \begin{frame}{Mô hình hóa nhịp tim theo bối cảnh}
 \small

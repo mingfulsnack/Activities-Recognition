@@ -112,7 +112,19 @@ Em không khẳng định các công thức là công thức y sinh được tr�
 
 Ví dụ, paper không nói stress tăng 1 mức thì HR tăng đúng 3 bpm. Paper chỉ hỗ trợ rằng stress kích hoạt hệ giao cảm và HR/HRV liên quan tới stress. Em chọn 3 bpm để stress rất cao chỉ cộng tối đa khoảng 15 bpm, nhỏ hơn nhiều so với Jogging cộng 40 bpm. Nhờ vậy hệ thống không đánh đồng vận động mạnh với stress cao."
 
-## Slide 14 — Mô hình hóa nhịp tim
+## Slide 14 — Mô phỏng Screen Usage, Mood và Energy
+
+"Slide này giải thích ba nhóm đặc trưng dễ bị hỏi: mức sử dụng màn hình, tâm trạng và năng lượng.
+
+Với Screen Usage, em không sinh ngẫu nhiên. Công thức dùng activity làm nền, location làm hệ số bối cảnh, và stress chỉ điều chỉnh nhẹ. Ví dụ khi đang Sitting hoặc ở Home/Work thì khả năng dùng điện thoại cao hơn; khi Jogging hoặc Upstairs thì thấp hơn. Hệ số stress 0.15 được giữ nhỏ để Screen Usage không trở thành bản sao của Stress Level.
+
+Với Mood Score, mood nền của ngày được đặt quanh mức 5 trên thang 1 đến 10, sau đó cộng các ảnh hưởng của thời gian, hoạt động, vị trí và stress. Thành phần stress là âm: stress cao kéo mood xuống theo hệ số 0.3, nhưng mức kéo vừa phải để mood vẫn còn phụ thuộc vào các yếu tố khác.
+
+Với Energy Level, đây là latent recovery score trong khoảng 0.2 đến 1.0, không phải năng lượng sinh lý đo trực tiếp. Nó mô phỏng trạng thái phục hồi trong ngày, chịu tác động bởi nhiễu hằng ngày, fatigue tích lũy theo tuần và sự kiện như deadline, ốm hoặc ngày nghỉ.
+
+Câu chốt khi bị hỏi là: các đặc trưng này được neo bởi mobile sensing, MoodScope và StudentLife; còn hệ số cụ thể là heuristic chuẩn hóa để tạo dữ liệu có kiểm soát."
+
+## Slide 15 — Mô hình hóa nhịp tim
 
 "Công thức HR gồm HR nghỉ, ảnh hưởng hoạt động, ảnh hưởng stress, ảnh hưởng mệt mỏi và nhiễu.
 
@@ -120,7 +132,7 @@ HRmax được neo theo Tanaka: 208 trừ 0.7 nhân tuổi. Ảnh hưởng hoạ
 
 Phần stress là `(Stress Level - 4) * 3 bpm`. Trừ 4 vì 4 là mốc gần trung tính trên thang 1-9; nhân 3 vì muốn tác động stress vừa đủ rõ nhưng không lấn át hoạt động. Đây là tham số mô phỏng, không phải hệ số lâm sàng."
 
-## Slide 15 — Công thức stress đa yếu tố
+## Slide 16 — Công thức stress đa yếu tố
 
 "Stress base được tạo từ nhiều thành phần: stress nền, thời gian, hoạt động, vị trí, workload, HR, sleep và momentum.
 
@@ -128,7 +140,7 @@ Mỗi thành phần là một modifier chuẩn hóa. Ví dụ time được neo 
 
 Điểm quan trọng là hệ thống không để một biến đơn lẻ quyết định stress. Stress cuối cùng hình thành từ tương tác đa yếu tố, sau đó còn được điều chỉnh bởi Context-Stress Modifier."
 
-## Slide 16 — Context-Stress Modifier
+## Slide 17 — Context-Stress Modifier
 
 "Đây là đóng góp cốt lõi của khóa luận.
 
@@ -136,7 +148,7 @@ Theo Lazarus và Folkman, stress không chỉ phụ thuộc kích thích bên ng
 
 Ví dụ, Jogging ngoài trời sáng cuối tuần có HR 140 nhưng stress có thể thấp. Ngược lại, Sitting ở work buổi chiều có deadline, HR chỉ 95 nhưng stress lại cao. Bảng delta ở đây là lookup heuristic để mã hóa tri thức ngữ cảnh, không phải bảng đo lâm sàng."
 
-## Slide 17 — Pipeline chống rò rỉ dữ liệu
+## Slide 18 — Pipeline chống rò rỉ dữ liệu
 
 "Với chuỗi thời gian, thứ tự xử lý rất quan trọng: split trước, rồi mới encode, normalize và tạo sequence.
 
@@ -144,7 +156,7 @@ Nếu tạo rolling feature hoặc normalize trên toàn bộ dữ liệu trư�
 
 Điểm em muốn nhấn mạnh là kết quả model chỉ có ý nghĩa khi pipeline không bị leakage."
 
-## Slide 18 — Thiết lập thực nghiệm
+## Slide 19 — Thiết lập thực nghiệm
 
 "Toàn bộ mô hình được đánh giá trong cùng điều kiện: cùng dữ liệu, cùng pipeline, cùng callbacks, cùng protocol, seed cố định.
 
@@ -152,7 +164,7 @@ Với bài toán stress hồi quy, em dùng MAE, RMSE và R-squared. Với HAR, 
 
 Thiết lập này giúp việc so sánh 5 kiến trúc công bằng hơn, vì sự khác biệt đến từ mô hình và tuning chứ không phải từ xử lý dữ liệu khác nhau."
 
-## Slide 19 — Stress Baseline
+## Slide 20 — Stress Baseline
 
 "Baseline là Stacked Bi-LSTM với dropout 0.3, learning rate 0.001 và khoảng 320 nghìn tham số.
 
@@ -160,7 +172,7 @@ Baseline đạt R-squared 0.9245 và MAE 0.6855. Kết quả này tốt, nhưng 
 
 Từ đó em đặt câu hỏi: nếu không đổi kiến trúc, chỉ tuning siêu tham số thì có cải thiện đáng kể không?"
 
-## Slide 20 — Bayesian Optimization
+## Slide 21 — Bayesian Optimization
 
 "Sau Bayesian Optimization, MAE giảm 22.8%, RMSE giảm 14.2%, R-squared tăng lên 0.944, trong khi số tham số giảm gần 49%.
 
@@ -168,7 +180,7 @@ Từ đó em đặt câu hỏi: nếu không đổi kiến trúc, chỉ tuning s
 
 Cách nói an toàn là: trong thiết lập thực nghiệm này, tuning tạo cải thiện rõ rệt và giúp mô hình gọn hơn."
 
-## Slide 21 — So sánh 5 mô hình
+## Slide 22 — So sánh 5 mô hình
 
 "Slide này so sánh 5 kiến trúc trên cùng pipeline.
 
@@ -176,7 +188,7 @@ Bi-LSTM Tuned đạt R-squared 0.956 và MAE 0.441, tốt nhất trong bộ dữ
 
 Em không trình bày con số này như hiệu năng ngoài đời thật, mà như bằng chứng rằng pipeline context-aware có thể được mô hình chuỗi khai thác hiệu quả."
 
-## Slide 22 — Bài học từ so sánh mô hình
+## Slide 23 — Bài học từ so sánh mô hình
 
 "Bài học chính là: kiến trúc mạnh nhưng siêu tham số không phù hợp có thể thua kiến trúc đơn giản hơn.
 
@@ -184,7 +196,7 @@ Bi-LSTM Baseline nhiều tham số hơn nhưng kém Simple LSTM; sau tuning, Bi-
 
 Em tránh nói tuning luôn quan trọng hơn kiến trúc trong mọi bài toán. Em chỉ kết luận trong phạm vi thực nghiệm này, tuning có tác động rất lớn."
 
-## Slide 23 — Phân tích lỗi
+## Slide 24 — Phân tích lỗi
 
 "Mô hình tuned không chỉ cải thiện trung bình mà còn cải thiện ở nhóm quan trọng: stress rất cao từ 8 đến 9.
 
@@ -192,7 +204,7 @@ MAE ở nhóm này giảm 46.1%, tức mô hình giảm sai số ở vùng có �
 
 Phân tích lỗi giúp chứng minh mô hình không chỉ đẹp ở metric tổng quát, mà cải thiện ở đúng vùng cần quan tâm."
 
-## Slide 24 — Feature importance
+## Slide 25 — Feature importance
 
 "Em dùng 4 phương pháp feature importance để tránh phụ thuộc vào một cách giải thích duy nhất.
 
@@ -200,7 +212,7 @@ Mood Score và Heart Rate nhất quán nằm trong top 2. Điều này hợp lý
 
 Tuy nhiên cần nhớ: vì dữ liệu là bán mô phỏng, feature importance phản ánh logic của bộ sinh dữ liệu và cách model học logic đó."
 
-## Slide 25 — So sánh thứ hạng đặc trưng
+## Slide 26 — So sánh thứ hạng đặc trưng
 
 "Ở slide này, em nhấn mạnh vì sao dùng nhiều phương pháp giải thích là cần thiết.
 
@@ -208,7 +220,7 @@ Location có thể rất quan trọng trong Random Forest surrogate nhưng khôn
 
 Việc tổng hợp thứ hạng giúp giảm thiên lệch từ từng phương pháp riêng lẻ và cho cái nhìn ổn định hơn."
 
-## Slide 26 — Tổng hợp theo câu hỏi nghiên cứu
+## Slide 27 — Tổng hợp theo câu hỏi nghiên cứu
 
 "Bốn câu hỏi nghiên cứu đều có bằng chứng trả lời.
 
@@ -216,7 +228,7 @@ RQ1: context-aware có vai trò vì các đặc trưng ngữ cảnh-hành vi xu�
 
 Đây là slide nối phần kết quả với phần đóng góp."
 
-## Slide 27 — Tóm tắt kết quả sau thực nghiệm
+## Slide 28 — Tóm tắt kết quả sau thực nghiệm
 
 "Sau khi trình bày chi tiết, em tóm tắt lại ba kết quả chính.
 
@@ -224,7 +236,7 @@ Một là Bi-LSTM Tuned tốt nhất trong bộ dữ liệu bán mô phỏng. Ha
 
 Điểm em muốn giữ là không overclaim: metric cao là kết quả trong phạm vi dataset hiện tại; đóng góp bền hơn là phương pháp xây dựng và kiểm chứng pipeline."
 
-## Slide 28 — Đóng góp phương pháp
+## Slide 29 — Đóng góp phương pháp
 
 "Đóng góp được chia thành ba tầng.
 
@@ -232,7 +244,7 @@ Tầng bài toán: chuyển từ phân loại stress rời rạc sang hồi quy 
 
 Em nhấn mạnh đây là đóng góp phương pháp và proof-of-concept, chưa phải hệ thống đạt chuẩn lâm sàng."
 
-## Slide 29 — Hạn chế nghiên cứu
+## Slide 30 — Hạn chế nghiên cứu
 
 "Em trình bày hạn chế theo khung validity.
 
@@ -240,13 +252,13 @@ Construct validity: nhãn stress là bán mô phỏng, chưa phải EMA hay nhã
 
 Việc nói rõ hạn chế không làm yếu khóa luận; ngược lại, nó xác định chính xác phạm vi đóng góp và hướng phát triển tiếp theo."
 
-## Slide 30 — Hướng phát triển
+## Slide 31 — Hướng phát triển
 
 "Hướng phát triển ngắn hạn là thu thập dữ liệu thực tế smartphone/wearable kết hợp EMA, học hoặc hiệu chỉnh hệ số công thức từ dữ liệu thật, mở rộng benchmark sang Transformer/TCN, và làm ablation cho Context-Stress Modifier.
 
 Trung hạn là triển khai gần real-time, cá nhân hóa mô hình và bảo vệ quyền riêng tư bằng federated learning. Dài hạn là mở rộng cảm biến như EDA, HRV và hướng predict-to-intervene."
 
-## Slide 31 — Kết luận
+## Slide 32 — Kết luận
 
 "Tóm lại, khóa luận đã xây dựng một pipeline context-aware cho dự đoán stress liên tục trong thiết lập bán mô phỏng.
 
@@ -254,7 +266,7 @@ Giá trị chính gồm: hệ thống end-to-end có kết quả tốt trong ph�
 
 Giá trị cốt lõi không chỉ là metric, mà là khung sinh dữ liệu và dự đoán stress minh bạch, có thể truy vết, sẵn sàng được kiểm chứng bằng dữ liệu thực."
 
-## Slide 32 — Q&A
+## Slide 33 — Q&A
 
 "Em xin cảm ơn Hội đồng đã lắng nghe. Em sẵn sàng trao đổi thêm về cơ sở hệ số heuristic, thiết kế Context-Stress Modifier, tính hợp lệ của dữ liệu bán mô phỏng, và kế hoạch kiểm chứng thực địa."
 
