@@ -116,13 +116,13 @@ Ví dụ, paper không nói stress tăng 1 mức thì HR tăng đúng 3 bpm. Pap
 
 "Slide này giải thích ba nhóm đặc trưng dễ bị hỏi: mức sử dụng màn hình, tâm trạng và năng lượng.
 
-Với Screen Usage, em không sinh ngẫu nhiên. Công thức dùng activity làm nền, location làm hệ số bối cảnh, và stress chỉ điều chỉnh nhẹ. Ví dụ khi đang Sitting hoặc ở Home/Work thì khả năng dùng điện thoại cao hơn; khi Jogging hoặc Upstairs thì thấp hơn. Hệ số stress 0.15 được giữ nhỏ để Screen Usage không trở thành bản sao của Stress Level.
+Với Screen Usage, cơ sở chính là hướng mobile sensing. Lane et al. 2010 tổng quan rằng smartphone có thể ghi nhận dấu vết hành vi như app usage, location và activity để suy luận trạng thái cá nhân. MoodScope của Likamwa et al. cũng dùng smartphone usage pattern để suy luận mood. Từ đó em không sinh Screen Usage ngẫu nhiên, mà dùng activity làm nền, location làm hệ số bối cảnh, và stress chỉ điều chỉnh nhẹ. Ví dụ khi Sitting hoặc ở Home/Work thì khả năng dùng điện thoại cao hơn; khi Jogging hoặc Upstairs thì thấp hơn. Hệ số stress 0.15 được giữ nhỏ để Screen Usage không trở thành bản sao của Stress Level.
 
-Với Mood Score, mood nền của ngày được đặt quanh mức 5 trên thang 1 đến 10, sau đó cộng các ảnh hưởng của thời gian, hoạt động, vị trí và stress. Thành phần stress là âm: stress cao kéo mood xuống theo hệ số 0.3, nhưng mức kéo vừa phải để mood vẫn còn phụ thuộc vào các yếu tố khác.
+Với Mood Score, nguồn neo chính là MoodScope của Likamwa et al. và StudentLife của Wang et al. MoodScope cho thấy mood có thể được suy luận từ mẫu sử dụng smartphone; StudentLife theo dõi sleep, activity, workload, sociability và mental well-being của sinh viên bằng smartphone sensing. Vì vậy mood nền của ngày được đặt quanh mức 5 trên thang 1 đến 10, sau đó cộng ảnh hưởng của thời gian, hoạt động, vị trí và stress. Thành phần stress là âm: stress cao kéo mood xuống theo hệ số 0.3, nhưng mức kéo vừa phải để mood vẫn còn phụ thuộc vào các yếu tố khác.
 
-Với Energy Level, đây là latent recovery score trong khoảng 0.2 đến 1.0, không phải năng lượng sinh lý đo trực tiếp. Nó mô phỏng trạng thái phục hồi trong ngày, chịu tác động bởi nhiễu hằng ngày, fatigue tích lũy theo tuần và sự kiện như deadline, ốm hoặc ngày nghỉ.
+Với Energy Level, nguồn neo là McEwen về allostatic load và StudentLife về quan hệ giữa sleep, workload, activity và trạng thái cá nhân. Em không nói đây là năng lượng sinh lý đo trực tiếp. Đây là latent recovery score trong khoảng 0.2 đến 1.0, mô phỏng trạng thái phục hồi trong ngày, chịu tác động bởi nhiễu hằng ngày, fatigue tích lũy theo tuần và sự kiện như deadline, ốm hoặc ngày nghỉ.
 
-Câu chốt khi bị hỏi là: các đặc trưng này được neo bởi mobile sensing, MoodScope và StudentLife; còn hệ số cụ thể là heuristic chuẩn hóa để tạo dữ liệu có kiểm soát."
+Câu chốt khi bị hỏi là: các paper hỗ trợ cơ chế và chiều tác động; còn các hệ số như 0.15, 0.3 hay nền 0.7 là heuristic chuẩn hóa để tạo dữ liệu có kiểm soát, không phải công thức lâm sàng."
 
 ## Slide 15 — Mô hình hóa nhịp tim
 

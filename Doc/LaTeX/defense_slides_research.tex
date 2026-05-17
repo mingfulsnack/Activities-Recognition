@@ -370,17 +370,22 @@ Khoảng hợp lý & Hệ số được chuẩn hóa về thang stress 1--9 và 
 \begin{columns}[T]
 \column{0.32\textwidth}
 \textbf{Screen\_Usage\_Current}
+\vspace{0.03cm}
+
+\textit{Nguồn neo: Lane et al. (2010), MoodScope}
 \[
 U(t)=B_{\text{act}}(a_t)\,M_{\text{loc}}(l_t)\,[1+(S_t-4)0.15]+\varepsilon
 \]
 \begin{itemize}
-    \item Activity quyết định khả năng dùng điện thoại.
-    \item Location điều chỉnh theo bối cảnh.
-    \item Stress chỉ tăng nhẹ, không chi phối toàn bộ feature.
+    \item Smartphone usage phản ánh activity/location trong mobile sensing.
+    \item Stress chỉ tăng nhẹ để không biến feature thành nhãn.
 \end{itemize}
 
 \column{0.34\textwidth}
 \textbf{Mood\_Score}
+\vspace{0.03cm}
+
+\textit{Nguồn neo: Likamwa et al. (MoodScope), Wang et al. (StudentLife)}
 \[
 M(t)=M_0(d)+\Delta M_{\text{time}}+\Delta M_{\text{act}}+\Delta M_{\text{loc}}-(S_t-4)0.3+\varepsilon
 \]
@@ -388,23 +393,26 @@ M(t)=M_0(d)+\Delta M_{\text{time}}+\Delta M_{\text{act}}+\Delta M_{\text{loc}}-(
 M_0(d)=5+F_{\text{mood}}(d)\times3
 \]
 \begin{itemize}
-    \item Mood nền dao động theo ngày/sự kiện.
-    \item Stress cao kéo mood xuống vừa phải.
+    \item Mood liên quan phone usage, sleep, activity, workload.
+    \item Stress cao kéo mood xuống vừa phải, không sao chép nhãn.
 \end{itemize}
 
 \column{0.30\textwidth}
 \textbf{Energy\_Level}
+\vspace{0.03cm}
+
+\textit{Nguồn neo: McEwen (Allostatic Load), StudentLife}
 \[
 E(d)=\text{clip}(0.7+\eta_{\text{energy}}(d)+\Delta E_{\text{event}},0.2,1.0)
 \]
 \begin{itemize}
-    \item Biến tiềm ẩn về phục hồi/fatigue.
-    \item Bị ảnh hưởng bởi chu kỳ, mệt mỏi tuần và sự kiện.
+    \item Biến tiềm ẩn về recovery/fatigue, không đo trực tiếp.
+    \item Sự kiện và sleep/workload tạo biến thiên dài hạn.
 \end{itemize}
 \end{columns}
 
 \vspace{0.08cm}
-\fbox{\parbox{0.92\textwidth}{\centering\scriptsize\textbf{Nguồn neo:} Mobile sensing, MoodScope và StudentLife hỗ trợ liên hệ giữa phone usage, mood, sleep, activity; các hệ số vẫn là heuristic chuẩn hóa, không phải công thức lâm sàng.}}
+\fbox{\parbox{0.92\textwidth}{\centering\scriptsize\textbf{Cách dùng nguồn:} Paper hỗ trợ cơ chế và chiều tác động; các hệ số 0.15, 0.3, 0.7 là heuristic chuẩn hóa cho dữ liệu mô phỏng.}}
 \end{frame}
 
 % ============================================================
