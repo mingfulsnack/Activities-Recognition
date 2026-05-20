@@ -54,9 +54,9 @@ class DataPreprocessor:
         
     def load_data(self):
         """Load 13-feature dataset."""
-        print(f"📂 Loading data from: {self.data_path}")
+        print(f" Loading data from: {self.data_path}")
         self.df = pd.read_csv(self.data_path)
-        print(f"✓ Loaded {len(self.df):,} samples with {len(self.df.columns)} columns")
+        print(f" Loaded {len(self.df):,} samples with {len(self.df.columns)} columns")
         print(f"\nColumns: {list(self.df.columns)}")
         return self
         
@@ -114,7 +114,7 @@ class DataPreprocessor:
                 print(f"    {col} mapping: {mapping}")
         
         print(f"\n Encoded {len(self.categorical_features)} categorical features")
-        print("✓ NO DATA LEAKAGE: Fitted on train only, transformed val/test")
+        print(" NO DATA LEAKAGE: Fitted on train only, transformed val/test")
         
         return X_train, X_val, X_test
         
@@ -133,7 +133,7 @@ class DataPreprocessor:
         X_val_scaled = self.scaler.transform(X_val)
         X_test_scaled = self.scaler.transform(X_test)
         
-        print(f"✓ Normalized {X_train_scaled.shape[1]} features")
+        print(f"  Normalized {X_train_scaled.shape[1]} features")
         print(f"  Mean: {self.scaler.mean_[:3]} ...")
         print(f"  Std:  {self.scaler.scale_[:3]} ...")
         
