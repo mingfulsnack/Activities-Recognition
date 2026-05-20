@@ -180,7 +180,7 @@ class AccelerometerValidator:
             actual = actual_labels[i]
             predicted = predicted_labels[i]
             confidence = np.max(predictions[i])
-            status = "✅" if actual == predicted else "❌"
+            status = "Correct" if actual == predicted else "Incorrect"
             
             print(f"  {status} Actual: {actual:12} | Predicted: {predicted:12} | Confidence: {confidence:.3f}")
         

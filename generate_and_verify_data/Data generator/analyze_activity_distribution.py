@@ -32,7 +32,7 @@ def analyze_current_distribution():
         daily_samples = count / 30
         daily_hours = (daily_samples / samples_per_day) * hours_per_day
         
-        status = "🚨" if percentage > 40 else "⚠️" if percentage > 20 else "✅"
+        status = "Cautious" if percentage > 40 else "Warning" if percentage > 20 else "OK"
         print(f"{activity:<12} {count:<8} {percentage:<9.1f}% {daily_hours:<9.1f}h {status}")
     
     # HAR Segment Analysis
@@ -150,7 +150,7 @@ def calculate_required_changes(target_distribution, current_percentages):
     print("   - Upstairs: Min 1.3h/day (currently ~0.1h)")
     print("   - Downstairs: Min 1.1h/day (currently ~0.1h)")
     
-    print("\n2. 📐 HAR Segment Targets:")
+    print("\n2. HAR Segment Targets:")
     segment_size = 180
     for activity, target_pct in target_distribution.items():
         target_samples = int((target_pct / 100) * total_samples)
