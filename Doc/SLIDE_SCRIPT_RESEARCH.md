@@ -1,315 +1,374 @@
-# KỊCH BẢN NÓI THEO SLIDE BẢO VỆ KHÓA LUẬN
+# KỊCH BẢN THUYẾT TRÌNH THEO `Final Slide.md`
 
-Tài liệu này bám theo file `Doc/LaTeX/defense_slides_research.tex` sau khi chỉnh lại nội dung bảo vệ.
+Tài liệu này được viết lại theo slide mới trong `Doc/Final Slide.md`.
 
-Nguyên tắc nói:
-- Mỗi slide khoảng 40-70 giây; các slide công thức có thể nói 90 giây nếu hội đồng quan tâm.
-- Luôn phân biệt rõ: kết quả metric thuộc phạm vi dữ liệu bán mô phỏng, không phải kết luận lâm sàng ngoài thực địa.
-- Khi nói về công thức Module 2, dùng câu chốt: "Đây là heuristic có neo nghiên cứu, không phải công thức y sinh lấy nguyên văn từ paper."
-- Nếu bị hỏi sâu, trả lời theo cấu trúc: paper hỗ trợ cơ chế/chiều tác động/khoảng hợp lý; hệ số cụ thể là tham số mô phỏng được chuẩn hóa.
+Nguyên tắc nói xuyên suốt:
+- Không nói "em đề xuất toàn bộ kiến trúc". Nói đúng hơn: "em xây dựng một pipeline tổng thể, trong đó một số thành phần kế thừa từ nghiên cứu trước; phần đề xuất chính là cách ghép ngữ cảnh hoạt động vào dự đoán stress, bộ sinh dữ liệu đa phương thức có truy vết và Context-Stress Modifier."
+- Khi nói về công thức Module 2, dùng câu an toàn: "Các hệ số là heuristic có neo nghiên cứu, không phải công thức y sinh/lâm sàng lấy nguyên văn từ paper."
+- Khi nói về kết quả `R² = 0.9555`, nhấn mạnh đây là kết quả trong thiết lập dữ liệu bán mô phỏng, có giá trị proof-of-concept, chưa phải kiểm chứng lâm sàng ngoài thực địa.
+- Các nguồn nên nhắc miệng: WISDM/Kwapisz et al. cho dữ liệu hoạt động; Lazarus & Folkman cho stress theo bối cảnh; McEwen cho allostatic load; Ainsworth cho MET; Tanaka cho HRmax; Lane, MoodScope, StudentLife cho mobile sensing; Hovsepian/cStress và WESAD cho stress detection bằng tín hiệu sinh lý.
 
 ---
 
 ## Slide 1 — Trang bìa
 
-"Kính thưa Hội đồng, em xin trình bày khóa luận: Khung Đa Phương Thức Nhận Thức Ngữ Cảnh cho Dự Đoán Mức Độ Stress Liên Tục.
+"Kính thưa Hội đồng, em xin trình bày khóa luận: Một mô hình đa phương thức cho phát hiện căng thẳng trong hoạt động hằng ngày.
 
-Bài toán em tập trung không chỉ là dự đoán stress, mà là diễn giải đúng ý nghĩa của tín hiệu sinh lý theo bối cảnh. Ví dụ cùng một nhịp tim cao, hệ thống cần phân biệt được đó là do chạy bộ, do mệt mỏi, hay do stress khi đang làm việc."
+Ý tưởng trung tâm của khóa luận là: stress không thể được hiểu chính xác nếu chỉ nhìn một tín hiệu đơn lẻ như nhịp tim. Cùng một nhịp tim cao có thể là do chạy bộ, leo cầu thang, mệt mỏi, hoặc stress trong công việc. Vì vậy, khóa luận xây dựng một pipeline đa phương thức, trong đó nhãn hoạt động, ngữ cảnh thời gian, vị trí, hành vi sử dụng điện thoại và tín hiệu sinh lý được kết hợp để dự đoán stress liên tục."
 
-## Slide 2 — Nội dung trình bày
+## Slide 2 — Nội dung
 
-"Bài trình bày gồm 5 phần: đặt vấn đề, phương pháp đề xuất, thực nghiệm và kết quả, đóng góp-hạn chế-hướng phát triển, và kết luận.
+"Bài trình bày gồm 5 phần.
 
-Trọng tâm của bài là cơ chế Context-Stress Modifier và cách em xây dựng pipeline stress liên tục theo hướng context-aware."
+Phần 1 đặt vấn đề và mục tiêu nghiên cứu. Phần 2 trình bày thiết kế hệ thống và làm rõ đâu là phần kế thừa, đâu là phần em đề xuất. Phần 3 đi vào thiết kế dữ liệu, công thức mô phỏng và pipeline mô hình. Phần 4 trình bày thực nghiệm và kết quả. Cuối cùng là hạn chế, hướng phát triển và kết luận.
 
-## Slide 3 — Thông điệp chính
+Điểm em muốn nhấn mạnh ngay từ đầu là: đóng góp chính không phải là phát minh lại mô hình HAR hay LSTM, mà là xây dựng một cách diễn giải stress có nhận thức ngữ cảnh."
 
-"Trước khi đi vào chi tiết, em xin nêu thông điệp chính của khóa luận.
+## Slide 3 — Đặt vấn đề
 
-Thứ nhất, mô hình tốt nhất đạt R-squared 0.956 trong thiết lập dữ liệu bán mô phỏng. Con số này cần được hiểu đúng phạm vi: nó phản ánh hiệu quả trong bộ dữ liệu do hệ thống sinh có kiểm soát, không phải hiệu năng lâm sàng ngoài thực địa.
+"Stress kéo dài là một vấn đề sức khỏe tinh thần và thể chất nghiêm trọng. WHO ghi nhận sau đại dịch COVID-19, các rối loạn lo âu và trầm cảm tăng đáng kể trên phạm vi toàn cầu. Stress kéo dài có thể liên quan tới bệnh tim mạch, suy giảm miễn dịch và trầm cảm.
 
-Thứ hai, đóng góp quan trọng hơn là cách đưa ngữ cảnh vào diễn giải stress. Hệ thống không xem HR cao là stress cao một cách máy móc, mà xét thêm hoạt động, vị trí và thời điểm.
+Các phương pháp đánh giá truyền thống, ví dụ bảng hỏi hồi cứu, có ba hạn chế: chủ quan, không liên tục và gây gián đoạn. Trong khi đó, smartphone và wearable có khả năng thu thập tín hiệu liên tục hơn, ví dụ hoạt động, vị trí, nhịp tim, giấc ngủ hoặc hành vi sử dụng điện thoại.
 
-Thứ ba, các công thức trong Module 2 là heuristic có neo nghiên cứu. Paper cung cấp cơ chế và chiều tác động; còn hệ số cụ thể được chuẩn hóa cho thang stress 1 đến 9."
+Từ đó, mục tiêu của khóa luận là dự đoán stress liên tục trên thang 1 đến 9 bằng một pipeline context-aware có thể giải thích được."
 
-## Slide 4 — Động lực nghiên cứu
+## Slide 4 — Khoảng trống nghiên cứu
 
-"Stress kéo dài là vấn đề sức khỏe cộng đồng nghiêm trọng. WHO ghi nhận sau COVID-19, rối loạn lo âu và trầm cảm tăng mạnh trên toàn cầu.
+"Em xác định bốn khoảng trống chính.
 
-Các cách đánh giá truyền thống như bảng hỏi có hạn chế: chủ quan, không liên tục, và thường làm gián đoạn người dùng. Trong khi đó, smartphone và wearable có thể cung cấp tín hiệu liên tục hơn.
+Thứ nhất, nhiều nghiên cứu stress detection xử lý stress như bài toán phân loại rời rạc, ví dụ stress/không stress, trong khi thực tế stress có cường độ biến thiên liên tục.
 
-Khoảng trống em tập trung gồm ba điểm: stress thường bị phân loại rời rạc thay vì dự đoán liên tục; tín hiệu sinh lý như nhịp tim bị nhập nhằng; và stress có tính tích lũy theo thời gian."
+Thứ hai, nhận diện hoạt động và dự đoán stress thường bị xử lý tách rời. Điều này gây ra vấn đề nhập nhằng sinh lý: HR cao khi chạy bộ không có cùng ý nghĩa với HR cao khi đang ngồi họp deadline.
 
-## Slide 5 — Khoảng trống nghiên cứu
+Thứ ba, nhiều so sánh mô hình chưa thật sự công bằng vì khác pipeline, khác preprocessing hoặc khác cách chia dữ liệu.
 
-"Slide này ánh xạ khoảng trống nghiên cứu với hướng tiếp cận của khóa luận.
+Thứ tư, kết quả mô hình thường thiếu phân tích giải thích. Vì vậy khóa luận dùng feature importance và phân tích lỗi để hiểu mô hình học từ đâu."
 
-G1 là chuyển từ phân loại stress sang hồi quy liên tục trên thang 1 đến 9. G2 là liên kết HAR với stress trong pipeline thống nhất 4 module. G3 là benchmark 5 kiến trúc trên cùng điều kiện để so sánh công bằng. G4 là giải thích kết quả bằng nhiều phương pháp feature importance và phân tích lỗi.
+## Slide 5 — Kiến trúc tổng thể triển khai
 
-Logic xuyên suốt là: câu hỏi nghiên cứu dẫn tới thiết kế phương pháp, sau đó được kiểm chứng bằng thực nghiệm."
+"Slide này mô tả kiến trúc triển khai tổng thể, không nên hiểu là toàn bộ đều là phần em đề xuất mới.
 
-## Slide 6 — Câu hỏi nghiên cứu và giả thuyết
+Module 1 là HAR Module, dùng dữ liệu WISDM và mô hình Stacked Bi-LSTM để nhận dạng 6 hoạt động. Phần này em kế thừa bài toán và dữ liệu từ hướng nghiên cứu HAR, không nhận đây là đóng góp mới về mô hình HAR.
 
-"Khóa luận đặt 4 câu hỏi nghiên cứu.
+Module 2 là Data Generation, sinh tập dữ liệu bán mô phỏng đa phương thức, gồm accelerometer thật từ WISDM và các biến mô phỏng như nhịp tim, mood, energy, screen usage, sleep, location và stress.
 
-RQ1 hỏi liệu context-aware có giúp diễn giải tín hiệu sinh lý tốt hơn không. RQ2 hỏi mô hình chuỗi có vượt mô hình phi chuỗi không. RQ3 kiểm tra tác động của Bayesian Optimization. RQ4 tìm nhóm đặc trưng đóng góp chính.
+Module 3 là Feature & Pipeline, xử lý dữ liệu theo thứ tự chống leakage: split theo thời gian, encode, normalize và tạo chuỗi.
 
-Mỗi câu hỏi đều có cách kiểm chứng riêng, nên phần thực nghiệm phía sau không chỉ là chạy model, mà là trả lời trực tiếp các giả thuyết đã đặt ra."
+Module 4 là Model & Evaluation, huấn luyện, tuning, so sánh 5 kiến trúc và giải thích kết quả.
 
-## Slide 7 — Kiến trúc tổng thể hệ thống
+Câu chốt ở slide này: đây là kiến trúc triển khai; phần đề xuất thực sự nằm ở cách kết hợp các module, đặc biệt là Module 2 và Context-Stress Modifier."
 
-"Hệ thống gồm 4 module.
+Không nên nói:
+"Em đề xuất kiến trúc HAR 4 module hoàn toàn mới."
 
-Module 1 là HAR, nhận dạng 6 hoạt động từ WISDM. Module 2 sinh dữ liệu đa phương thức 54,448 mẫu, trong đó có nhịp tim, mood, sleep, phone usage, location và stress label. Module 3 gồm chọn đặc trưng và pipeline chống leakage. Module 4 là huấn luyện, tuning, so sánh và giải thích mô hình.
+Nên nói:
+"Em xây dựng pipeline tổng thể; trong đó HAR và LSTM là thành phần kế thừa/ứng dụng, còn phần đề xuất là cơ chế context-aware và bộ sinh dữ liệu có truy vết."
 
-Điểm then chốt là nhãn hoạt động từ HAR đi vào Module 2. Nhờ vậy, stress không chỉ phụ thuộc vào tín hiệu sinh lý, mà được diễn giải theo hoạt động đang diễn ra."
+## Slide 6 — Phương pháp đề xuất của khóa luận
 
-## Slide 8 — Module 1: Kết quả HAR
+"Đây là slide quan trọng để tránh hiểu nhầm về chữ 'đề xuất'.
 
-"Module HAR được huấn luyện trên WISDM v1.1 với hơn 1 triệu bản ghi gia tốc kế và 6 hoạt động.
+Phần đề xuất thứ nhất là ghép nhãn hoạt động từ HAR vào bài toán stress. Nhãn activity không chỉ là output phụ, mà trở thành ngữ cảnh để diễn giải tín hiệu sinh lý. Đây là điểm giải quyết trực tiếp nhập nhằng: cùng HR cao nhưng nếu activity là Jogging thì không nên kết luận stress cao.
 
-Kết quả accuracy đạt 96.19%. Các hoạt động như Jogging, Sitting, Standing có F1 rất cao; Upstairs và Downstairs khó hơn do tín hiệu tương tự nhau nhưng vẫn đạt mức chấp nhận được.
+Phần đề xuất thứ hai là bộ sinh dữ liệu đa phương thức có truy vết. Em kết hợp accelerometer thật từ WISDM với các biến mô phỏng như Heart_Rate, Screen_Usage, Mood, Energy, Sleep, Location và Stress_Level. Mỗi công thức đều có nguồn neo lý thuyết, ví dụ Ainsworth cho MET, Tanaka cho HRmax, McEwen cho allostatic load, MoodScope và StudentLife cho mobile sensing.
 
-Vai trò của module này là cung cấp activity label đủ tin cậy cho phần sinh dữ liệu stress. Nếu không có activity label, hệ thống sẽ rất dễ nhầm HR cao do vận động thành stress cao."
+Phần đề xuất thứ ba là Context-Stress Modifier. Đây là lớp điều chỉnh stress dựa trên tổ hợp Activity × Location × Context. Ý tưởng dựa trên Lazarus & Folkman 1984: stress phụ thuộc vào đánh giá nhận thức trong bối cảnh cụ thể, không chỉ phụ thuộc kích thích bên ngoài.
 
-## Slide 9 — Tạo dữ liệu đa phương thức
+Phần đề xuất thứ tư là protocol kiểm chứng có kiểm soát: split theo thời gian, chống leakage, benchmark 5 mô hình và giải thích bằng feature importance.
 
-"Dữ liệu cuối gồm 54,448 mẫu trong 30 ngày, với tần suất khoảng 2 mẫu mỗi phút trong khung thức.
+Tóm lại, em không đề xuất từng viên gạch riêng lẻ như WISDM hay Bi-LSTM; em đề xuất cách ghép các viên gạch đó thành một pipeline context-aware có thể truy vết."
 
-Em dùng dữ liệu bán mô phỏng vì mục tiêu ở giai đoạn này là kiểm chứng cơ chế context-aware trong môi trường có kiểm soát. Phần accelerometer là dữ liệu thực từ WISDM; phần hành vi và sinh lý như mood, sleep, HR, phone usage được mô phỏng có cơ sở.
+## Slide 7 — Module 1: Nhận diện hành động
 
-Điểm cần nói rõ là nhãn stress không phải nhãn lâm sàng. Nó là nhãn mô phỏng rule-based để kiểm chứng pipeline và giả thuyết nghiên cứu."
+"Module 1 sử dụng tập WISDM, gồm hơn 1 triệu bản ghi gia tốc kế từ Wireless Sensor Data Mining Lab, với 6 hoạt động: Walking, Jogging, Sitting, Standing, Upstairs và Downstairs.
 
-## Slide 10 — Lịch trình mô phỏng trong 1 ngày
+Mục tiêu của module này là cung cấp nhãn hoạt động đủ tin cậy cho Module 2. Kết quả đạt accuracy 96.19%, cho thấy nhãn hoạt động có thể dùng làm đầu vào ngữ cảnh.
 
-"Slide này giải thích dữ liệu một ngày được tạo như thế nào.
+Điểm cần nói rõ: phần HAR là nền tảng kỹ thuật để lấy activity context. Đóng góp chính của khóa luận không nằm ở việc phát minh mô hình HAR mới, mà ở cách dùng nhãn HAR để diễn giải stress."
 
-Em không sinh ngẫu nhiên hoàn toàn, mà dùng lịch trình có cấu trúc: sáng ở nhà, commute, làm việc buổi sáng, nghỉ trưa, làm việc buổi chiều, về nhà, tập luyện hoặc nghỉ ngơi, rồi ngủ.
+## Slide 8 — Chọn 13 đặc trưng cho tập dữ liệu
 
-Ý nghĩa của lịch trình là gắn stress với bối cảnh thời gian. Ví dụ buổi chiều ở work thường có áp lực cao hơn, còn buổi tối ở nhà là pha phục hồi. Đây là cách tạo nhịp ngày hợp lý cho dữ liệu."
+"Tập dữ liệu cuối sử dụng 13 đặc trưng thuộc 5 nhóm.
 
-## Slide 11 — Nhiễu và biến thiên
+Nhóm thời gian gồm Hour và Day_of_Week. Nhóm hoạt động và cảm biến gồm Activity và ba trục Accelerometer X, Y, Z. Nhóm sinh lý gồm Heart_Rate. Nhóm hành vi gồm Screen_Usage_Current, Phone_Event_Frequency và Mood_Score. Nhóm ngữ cảnh gồm Location, Energy_Level và Sleep_Duration.
 
-"Nếu dữ liệu mô phỏng quá sạch, mô hình sẽ học quá dễ và kết quả không có nhiều ý nghĩa. Vì vậy em thêm nhiều lớp biến thiên.
+Lý do chọn các nhóm này là chúng đại diện cho ba lớp thông tin quan trọng: cơ thể đang làm gì, môi trường/ngữ cảnh là gì, và trạng thái cá nhân đang như thế nào. Đây cũng là tinh thần của mobile sensing và digital phenotyping."
 
-Có life events như deadline, ốm, thi cử; có daily noise cho sleep, mood, energy, workload; có chu kỳ tuần và chu kỳ tháng. Ở mức sinh lý, HR có nhiễu nhỏ và vẫn bị ràng buộc trong giới hạn hợp lý.
+## Slide 9 — Vì sao dùng dữ liệu bán mô phỏng?
 
-Mục tiêu là cân bằng giữa hai yêu cầu: dữ liệu đủ có cấu trúc để kiểm chứng giả thuyết, nhưng không quá sạch đến mức phi thực tế."
+"Dữ liệu stress thực địa có nhãn tin cậy rất khó thu thập, vì cần đồng bộ wearable, smartphone và nhãn tự báo cáo như EMA. Trong phạm vi khóa luận, em dùng dữ liệu bán mô phỏng để kiểm chứng proof-of-concept.
 
-## Slide 12 — Từ WISDM gốc đến 44 trường
+Phần accelerometer là thật từ WISDM. Phần hành vi, sinh lý và stress label được mô phỏng có kiểm soát. Điều này cho phép biết rõ biến nào tác động đến stress, kiểm tra được Context-Stress Modifier, và tránh việc mô hình học từ một bộ dữ liệu hoàn toàn không có cấu trúc.
 
-"Slide này trả lời câu hỏi: WISDM gốc được lồng vào dữ liệu cuối như thế nào.
+Tuy nhiên, đây cũng là hạn chế lớn: kết quả chưa thể xem là kiểm chứng lâm sàng. Em trình bày rõ điều này ở phần hạn chế."
 
-Quy trình là schedule-driven sampling. Đầu tiên em nạp WISDM thực, sau đó tạo kho mẫu theo từng hoạt động. Lịch trình 30 ngày sinh ra activity label cho từng timestamp. Với mỗi timestamp, WisdmDataLoader lấy mẫu accelerometer thực tương ứng với hoạt động đó.
+## Slide 10 — Lịch trình mô phỏng 30 ngày
 
-Vì vậy, accelerometer X, Y, Z trong dữ liệu cuối không phải tín hiệu tự chế. Chúng đến từ WISDM thật; phần mô phỏng là các biến sinh lý-hành vi-ngữ cảnh được ghép thêm để phục vụ bài toán stress."
+"Dữ liệu được sinh theo lịch trình 30 ngày, với các bối cảnh như home, commute, work, gym, social và outdoor.
 
-## Slide 13 — Nguyên tắc suy luận công thức Module 2
+Trong một ngày, stress có logic theo nhịp sinh hoạt: sáng thức dậy, đi làm, làm việc, nghỉ trưa, làm việc buổi chiều, về nhà, tập luyện hoặc nghỉ ngơi, rồi ngủ. Buổi chiều ở work thường có áp lực cao hơn; buổi tối ở nhà thường là pha phục hồi.
 
-"Đây là slide rất quan trọng khi bảo vệ.
+Ngoài lịch cố định, em thêm sự kiện đặc biệt như deadline, ốm hoặc thi cử với xác suất 6% mỗi ngày, cộng thêm chu kỳ tuần/tháng. Mục tiêu là dữ liệu không quá sạch, nhưng vẫn có cấu trúc để mô hình học được."
 
-Em không khẳng định các công thức là công thức y sinh được trích nguyên văn từ paper. Cách em làm là evidence-based heuristic mapping: dùng paper để xác định cơ chế tác động, chiều ảnh hưởng và khoảng giá trị hợp lý; sau đó chuẩn hóa thành hệ số trong thang stress 1 đến 9.
+## Slide 11 — Mô phỏng Energy Level
 
-Ví dụ, paper không nói stress tăng 1 mức thì HR tăng đúng 3 bpm. Paper chỉ hỗ trợ rằng stress kích hoạt hệ giao cảm và HR/HRV liên quan tới stress. Em chọn 3 bpm để stress rất cao chỉ cộng tối đa khoảng 15 bpm, nhỏ hơn nhiều so với Jogging cộng 40 bpm. Nhờ vậy hệ thống không đánh đồng vận động mạnh với stress cao."
+"Energy_Level được hiểu là latent recovery score, tức điểm phục hồi tiềm ẩn, không phải năng lượng sinh lý đo trực tiếp.
 
-## Slide 14 — Mô phỏng Screen Usage, Mood và Energy
+Cơ sở lý thuyết là McEwen về allostatic load: khi cơ thể thiếu phục hồi, gánh nặng stress tích lũy tăng lên. StudentLife cũng cho thấy sleep, workload, activity và trạng thái cá nhân có liên hệ trong dữ liệu smartphone theo thời gian.
 
-"Slide này giải thích ba nhóm đặc trưng dễ bị hỏi: mức sử dụng màn hình, tâm trạng và năng lượng.
+Vì vậy Energy_Level được tạo từ nền 0.7, cộng dao động theo chu kỳ, mệt mỏi tích lũy theo tuần và sự kiện. Nó bị clip trong khoảng 0.2 đến 1.0 để tránh giá trị phi thực tế.
 
-Với Screen Usage, cơ sở chính là hướng mobile sensing. Lane et al. 2010 tổng quan rằng smartphone có thể ghi nhận dấu vết hành vi như app usage, location và activity để suy luận trạng thái cá nhân. MoodScope của Likamwa et al. cũng dùng smartphone usage pattern để suy luận mood. Từ đó em không sinh Screen Usage ngẫu nhiên, mà dùng activity làm nền, location làm hệ số bối cảnh, và stress chỉ điều chỉnh nhẹ. Ví dụ khi Sitting hoặc ở Home/Work thì khả năng dùng điện thoại cao hơn; khi Jogging hoặc Upstairs thì thấp hơn. Hệ số stress 0.15 được giữ nhỏ để Screen Usage không trở thành bản sao của Stress Level.
+Câu cần nhớ: Energy_Level là feature mô phỏng trạng thái phục hồi, không phải đại lượng y sinh đo trực tiếp."
 
-Với Mood Score, nguồn neo chính là MoodScope của Likamwa et al. và StudentLife của Wang et al. MoodScope cho thấy mood có thể được suy luận từ mẫu sử dụng smartphone; StudentLife theo dõi sleep, activity, workload, sociability và mental well-being của sinh viên bằng smartphone sensing. Vì vậy mood nền của ngày được đặt quanh mức 5 trên thang 1 đến 10, sau đó cộng ảnh hưởng của thời gian, hoạt động, vị trí và stress. Thành phần stress là âm: stress cao kéo mood xuống theo hệ số 0.3, nhưng mức kéo vừa phải để mood vẫn còn phụ thuộc vào các yếu tố khác.
+## Slide 12 — Mô hình hóa nhịp tim
 
-Với Energy Level, nguồn neo là McEwen về allostatic load và StudentLife về quan hệ giữa sleep, workload, activity và trạng thái cá nhân. Em không nói đây là năng lượng sinh lý đo trực tiếp. Đây là latent recovery score trong khoảng 0.2 đến 1.0, mô phỏng trạng thái phục hồi trong ngày, chịu tác động bởi nhiễu hằng ngày, fatigue tích lũy theo tuần và sự kiện như deadline, ốm hoặc ngày nghỉ.
+"Nhịp tim được tính từ nhiều thành phần: HR nghỉ, ảnh hưởng của hoạt động, ảnh hưởng của stress, ảnh hưởng của fatigue và nhiễu.
 
-Câu chốt khi bị hỏi là: các paper hỗ trợ cơ chế và chiều tác động; còn các hệ số như 0.15, 0.3 hay nền 0.7 là heuristic chuẩn hóa để tạo dữ liệu có kiểm soát, không phải công thức lâm sàng."
+HRrest lấy từ hồ sơ người dùng. HRmax được neo theo Tanaka et al. 2001 với công thức 208 - 0.7 × age. Ảnh hưởng hoạt động được quy đổi từ MET theo Ainsworth Compendium of Physical Activities. Ví dụ Jogging có MET cao nên cộng HR lớn hơn Walking hoặc Sitting.
 
-## Slide 15 — Mô hình hóa nhịp tim
+Thành phần stress là `(StressLevel - 4) × 3 bpm`. Paper không cho hệ số đúng 3 bpm. Paper chỉ hỗ trợ cơ chế stress kích hoạt hệ giao cảm, HR/HRV liên quan đến stress. Em chọn 3 bpm để stress rất cao chỉ cộng khoảng 15 bpm, nhỏ hơn tác động vận động mạnh như Jogging."
 
-"Công thức HR gồm HR nghỉ, ảnh hưởng hoạt động, ảnh hưởng stress, ảnh hưởng mệt mỏi và nhiễu.
+## Slide 13 — Bảng điều chỉnh HR theo MET
 
-HRmax được neo theo Tanaka: 208 trừ 0.7 nhân tuổi. Ảnh hưởng hoạt động dựa trên cường độ MET từ Ainsworth: Sitting gần như không tăng HR, Walking tăng vừa, Jogging tăng mạnh.
+"Bảng này giải thích vì sao mỗi hoạt động cộng một lượng bpm khác nhau.
 
-Phần stress là `(Stress Level - 4) * 3 bpm`. Trừ 4 vì 4 là mốc gần trung tính trên thang 1-9; nhân 3 vì muốn tác động stress vừa đủ rõ nhưng không lấn át hoạt động. Đây là tham số mô phỏng, không phải hệ số lâm sàng."
+Sitting gần nghỉ ngơi nên cộng 0 bpm. Standing tăng nhẹ. Walking tăng vừa. Upstairs và Jogging có cường độ cao nên tăng mạnh hơn.
 
-## Slide 16 — Công thức stress đa yếu tố
+Cơ sở là Ainsworth et al. 2011 về MET Compendium, kết hợp nguyên tắc của American Heart Association rằng nhịp tim tăng theo cường độ vận động. Đây không phải bảng bpm gốc từ Ainsworth; đây là bước quy đổi thực dụng từ MET sang bpm để phục vụ mô phỏng."
 
-"Stress base được tạo từ nhiều thành phần: stress nền, thời gian, hoạt động, vị trí, workload, HR, sleep và momentum.
+## Slide 14 — Công thức stress đa yếu tố
 
-Mỗi thành phần là một modifier chuẩn hóa. Ví dụ time được neo vào nhịp sinh học và lịch làm việc; activity dựa trên hướng tác động của vận động; work/location dựa trên bối cảnh áp lực; sleep và momentum dựa trên allostatic load.
+"Stress base được tính từ nhiều thành phần: stress nền, thời gian, hoạt động, vị trí, workload, HR, sleep và momentum.
 
-Điểm quan trọng là hệ thống không để một biến đơn lẻ quyết định stress. Stress cuối cùng hình thành từ tương tác đa yếu tố, sau đó còn được điều chỉnh bởi Context-Stress Modifier."
+Điểm quan trọng là stress không được quyết định bởi một feature duy nhất. HR cao chỉ là một tín hiệu; nếu HR cao do Jogging thì ý nghĩa stress khác với HR cao khi Sitting ở Work.
 
-## Slide 17 — Context-Stress Modifier
+Các thành phần trong công thức đều có nguồn neo: Chrousos cho nhịp cortisol và HPA axis, Salmon cho tác động của vận động lên lo âu/stress, Karasek cho job demand-control, McEwen cho allostatic load, Hovsepian/cStress và WESAD cho stress detection bằng tín hiệu sinh lý."
 
-"Đây là đóng góp cốt lõi của khóa luận.
+## Slide 15 — Điều chỉnh theo thời gian
 
-Theo Lazarus và Folkman, stress không chỉ phụ thuộc kích thích bên ngoài mà còn phụ thuộc cách cá nhân đánh giá kích thích đó trong bối cảnh cụ thể. Áp dụng vào dữ liệu cảm biến: cùng một HR cao có thể có ý nghĩa hoàn toàn khác nhau.
+"Điều chỉnh theo thời gian mô phỏng nhịp stress trong ngày.
 
-Ví dụ, Jogging ngoài trời sáng cuối tuần có HR 140 nhưng stress có thể thấp. Ngược lại, Sitting ở work buổi chiều có deadline, HR chỉ 95 nhưng stress lại cao. Bảng delta ở đây là lookup heuristic để mã hóa tri thức ngữ cảnh, không phải bảng đo lâm sàng."
+Cơ sở là Chrousos về hệ HPA và cortisol. Cortisol có nhịp sinh học, thường tăng mạnh quanh giai đoạn thức dậy và thay đổi theo hoạt động trong ngày.
 
-## Slide 18 — Pipeline chống rò rỉ dữ liệu
+Trong mô phỏng, các khung giờ làm việc được gán hệ số stress cao hơn, đặc biệt buổi chiều vì tích lũy workload và mệt mỏi. Buổi tối và sau 20h giảm dần vì là pha nghỉ ngơi.
 
-"Với chuỗi thời gian, thứ tự xử lý rất quan trọng: split trước, rồi mới encode, normalize và tạo sequence.
+Lưu ý: đây là mô phỏng theo xu hướng, không phải đo cortisol thật theo từng người."
 
-Nếu tạo rolling feature hoặc normalize trên toàn bộ dữ liệu trước khi split, thông tin tương lai có thể rò vào train set. Trong quá trình thử nghiệm, các rolling features đã gây vấn đề nên em loại bỏ và giữ 13 đặc trưng sạch.
+## Slide 16 — Điều chỉnh theo hoạt động
 
-Điểm em muốn nhấn mạnh là kết quả model chỉ có ý nghĩa khi pipeline không bị leakage."
+"Điều chỉnh theo hoạt động dựa trên ý tưởng rằng vận động thể chất có thể giảm căng thẳng tâm lý, nhưng gắng sức tức thời cũng có thể tạo arousal.
 
-## Slide 19 — Thiết lập thực nghiệm
+Salmon et al. 2001 tổng quan rằng luyện tập thể chất có thể giảm lo âu, trầm cảm và độ nhạy với stress. Vì vậy các hoạt động như Walking hoặc Jogging trong bối cảnh phù hợp có hệ số giảm stress.
 
-"Toàn bộ mô hình được đánh giá trong cùng điều kiện: cùng dữ liệu, cùng pipeline, cùng callbacks, cùng protocol, seed cố định.
+Ngược lại, Upstairs hoặc Downstairs là gắng sức ngắn, dễ làm tăng kích hoạt sinh lý, nên không được xem là thư giãn giống Jogging ngoài trời."
 
-Với bài toán stress hồi quy, em dùng MAE, RMSE và R-squared. Với HAR, em dùng Accuracy và F1.
+## Slide 17 — Điều chỉnh theo vị trí
 
-Thiết lập này giúp việc so sánh 5 kiến trúc công bằng hơn, vì sự khác biệt đến từ mô hình và tuning chứ không phải từ xử lý dữ liệu khác nhau."
+"Location được dùng như proxy cho bối cảnh tâm lý.
 
-## Slide 20 — Stress Baseline
+Work được gán hệ số tăng stress dựa trên mô hình Demand-Control của Karasek: yêu cầu công việc cao và quyền kiểm soát thấp làm tăng stress nghề nghiệp. Commute tăng nhẹ vì bối cảnh giao thông, thời gian gấp và tiếng ồn.
 
-"Baseline là Stacked Bi-LSTM với dropout 0.3, learning rate 0.001 và khoảng 320 nghìn tham số.
+Home, Outdoor, Social và Gym có xu hướng giảm stress tùy ngữ cảnh. Bratman et al. 2015 hỗ trợ rằng môi trường tự nhiên có liên hệ với giảm rumination và phục hồi tinh thần. Social có thể giảm stress nhờ hỗ trợ xã hội, nhưng nếu là conflict thì lại tăng; phần này được xử lý rõ hơn ở Context-Stress Modifier."
 
-Baseline đạt R-squared 0.9245 và MAE 0.6855. Kết quả này tốt, nhưng em thấy có dư địa cải thiện: dropout cao có thể gây underfitting, learning rate thấp làm hội tụ chậm, và số tham số khá lớn.
+## Slide 18 — Điều chỉnh theo HR
 
-Từ đó em đặt câu hỏi: nếu không đổi kiến trúc, chỉ tuning siêu tham số thì có cải thiện đáng kể không?"
+"HR được dùng như một tín hiệu phụ cho stress, nhưng không được dùng như kết luận trực tiếp.
 
-## Slide 21 — Bayesian Optimization
+Hovsepian et al. trong cStress và các nghiên cứu như WESAD cho thấy HR/HRV là nhóm tín hiệu quan trọng trong nhận diện stress. Tuy nhiên HR không đặc hiệu: HR tăng có thể do vận động, caffeine, mệt mỏi hoặc stress.
 
-"Sau Bayesian Optimization, MAE giảm 22.8%, RMSE giảm 14.2%, R-squared tăng lên 0.944, trong khi số tham số giảm gần 49%.
+Vì vậy trong công thức stress, HR chỉ là một modifier. Ý nghĩa thật sự của HR phải được giải thích cùng activity và context."
 
-Điều này cho thấy mô hình baseline không thiếu độ phức tạp; vấn đề chính là siêu tham số chưa phù hợp. Dropout giảm từ 0.3 xuống 0.1, learning rate tăng lên 0.01, và số units được điều chỉnh gọn hơn.
+## Slide 19 — Sleep và Momentum
 
-Cách nói an toàn là: trong thiết lập thực nghiệm này, tuning tạo cải thiện rõ rệt và giúp mô hình gọn hơn."
+"Sleep ảnh hưởng stress vì thiếu ngủ làm giảm khả năng phục hồi và điều hòa cảm xúc. McEwen về allostatic load và Yoo et al. về phản ứng amygdala khi thiếu ngủ là nguồn neo chính.
 
-## Slide 22 — So sánh 5 mô hình
+Momentum phản ánh quán tính stress: stress không biến mất ngay ở bước thời gian tiếp theo. Plarre/cStress cũng mô hình hóa stress như tín hiệu có tính tích lũy và suy giảm theo thời gian.
 
-"Slide này so sánh 5 kiến trúc trên cùng pipeline.
+Hệ số momentum 0.3 được chọn để stress trước đó có ảnh hưởng nhưng không chi phối hoàn toàn hiện tại."
 
-Bi-LSTM Tuned đạt R-squared 0.956 và MAE 0.441, tốt nhất trong bộ dữ liệu bán mô phỏng. So sánh MLP với Simple LSTM cho thấy mô hình chuỗi có lợi thế rõ, vì stress phụ thuộc vào lịch sử gần đây chứ không chỉ trạng thái tại một thời điểm.
+## Slide 20 — Screen Usage
 
-Em không trình bày con số này như hiệu năng ngoài đời thật, mà như bằng chứng rằng pipeline context-aware có thể được mô hình chuỗi khai thác hiệu quả."
+"Screen_Usage_Current được mô phỏng dựa trên mobile sensing.
 
-## Slide 23 — Bài học từ so sánh mô hình
+Lane et al. 2010 tổng quan rằng smartphone có thể ghi nhận app usage, location, activity và giao tiếp để suy luận trạng thái cá nhân. MoodScope của Likamwa et al. cũng dùng smartphone usage pattern để suy luận mood.
 
-"Bài học chính là: kiến trúc mạnh nhưng siêu tham số không phù hợp có thể thua kiến trúc đơn giản hơn.
+Trong công thức, activity quyết định khả năng dùng điện thoại nền. Sitting cao hơn Jogging vì khi chạy bộ khó dùng điện thoại. Location điều chỉnh theo bối cảnh: Home/Work thường cao hơn Gym/Outdoor. Stress chỉ tăng nhẹ qua hệ số 0.15 để tránh biến Screen Usage thành bản sao của Stress_Level."
 
-Bi-LSTM Baseline nhiều tham số hơn nhưng kém Simple LSTM; sau tuning, Bi-LSTM mới thể hiện đúng tiềm năng. Điều này nhấn mạnh vai trò của Bayesian Optimization và protocol so sánh công bằng.
+## Slide 21 — Mood Score
 
-Em tránh nói tuning luôn quan trọng hơn kiến trúc trong mọi bài toán. Em chỉ kết luận trong phạm vi thực nghiệm này, tuning có tác động rất lớn."
+"Mood_Score được neo bởi MoodScope và StudentLife.
 
-## Slide 24 — Phân tích lỗi
+MoodScope cho thấy mood có thể được suy luận từ mẫu sử dụng smartphone. StudentLife theo dõi sleep, activity, workload, sociability và mental well-being của sinh viên bằng smartphone sensing.
 
-"Mô hình tuned không chỉ cải thiện trung bình mà còn cải thiện ở nhóm quan trọng: stress rất cao từ 8 đến 9.
+Trong mô phỏng, mood nền của ngày đặt quanh mức 5 trên thang 1 đến 10. Sau đó mood được điều chỉnh bởi thời gian, hoạt động, vị trí và stress. Stress cao kéo mood xuống theo hệ số 0.3, nhưng không quyết định toàn bộ mood.
 
-MAE ở nhóm này giảm 46.1%, tức mô hình giảm sai số ở vùng có ý nghĩa cảnh báo sớm. Theo hoạt động, Sitting cũng cải thiện mạnh vì Sitting là hoạt động nhập nhằng: ngồi ở nhà và ngồi ở work có ý nghĩa stress rất khác nhau.
+Câu trả lời nếu bị hỏi: mood có tương quan với stress, nhưng không phải bản sao của stress, vì nó còn phụ thuộc nhiều yếu tố và nhiễu."
 
-Phân tích lỗi giúp chứng minh mô hình không chỉ đẹp ở metric tổng quát, mà cải thiện ở đúng vùng cần quan tâm."
+## Slide 22 — Context-Stress Modifier
 
-## Slide 25 — Feature importance
+"Đây là phần cốt lõi nhất.
 
-"Em dùng 4 phương pháp feature importance để tránh phụ thuộc vào một cách giải thích duy nhất.
+Theo Lazarus & Folkman 1984, stress phụ thuộc vào cognitive appraisal, tức cách cá nhân đánh giá tình huống trong bối cảnh cụ thể. Vì vậy cùng tín hiệu sinh lý có thể có ý nghĩa stress khác nhau.
 
-Mood Score và Heart Rate nhất quán nằm trong top 2. Điều này hợp lý vì mood phản ánh trạng thái tâm lý, còn HR là biosignal phổ biến trong stress detection. Các đặc trưng smartphone như screen usage và phone event cũng quan trọng, phù hợp với hướng digital phenotyping.
+Ví dụ Jogging ngoài trời sáng cuối tuần có HR cao nhưng stress thấp. Ngược lại, Sitting ở Work buổi chiều có deadline, HR không quá cao nhưng stress có thể cao.
 
-Tuy nhiên cần nhớ: vì dữ liệu là bán mô phỏng, feature importance phản ánh logic của bộ sinh dữ liệu và cách model học logic đó."
+Context-Stress Modifier mã hóa ý tưởng này bằng bảng delta theo Activity × Location × Context. Bảng này là heuristic có cơ sở, không phải bảng đo lâm sàng."
 
-## Slide 26 — So sánh thứ hạng đặc trưng
+## Slide 23 — Các modifier phụ trong Context-Stress
 
-"Ở slide này, em nhấn mạnh vì sao dùng nhiều phương pháp giải thích là cần thiết.
+"Ngoài delta theo activity-location-context, hệ thống còn có sleep amplification, environment modifier và social modifier.
 
-Location có thể rất quan trọng trong Random Forest surrogate nhưng không nhất thiết đứng đầu trong SHAP hoặc Permutation của LSTM. Lý do là mỗi phương pháp nhìn feature theo một cách khác nhau.
+Sleep amplification dựa trên McEwen và Yoo: thiếu ngủ làm tăng phản ứng với tác nhân stress. Environment modifier dựa trên Bratman: môi trường tự nhiên/yên tĩnh có tác dụng phục hồi. Social modifier dựa trên Lazarus-Folkman và StudentLife: quan hệ xã hội và sociability ảnh hưởng đến trạng thái tinh thần.
 
-Việc tổng hợp thứ hạng giúp giảm thiên lệch từ từng phương pháp riêng lẻ và cho cái nhìn ổn định hơn."
+Tất cả modifier này là mức điều chỉnh nhỏ để mô phỏng bối cảnh, không phải công thức lâm sàng."
 
-## Slide 27 — Tổng hợp theo câu hỏi nghiên cứu
+## Slide 24 — Module 3: Tiền xử lý dữ liệu
 
-"Bốn câu hỏi nghiên cứu đều có bằng chứng trả lời.
+"Pipeline tiền xử lý gồm bốn bước: Sequential Split, Label Encoding, Standard Normalization và Sequence.
 
-RQ1: context-aware có vai trò vì các đặc trưng ngữ cảnh-hành vi xuất hiện trong nhóm quan trọng. RQ2: mô hình chuỗi vượt mô hình phi chuỗi. RQ3: Bayesian Optimization cải thiện rõ. RQ4: mood, HR và nhóm sinh lý-hành vi-ngữ cảnh là nhóm đặc trưng cốt lõi.
+Điểm quan trọng nhất là split theo thời gian trước, không shuffle. Train chiếm 70%, validation 15%, test 15%. Với chuỗi thời gian, nếu shuffle hoặc fit scaler trên toàn bộ dữ liệu trước khi split thì rất dễ rò rỉ thông tin tương lai.
 
-Đây là slide nối phần kết quả với phần đóng góp."
+Đây là phần bảo vệ tính hợp lệ nội bộ của thực nghiệm."
 
-## Slide 28 — Tóm tắt kết quả sau thực nghiệm
+## Slide 25 — Encode, Normalize và tạo Sequence
 
-"Sau khi trình bày chi tiết, em tóm tắt lại ba kết quả chính.
+"Hai biến phân loại Activity và Location được mã hóa bằng LabelEncoder. Encoder chỉ fit trên train, sau đó transform cho validation và test.
 
-Một là Bi-LSTM Tuned tốt nhất trong bộ dữ liệu bán mô phỏng. Hai là cải thiện mạnh ở nhóm stress rất cao. Ba là mô hình sau tuning gọn hơn nhưng sai số thấp hơn.
+Normalization cũng chỉ dùng mean và standard deviation của train. Val/test không được fit lại.
 
-Điểm em muốn giữ là không overclaim: metric cao là kết quả trong phạm vi dataset hiện tại; đóng góp bền hơn là phương pháp xây dựng và kiểm chứng pipeline."
+Sau đó dữ liệu được biến thành chuỗi độ dài 60. Mỗi cửa sổ gồm 60 vector liên tiếp, mỗi vector có 13 feature, và mô hình dự đoán stress ở bước tiếp theo.
 
-## Slide 29 — Đóng góp phương pháp
+Đây là lý do mô hình LSTM/Bi-LSTM có thể khai thác phụ thuộc thời gian."
 
-"Đóng góp được chia thành ba tầng.
+## Slide 26 — Baseline Stacked Bi-LSTM
 
-Tầng bài toán: chuyển từ phân loại stress rời rạc sang hồi quy liên tục. Tầng dữ liệu và phương pháp: xây dựng bộ dữ liệu bán mô phỏng đa phương thức có thể truy vết, và đề xuất Context-Stress Modifier. Tầng bằng chứng: benchmark 5 kiến trúc, 4 phương pháp giải thích, và phân tích lỗi đa chiều.
+"Baseline là Stacked Bi-LSTM với hai lớp LSTM hai chiều, dropout 0.3 và các lớp Dense phía sau.
 
-Em nhấn mạnh đây là đóng góp phương pháp và proof-of-concept, chưa phải hệ thống đạt chuẩn lâm sàng."
+Mô hình có khoảng 320 nghìn tham số. Kết quả baseline đã tốt, nhưng phân tích cho thấy dropout 0.3 có thể quá cao, learning rate 0.001 hội tụ chậm, và mô hình có dấu hiệu over-parameterized.
 
-## Slide 30 — Hạn chế nghiên cứu
+Vì vậy em dùng Bayesian Optimization để tìm bộ siêu tham số phù hợp hơn."
 
-"Em trình bày hạn chế theo khung validity.
+## Slide 27 — Bayesian Optimization
 
-Construct validity: nhãn stress là bán mô phỏng, chưa phải EMA hay nhãn lâm sàng. Modeling validity: hệ số công thức là heuristic có neo nghiên cứu, chưa được học từ dữ liệu stress thực. Internal validity: chưa có ablation đầy đủ cho từng thành phần Context-Stress Modifier. External validity: chưa kiểm chứng trên dữ liệu thực địa đa đối tượng.
+"Sau tuning, số units lớp đầu giảm từ 128 xuống 64, dropout giảm từ 0.3 xuống 0.1, dense_units tăng lên 128 và learning rate tăng lên 0.01.
 
-Việc nói rõ hạn chế không làm yếu khóa luận; ngược lại, nó xác định chính xác phạm vi đóng góp và hướng phát triển tiếp theo."
+Kết quả là số tham số giảm gần 48.9%, nhưng hiệu suất tốt hơn. Điều này cho thấy vấn đề không phải cứ mô hình lớn hơn là tốt hơn; mô hình cần siêu tham số phù hợp với dữ liệu.
 
-## Slide 31 — Hướng phát triển
+Em trình bày kết quả tuning như một bài học thực nghiệm, không khẳng định Bayesian Optimization là phương pháp mới do em phát minh."
 
-"Hướng phát triển ngắn hạn là thu thập dữ liệu thực tế smartphone/wearable kết hợp EMA, học hoặc hiệu chỉnh hệ số công thức từ dữ liệu thật, mở rộng benchmark sang Transformer/TCN, và làm ablation cho Context-Stress Modifier.
+## Slide 28 — So sánh mô hình
 
-Trung hạn là triển khai gần real-time, cá nhân hóa mô hình và bảo vệ quyền riêng tư bằng federated learning. Dài hạn là mở rộng cảm biến như EDA, HRV và hướng predict-to-intervene."
+"Năm mô hình được so sánh trên cùng pipeline: MLP, Simple LSTM, Bi-LSTM Baseline, Bi-GRU và Bi-LSTM Tuned.
 
-## Slide 32 — Kết luận
+Bi-LSTM Tuned đạt MAE 0.4414, RMSE 0.6697 và R² 0.9555. Simple LSTM cũng đạt kết quả tốt hơn MLP, cho thấy temporal dependency có vai trò quan trọng trong bài toán stress.
 
-"Tóm lại, khóa luận đã xây dựng một pipeline context-aware cho dự đoán stress liên tục trong thiết lập bán mô phỏng.
+Câu cần nhấn mạnh: kết quả này nằm trong thiết lập bán mô phỏng. Nó chứng minh pipeline học được logic context-aware, chưa chứng minh hiệu năng thực địa."
 
-Giá trị chính gồm: hệ thống end-to-end có kết quả tốt trong phạm vi thử nghiệm; Context-Stress Modifier giúp xử lý nhập nhằng sinh lý; và bài học thực nghiệm rằng tuning siêu tham số có thể tạo khác biệt lớn.
+## Slide 29 — Phân tích lỗi
 
-Giá trị cốt lõi không chỉ là metric, mà là khung sinh dữ liệu và dự đoán stress minh bạch, có thể truy vết, sẵn sàng được kiểm chứng bằng dữ liệu thực."
+"Phân tích lỗi cho thấy tuned model cải thiện mạnh ở nhóm Very High stress và ở hoạt động Sitting.
 
-## Slide 33 — Q&A
+Very High stress quan trọng vì đây là nhóm có ý nghĩa cảnh báo sớm. Sitting cũng quan trọng vì đây là activity nhập nhằng: ngồi ở nhà buổi tối có thể thư giãn, còn ngồi ở work với deadline có thể stress cao.
 
-"Em xin cảm ơn Hội đồng đã lắng nghe. Em sẵn sàng trao đổi thêm về cơ sở hệ số heuristic, thiết kế Context-Stress Modifier, tính hợp lệ của dữ liệu bán mô phỏng, và kế hoạch kiểm chứng thực địa."
+Kết quả này ủng hộ vai trò của context-aware: mô hình không chỉ giảm lỗi trung bình, mà cải thiện ở các vùng ngữ cảnh khó."
+
+## Slide 30 — Feature Importance
+
+"Feature importance được phân tích bằng nhiều phương pháp: Permutation, SHAP, Correlation và RF Surrogate.
+
+Heart_Rate và Mood_Score nhất quán nằm trong nhóm đặc trưng quan trọng nhất. Điều này phù hợp với y văn: Hovsepian/cStress và WESAD cho thấy HR/HRV là biosignal quan trọng cho stress; MoodScope và StudentLife hỗ trợ liên hệ giữa mood, phone usage, sleep, workload và trạng thái cá nhân.
+
+Screen_Usage và Energy_Level cũng xuất hiện trong nhóm quan trọng, củng cố hướng digital phenotyping."
+
+## Slide 31 — Hạn chế
+
+"Khóa luận có ba hạn chế chính.
+
+Thứ nhất, dữ liệu stress là bán mô phỏng, chưa phải dữ liệu thực địa có nhãn EMA hoặc lâm sàng. Vì vậy metric cao có thể phản ánh một phần tính nhất quán của bộ sinh dữ liệu.
+
+Thứ hai, dữ liệu mô phỏng hiện thiên về một hồ sơ người dùng/kịch bản sinh hoạt, nên chưa đại diện nhiều nhóm tuổi, nghề nghiệp và lối sống.
+
+Thứ ba, tài nguyên tính toán còn hạn chế; chưa mở rộng đầy đủ sang Transformer, TCN hoặc nhiều lần chạy thống kê."
+
+## Slide 32 — Hướng phát triển
+
+"Hướng phát triển quan trọng nhất là thu thập dữ liệu thực tế trên smartphone/wearable kết hợp EMA. Khi có dữ liệu thật, các hệ số heuristic có thể được học hoặc hiệu chỉnh thay vì đặt thủ công.
+
+Tiếp theo là triển khai dự đoán gần thời gian thực, mở rộng cảm biến như EDA, HRV, sleep tracker và cá nhân hóa mô hình theo từng người.
+
+Ngoài ra, cần làm ablation study: bật/tắt Context-Stress Modifier để đo trực tiếp đóng góp của phần đề xuất."
+
+## Slide 33 — Kết luận
+
+"Kết luận trọng tâm của khóa luận gồm ba ý.
+
+Thứ nhất, khóa luận không đề xuất một mô hình HAR hoàn toàn mới. HAR là thành phần nền để lấy activity context. Phần đề xuất là cách dùng activity context để diễn giải stress.
+
+Thứ hai, đóng góp cốt lõi là Context-Stress Modifier và bộ sinh dữ liệu đa phương thức có truy vết. Các paper cung cấp cơ chế, chiều tác động và khoảng hợp lý; còn hệ số là heuristic chuẩn hóa cho mô phỏng.
+
+Thứ ba, kết quả thực nghiệm cho thấy pipeline học được logic context-aware: Bi-LSTM Tuned đạt R² = 0.9555 và MAE = 0.4414 trong thiết lập bán mô phỏng. Đây là bằng chứng proof-of-concept, không phải kết luận lâm sàng.
+
+Bài học chính là: với bài toán stress theo chuỗi thời gian, thiết kế dữ liệu, chống leakage, ngữ cảnh và tuning quan trọng không kém việc chọn mô hình phức tạp hơn."
+
+## Slide 34 — Cảm ơn
+
+"Em xin cảm ơn Hội đồng đã lắng nghe. Em sẵn sàng trao đổi thêm về ba điểm: cơ sở lý thuyết của các công thức heuristic, thiết kế Context-Stress Modifier, và kế hoạch kiểm chứng bằng dữ liệu thực địa."
 
 ---
 
-# PHỤ LỤC: CÂU HỎI PHẢN BIỆN DỄ GẶP
+# BẢN ĐỒ NGUỒN CẦN NHỚ KHI BỊ HỎI
 
-## Q1: "Dữ liệu mô phỏng thì kết quả có đáng tin không?"
+- WISDM / Kwapisz et al. (2011): nguồn dữ liệu gia tốc kế thật cho 6 hoạt động hằng ngày; hỗ trợ phần HAR và activity context, không hỗ trợ trực tiếp stress.
+- Hochreiter & Schmidhuber / LSTM và Bi-LSTM: nền tảng mô hình chuỗi; hỗ trợ lựa chọn kiến trúc, không phải đóng góp mới của khóa luận.
+- Lane et al. (2010): mobile sensing cho thấy smartphone có thể ghi nhận activity, location, app usage và hành vi; hỗ trợ Screen Usage và digital phenotyping.
+- Likamwa et al. / MoodScope: dùng smartphone usage pattern để suy luận mood; hỗ trợ ý tưởng Mood_Score liên hệ phone usage/hành vi.
+- Wang et al. / StudentLife: theo dõi sleep, activity, workload, sociability và mental well-being bằng smartphone sensing; hỗ trợ mood, energy, sleep/workload và social context.
+- Tanaka et al. (2001): công thức HRmax theo tuổi; hỗ trợ phần giới hạn sinh lý nhịp tim.
+- Ainsworth et al. (2011): MET Compendium; hỗ trợ xếp hạng cường độ hoạt động, từ đó quy đổi heuristic sang `Delta HR_activity`.
+- Chrousos (2009): HPA axis/cortisol; hỗ trợ hướng tác động của thời gian trong ngày và stress physiology.
+- Salmon (2001): vận động thể chất liên quan giảm lo âu/stress sensitivity; hỗ trợ `Delta S_activity`.
+- Karasek (1979): Demand-Control model; hỗ trợ work context làm tăng stress.
+- Bratman et al. (2015): môi trường tự nhiên liên quan giảm rumination/phục hồi tinh thần; hỗ trợ outdoor/environment modifier.
+- McEwen (2008): allostatic load; hỗ trợ sleep, fatigue, recovery và stress tích lũy.
+- Yoo et al. (2007): thiếu ngủ làm tăng phản ứng cảm xúc tiêu cực/amygdala; hỗ trợ sleep amplification.
+- Hovsepian/cStress và WESAD: stress detection bằng tín hiệu sinh lý như HR/HRV; hỗ trợ HR là biosignal hữu ích nhưng không đặc hiệu.
+- Lazarus & Folkman (1984): Transactional Model of Stress/cognitive appraisal; nguồn lý thuyết quan trọng nhất cho Context-Stress Modifier.
 
-"Dạ, em xem đây là hạn chế lớn nhất và đã trình bày rõ. Dữ liệu bán mô phỏng không thay thế dữ liệu thực địa, nhưng có vai trò trong giai đoạn proof-of-concept: giúp kiểm soát biến, kiểm chứng Context-Stress Modifier và đánh giá pipeline trong môi trường có thể truy vết. Phần accelerometer là dữ liệu thực từ WISDM; phần stress label là mô phỏng rule-based. Bước tiếp theo bắt buộc là kiểm chứng bằng dữ liệu thực kết hợp EMA."
+Một câu chốt rất nên thuộc:
+"Các nghiên cứu trên không cho trực tiếp hệ số trong công thức. Chúng cung cấp cơ chế, chiều tác động và khoảng hợp lý; còn hệ số cụ thể là heuristic chuẩn hóa cho mô hình mô phỏng."
 
-## Q2: "Các công thức có phải bịa không?"
+---
 
-"Dạ, không phải bịa ngẫu nhiên, nhưng cũng không phải công thức lâm sàng lấy nguyên văn. Em dùng nghiên cứu để xác định cơ chế, chiều tác động và khoảng hợp lý; ví dụ stress kích hoạt hệ giao cảm, thiếu ngủ tăng phản ứng stress, vận động có thể giảm stress. Sau đó em chuẩn hóa thành hệ số trong thang mô phỏng 1-9. Vì vậy đây là heuristic có neo nghiên cứu."
+# CÂU HỎI PHẢN BIỆN CẦN CHUẨN BỊ
 
-## Q3: "Tại sao stress level lại trừ 4?"
+## Q1: "Vậy phần nào thật sự là đề xuất của em?"
 
-"Dạ, vì thang stress của em là 1-9 và 4 được chọn làm mốc gần trung tính trong mô hình sinh dữ liệu. Khi stress bằng 4 thì thành phần stress không làm tăng hay giảm HR. Khi stress lớn hơn 4 thì HR tăng nhẹ; khi nhỏ hơn 4 thì HR giảm nhẹ. Đây là cách đặt baseline cho công thức tuyến tính."
+"Dạ, phần đề xuất của em không phải là mô hình HAR hay LSTM riêng lẻ. Các phần đó là thành phần kế thừa/ứng dụng. Phần em đề xuất là cách ghép HAR vào stress prediction như một nguồn context, xây dựng bộ sinh dữ liệu đa phương thức có truy vết, và thiết kế Context-Stress Modifier để xử lý nhập nhằng sinh lý."
 
-## Q4: "Tại sao nhân 3 bpm trong công thức HR-stress?"
+## Q2: "Tại sao không gọi toàn bộ kiến trúc là đề xuất?"
 
-"Dạ, paper không nói chính xác là 3 bpm cho mỗi mức stress. Paper chỉ hỗ trợ rằng stress có thể làm tăng HR qua hệ thần kinh giao cảm. Em chọn 3 để stress rất cao từ mức 4 lên 9 chỉ cộng tối đa khoảng 15 bpm. Mức này đủ nhìn thấy nhưng vẫn nhỏ hơn tác động của Jogging khoảng 40 bpm, nên mô hình không nhầm vận động mạnh với stress cao."
+"Dạ, vì như vậy sẽ không chính xác. Toàn bộ kiến trúc là pipeline triển khai. Trong pipeline đó, WISDM, HAR, Bi-LSTM, Bayesian Optimization là các thành phần đã có trong y văn hoặc kỹ thuật học máy. Đóng góp của khóa luận là cách tích hợp các thành phần này vào bài toán stress context-aware."
 
-## Q5: "Tại sao HR cao không đồng nghĩa stress cao?"
+## Q3: "Các hệ số trong công thức có phải lấy nguyên văn từ paper không?"
 
-"Dạ, HR là tín hiệu không đặc hiệu. HR cao có thể do chạy bộ, leo cầu thang, mệt mỏi, caffeine hoặc stress. Vì vậy hệ thống cần activity và context để diễn giải. HR 140 khi Jogging ngoài trời có thể bình thường; HR 95 khi Sitting ở work với deadline lại có thể đáng chú ý hơn về stress."
+"Dạ không. Paper không cho các hệ số đúng như 0.15, 0.3 hay 3 bpm. Paper hỗ trợ cơ chế và chiều tác động, ví dụ stress làm tăng kích hoạt hệ giao cảm, thiếu ngủ tăng phản ứng stress, vận động có thể giảm stress. Em chuẩn hóa các tác động đó về thang mô phỏng 1-9. Vì vậy các hệ số là evidence-based heuristic, không phải công thức lâm sàng."
 
-## Q6: "Context-Stress Modifier có phải hand-crafted rules không?"
+## Q4: "Tại sao dữ liệu mô phỏng vẫn có giá trị khoa học?"
 
-"Dạ, đúng là hiện tại modifier là lookup rule-based. Điểm quan trọng là rule không tùy tiện: nó mã hóa lý thuyết appraisal của Lazarus-Folkman và hướng context-aware stress detection. Hạn chế là hệ số chưa học từ dữ liệu thật; hướng phát triển là thu thập EMA/wearable data để học hoặc hiệu chỉnh các hệ số này."
+"Dạ, dữ liệu bán mô phỏng có giá trị trong giai đoạn proof-of-concept vì nó cho phép kiểm soát biến, biết rõ cơ chế sinh nhãn và kiểm chứng giả thuyết Context-Stress Modifier. Tuy nhiên em không xem nó là thay thế dữ liệu thực địa. Hướng phát triển bắt buộc là thu thập EMA/wearable data để kiểm chứng ngoài đời thực."
 
-## Q7: "R-squared 0.956 có quá cao không?"
+## Q5: "R² = 0.9555 có quá cao không?"
 
-"Dạ, con số này cao và cần hiểu đúng phạm vi. Nó là kết quả trên dữ liệu bán mô phỏng, nên phản ánh một phần tính nhất quán của bộ sinh dữ liệu. Em không dùng con số này để khẳng định hiệu năng lâm sàng ngoài thực địa. Giá trị của nó là chứng minh pipeline học được logic context-aware trong môi trường kiểm soát."
+"Dạ, con số này cao vì mô hình được đánh giá trên bộ dữ liệu bán mô phỏng có cấu trúc. Em không dùng con số này để khẳng định hiệu năng lâm sàng. Ý nghĩa của nó là mô hình học được logic context-aware trong môi trường kiểm soát. Khi chuyển sang dữ liệu thực, kết quả có thể thấp hơn và cần external validation."
 
-## Q8: "Mood Score có gây leakage vì liên quan tới stress không?"
+## Q6: "Tại sao HR cao không đồng nghĩa stress cao?"
 
-"Dạ, Mood Score có tương quan với stress nhưng không phải bản sao trực tiếp của Stress Level. Nó còn phụ thuộc mood nền theo ngày, activity, location, sleep, phone usage và nhiễu. Trong pipeline, leakage được kiểm soát bằng split trước, encoder/scaler chỉ fit trên train, và không dùng thông tin tương lai khi tạo sequence."
+"Dạ, HR không đặc hiệu cho stress. HR cao có thể do chạy bộ, leo cầu thang, caffeine, mệt mỏi hoặc stress. Vì vậy cần activity và context. HR 140 khi Jogging ngoài trời có thể bình thường, nhưng HR 95 khi Sitting ở Work với deadline lại có thể đáng chú ý hơn về stress."
 
-## Q9: "Tại sao chưa học hệ số từ dữ liệu thật?"
+## Q7: "Mood Score có gây data leakage vì liên quan stress không?"
 
-"Dạ, vì phạm vi khóa luận là xây dựng proof-of-concept từ WISDM và bộ sinh dữ liệu có kiểm soát. Để học hệ số thật cần dữ liệu thực địa có EMA hoặc nhãn stress đáng tin cậy, đồng bộ với wearable/smartphone. Em đã đưa việc học hoặc hiệu chỉnh hệ số từ dữ liệu thật vào hướng phát triển ngắn hạn."
+"Dạ, Mood Score có tương quan với stress nhưng không phải bản sao trực tiếp của Stress_Level. Nó còn phụ thuộc mood nền theo ngày, activity, location, sleep, phone usage và nhiễu. Pipeline cũng split theo thời gian trước, encoder/scaler chỉ fit trên train, nên không dùng thông tin tương lai."
 
-## Q10: "Vậy đóng góp chính là gì nếu dữ liệu chưa phải thật hoàn toàn?"
+## Q8: "Nếu được làm tiếp, bước quan trọng nhất là gì?"
 
-"Dạ, đóng góp chính không phải là công bố một hệ thống chẩn đoán stress hoàn chỉnh. Đóng góp là khung phương pháp: kết hợp HAR với sinh dữ liệu đa phương thức, đề xuất Context-Stress Modifier để xử lý nhập nhằng sinh lý, xây dựng pipeline chống leakage, và benchmark nhiều mô hình/giải thích trên cùng điều kiện. Đây là nền tảng để kiểm chứng tiếp trên dữ liệu thực."
+"Dạ, bước quan trọng nhất là thu thập dữ liệu thực tế có EMA hoặc self-report đồng bộ với smartphone/wearable. Khi có dữ liệu thật, em có thể học hoặc hiệu chỉnh các hệ số hiện đang là heuristic, kiểm chứng Context-Stress Modifier bằng ablation, và đánh giá khả năng tổng quát hóa trên nhiều người dùng."

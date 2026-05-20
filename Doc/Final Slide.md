@@ -21,9 +21,9 @@ NGHIÊN CỨU
 #### 02
 
 ```
-PHƯƠNG PHÁP
-ĐỀ XUẤT VÀ
-THIẾT KÊ
+THIẾT KẾ
+HỆ THỐNG VÀ
+PHƯƠNG PHÁP ĐỀ XUẤT
 ```
 #### 03
 
@@ -77,16 +77,16 @@ Giải thích kết quả hạn chế 4 phtrưng + phân tích lôương pháp
 Các khoảng trống nghiên cứu
 
 
-##### 02 Phương pháp thực hiện
+##### 02. Thiết kế hệ thống
 
-Kiến trúc tổng thể hệ thống
+Kiến trúc tổng thể triển khai
 
 ```
-1.HAR Module: nhận dạng 6 hoạt động từ WISDM bằng Stacked Bi-LSTM
+1.HAR Module: sử dụng dữ liệu WISDM và mô hình Stacked Bi-LSTM để nhận dạng 6 hoạt động
 → 96.19% accuracy.
 ```
 ```
-2.Data Generation: sinh tập dữ liệu mô phỏng đa phương thức có
+2.Data Generation: sinh tập dữ liệu bán mô phỏng đa phương thức có
 Context-Stress Modifier.
 ```
 ```
@@ -99,14 +99,43 @@ và giải thích kết quả.
 ```
 
 ```
-Timestamp X-acceleration Y-acceleration Z-acceleration Activity
-49105962326000 - 6. 946. 377 12. 680544 0. 50395286 Jogging
-11281572276000 - 3. 49 17. 77 1. 5390993 Walking
-4133402202000 3. 38 6. 28 - 2. 1111538 Upstairs
-12428452283000 3. 3 9. 3 1. 0760075 Sitting
-14593872297000 - 1. 27 4. 02 1. 2666923 Downstairs
-14953002210000 - 0. 11 9. 58 2. 4925237 Standing
+Lưu ý: Đây là kiến trúc triển khai tổng thể. Không phải toàn bộ 4 module đều là
+đóng góp mới; một số thành phần là kế thừa/ứng dụng lại để xây dựng pipeline.
 ```
+
+##### 02. Phương pháp đề xuất
+
+**Phần đề xuất thực sự của khóa luận**
+
+```
+1. Ghép nhãn hoạt động từ HAR vào bài toán stress:
+   Activity không chỉ là nhãn phụ, mà trở thành ngữ cảnh để diễn giải tín hiệu sinh lý.
+```
+
+```
+2. Bộ sinh dữ liệu đa phương thức có truy vết:
+   Kết hợp accelerometer thực từ WISDM với các biến mô phỏng như Heart_Rate,
+   Screen_Usage, Mood, Energy, Sleep, Location và Stress_Level.
+```
+
+```
+3. Context-Stress Modifier:
+   Điều chỉnh stress theo tổ hợp Activity × Location × Context để xử lý nhập nhằng sinh lý,
+   ví dụ HR cao do Jogging khác HR cao khi Sitting + Work + deadline.
+```
+
+```
+4. Protocol kiểm chứng:
+   Split theo thời gian → Encode/Normalize chỉ fit trên train → Sequence → Benchmark 5 mô hình
+   và giải thích bằng feature importance.
+```
+
+**Kế thừa / sử dụng lại:** WISDM/Kwapisz et al. (2011), Bi-LSTM/LSTM, Bayesian Optimization,
+MET Compendium/Ainsworth, các mô hình stress trong y văn.
+
+**Đề xuất mới trong đồ án:** cách kết hợp các nguồn đó thành một pipeline context-aware có thể
+truy vết công thức, kiểm chứng giả thuyết và phân tích được.
+
 ##### 03. Thiết kế
 
 Module 1: Nhận diện hành động
@@ -120,6 +149,16 @@ Mô hình: Stacked Bi-LSTM (2 lớp)
 Accuracy : 96.19%
 ```
 Tập data gốc gồm 1,098,207 bản ghi của Wireless Sensor Data Mining (WISDM) Lab:
+
+```
+Timestamp X-acceleration Y-acceleration Z-acceleration Activity
+49105962326000 - 6. 946. 377 12. 680544 0. 50395286 Jogging
+11281572276000 - 3. 49 17. 77 1. 5390993 Walking
+4133402202000 3. 38 6. 28 - 2. 1111538 Upstairs
+12428452283000 3. 3 9. 3 1. 0760075 Sitting
+14593872297000 - 1. 27 4. 02 1. 2666923 Downstairs
+14953002210000 - 0. 11 9. 58 2. 4925237 Standing
+```
 
 
 ```
@@ -884,19 +923,24 @@ Hướng phát triển
 
 ##### 05 Kết luận
 
-**Khóa luận đã xây dựng thành công:**
+**Kết luận trọng tâm**
 
 ```
-Hệ thống context-aware end-to-end: từ dữ liệu cảm biến đến dự đoán stress liên tục —
-đạt R² = 0.956 và MAE = 0.441 trong thiết lập dữ liệu mô phỏng.
+Khóa luận không đề xuất một mô hình HAR hoàn toàn mới, mà đề xuất một cách khai thác
+nhãn hoạt động như ngữ cảnh để dự đoán stress liên tục.
 ```
 ```
-Context-Stress Modifier giải quyết trực tiếp vấn đề nhập nhằng sinh lý — cùng HR nhưng ý
-nghĩa khác biệt tùy bối cảnh.
+Đóng góp cốt lõi là Context-Stress Modifier và bộ sinh dữ liệu đa phương thức có truy vết:
+paper cung cấp cơ chế/chiều tác động, còn hệ số là heuristic chuẩn hóa cho mô phỏng.
 ```
 ```
-Bài học thực nghiệm: Tuning cải thiện 38.4% MAE — cho thấy siêu tham số phù hợp có thể
-quan trọng hơn chỉ tăng độ phức tạp kiến trúc.
+Kết quả thực nghiệm cho thấy pipeline học được logic context-aware:
+Bi-LSTM Tuned đạt R² = 0.9555, MAE = 0.4414 trong thiết lập bán mô phỏng.
+Con số này là bằng chứng proof-of-concept, không phải kết luận lâm sàng ngoài thực địa.
+```
+```
+Bài học chính: với bài toán chuỗi stress, thiết kế dữ liệu, chống leakage, ngữ cảnh và tuning
+quan trọng không kém việc chọn kiến trúc mô hình phức tạp hơn.
 ```
 
 # Cảm ơn thầy cô đã lắng nghe!
