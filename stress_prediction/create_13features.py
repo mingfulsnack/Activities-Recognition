@@ -1,20 +1,14 @@
 """
 Simplified Feature Selection - 13 Core + High-Importance Features
-==================================================================
-Purpose: Use only essential features without complex feature engineering
 
 Feature Set (13):
 - CORE (7): Hour, Day_of_Week, Activity, Accelerometer_X/Y/Z, Heart_Rate
 - HIGH-IMPORTANCE (6): Location, Screen_Usage_Current, Phone_Event_Frequency,
                        Mood_Score, Energy_Level, Sleep_Duration
 
-Why simplify:
 - Engineered rolling features cause data leakage in sequences
 - Simpler features = more interpretable + more robust
 - Evidence-based: Core features backed by literature, rest by RF importance
-
-Author: [Your Name]
-Date: February 2026
 """
 
 import pandas as pd

@@ -1,6 +1,5 @@
 """
 Feature Importance Analysis for Stress Prediction
-Phase 2 - Step 3
 
 Analyzes which features contribute most to stress predictions using:
 1. Random Forest feature importance

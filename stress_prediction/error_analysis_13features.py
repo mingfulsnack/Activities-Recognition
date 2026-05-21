@@ -1,6 +1,5 @@
 """
 Error Analysis for 13-Feature LSTM Model
-==========================================
 Comprehensive error analysis adapted for 13-feature model
 """
 

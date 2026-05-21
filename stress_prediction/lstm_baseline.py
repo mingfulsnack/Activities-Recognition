@@ -1,8 +1,5 @@
 """
 LSTM Baseline Model for Stress Prediction
-Phase 2 - Step 1
-
-This module implements:
 1. LSTM architecture for stress level prediction
 2. Training loop with callbacks
 3. Model saving and loading

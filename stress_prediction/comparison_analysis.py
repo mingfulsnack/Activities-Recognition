@@ -7,9 +7,6 @@ Purpose: Compare performance between:
 
 Validates feature selection hypothesis: Top 10 features (98% importance) 
 should achieve comparable performance with 43% fewer features.
-
-Author: [Your Name]
-Date: February 2026
 """
 
 import pandas as pd

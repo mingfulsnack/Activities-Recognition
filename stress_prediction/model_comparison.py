@@ -8,11 +8,6 @@ Compare 5 architectures on same data pipeline:
 4. Bi-GRU (GRU alternative)
 5. Stacked Bi-LSTM Tuned (best from HP tuning)
 
-All models use identical data pipeline (no leakage):
-Split -> Encode (fit train) -> Normalize -> Sequences(60)
-
-Author: Auto-generated
-Date: February 2026
 """
 
 import sys
