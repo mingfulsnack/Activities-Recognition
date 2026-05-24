@@ -1,7 +1,5 @@
 """
 Feature Selection Script
-========================
-Purpose: Create reduced dataset with top 10 features based on Random Forest importance analysis.
 
 Top 10 Features (98.07% cumulative importance):
 1. Location (64.98%)
@@ -15,8 +13,6 @@ Top 10 Features (98.07% cumulative importance):
 9. Screen_Usage_15min_Avg (1.05%)
 10. Sleep_Quality (0.63%)
 
-Author: [Your Name]
-Date: February 2026
 """
 
 import pandas as pd

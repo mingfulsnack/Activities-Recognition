@@ -1,15 +1,11 @@
 """
 Feature Importance Analysis - 13-Feature Tuned LSTM Model
-==========================================================
 Methods:
 1. Permutation Importance (truc tiep tren LSTM model)
 2. SHAP Values (DeepExplainer cho deep learning)
 3. Correlation Analysis
 4. Random Forest surrogate importance
 
-Pipeline: Standalone - tu load data, model, khong phu thuoc config.py cu
-Author: Auto-generated
-Date: February 2026
 """
 
 import sys

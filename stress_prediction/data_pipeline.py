@@ -1,8 +1,5 @@
 """
 Data Pipeline for Stress Prediction
-Phase 2 - LSTM Baseline
-
-This module handles:
 1. Loading data from CSV
 2. Preprocessing features
 3. Creating sequences for time-series prediction

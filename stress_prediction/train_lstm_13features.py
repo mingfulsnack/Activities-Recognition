@@ -1,26 +1,3 @@
-"""
-Train LSTM Model with 13 Simplified Features
-=============================================
-Purpose: Train stress prediction model with core + high-importance features (no complex engineering)
-
-Feature Set (13):
-- Core (7): Hour, Day_of_Week, Activity, Acc_X/Y/Z, Heart_Rate
-- High-Importance (6): Location, Screen_Usage, Phone_Events, Mood, Energy, Sleep_Duration
-
-Advantages over 17-feature version:
-- No rolling windows → No data leakage
-- Simpler features → More robust training
-- Evidence-based core + ML-selected importance
-
-PIPELINE FIX (Feb 13, 2026):
-   Encoding now happens AFTER train/test split
-   Correct order: Load → Split RAW → Encode (fit train, transform val/test) → Normalize → Sequences
-   Previous bug: Load → Encode ALL → Split (leaked test info into train encoders)
-
-Author: [Your Name]
-Date: February 2026
-"""
-
 import pandas as pd
 import numpy as np
 import os

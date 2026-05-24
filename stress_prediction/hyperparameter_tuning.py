@@ -1,6 +1,5 @@
 """
 Hyperparameter Tuning - 13-Feature LSTM Model
-================================================
 Bayesian Optimization using Keras Tuner
 
 Hyperparameters tuned:
@@ -13,8 +12,6 @@ Hyperparameters tuned:
 
 Pipeline: Split → Encode (fit train) → Normalize → Sequences (no data leakage)
 
-Author: [Your Name]
-Date: February 19, 2026
 """
 
 import pandas as pd

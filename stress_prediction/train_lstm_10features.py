@@ -11,9 +11,6 @@ Architecture: Same as baseline
 
 Expected: Performance should be similar to baseline (R² ~ 0.93) 
           since top 10 features cover 98% importance
-
-Author: [Your Name]
-Date: February 2026
 """
 
 import pandas as pd
