@@ -238,7 +238,7 @@ class LSTMModel:
         
         training_time = time.time() - start_time
         
-        print(f"\n✓ Training completed in {training_time:.1f}s ({training_time/60:.1f} min)")
+        print(f"\n Training completed in {training_time:.1f}s ({training_time/60:.1f} min)")
         
         return self
         
@@ -253,7 +253,7 @@ class LSTMModel:
         rmse = np.sqrt(mse)
         r2 = r2_score(y_test, y_pred)
         
-        print(f"\n✓ Test Performance:")
+        print(f"\n Test Performance:")
         print(f"  MAE:  {mae:.4f}")
         print(f"  RMSE: {rmse:.4f}")
         print(f"  R²:   {r2:.4f}")
@@ -373,7 +373,7 @@ def main():
         model.save_metrics(metrics)
         
         print("\n" + "=" * 80)
-        print("✓ TRAINING PIPELINE COMPLETED - NO DATA LEAKAGE!")
+        print("TRAINING PIPELINE COMPLETED - NO DATA LEAKAGE!")
         print("=" * 80)
         print(f"\nModel saved to: models/lstm_13features_best.keras")
         print(f"Metrics saved to: results/metrics_13features.txt")

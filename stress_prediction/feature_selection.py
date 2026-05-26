@@ -177,11 +177,11 @@ class FeatureSelector:
         # Expected impact
         report.append("4. EXPECTED IMPACT")
         report.append("-" * 80)
-        report.append("  ✓ Performance retention: ~98% (based on cumulative importance)")
-        report.append("  ✓ Training speed: Faster (43% fewer features)")
-        report.append("  ✓ Model complexity: Reduced (lower overfitting risk)")
-        report.append("  ✓ Interpretability: Improved (fewer features to explain)")
-        report.append("  ✓ Memory usage: Reduced by ~43%")
+        report.append("   Performance retention: ~98% (based on cumulative importance)")
+        report.append("   Training speed: Faster (43% fewer features)")
+        report.append("   Model complexity: Reduced (lower overfitting risk)")
+        report.append("   Interpretability: Improved (fewer features to explain)")
+        report.append("   Memory usage: Reduced by ~43%")
         report.append("")
         
         # Next steps

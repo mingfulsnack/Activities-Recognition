@@ -122,7 +122,7 @@ class ModelComparator:
         # Save table
         table_path = os.path.join(self.results_dir, 'comparison_table.csv')
         df.to_csv(table_path, index=False)
-        print(f"\n✓ Table saved to: {table_path}")
+        print(f"\n Table saved to: {table_path}")
         
         return df
         
@@ -287,10 +287,10 @@ Conclusion:
   {conclusion}
 
 Benefits of 10-Feature Model:
-  ✓ 52% fewer features
-  ✓ Faster training
-  ✓ Better interpretability
-  ✓ Lower overfitting risk
+   52% fewer features
+   Faster training
+   Better interpretability
+   Lower overfitting risk
         """
         
         ax6.text(0.1, 0.5, summary_text, transform=ax6.transAxes,
@@ -387,21 +387,21 @@ Benefits of 10-Feature Model:
         # Advantages of 10-Feature Model
         report.append("ADVANTAGES OF 10-FEATURE MODEL")
         report.append("-" * 80)
-        report.append("  ✓ Simpler Model:")
+        report.append("   Simpler Model:")
         report.append("    - 52% fewer features")
         report.append("    - Easier to interpret and explain")
         report.append("    - Reduced data collection requirements")
         report.append("")
-        report.append("  ✓ Better Generalization:")
+        report.append("   Better Generalization:")
         report.append("    - Lower risk of overfitting")
         report.append("    - More robust to noise in less important features")
         report.append("")
-        report.append("  ✓ Computational Efficiency:")
+        report.append("   Computational Efficiency:")
         report.append("    - Faster training time")
         report.append("    - Faster inference")
         report.append("    - Lower memory footprint")
         report.append("")
-        report.append("  ✓ Practical Benefits:")
+        report.append("   Practical Benefits:")
         report.append("    - Focus on most important features")
         report.append("    - Easier to deploy on resource-constrained devices")
         report.append("    - Better for real-time applications")
@@ -447,7 +447,7 @@ Benefits of 10-Feature Model:
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(report_text)
         
-        print(f"\n✓ Report saved to: {report_path}")
+        print(f"\n Report saved to: {report_path}")
 
 
 def main():
@@ -473,7 +473,7 @@ def main():
         comparator.generate_final_report()
         
         print("\n" + "=" * 80)
-        print("✓ COMPARISON ANALYSIS COMPLETED!")
+        print(" COMPARISON ANALYSIS COMPLETED!")
         print("=" * 80)
         print(f"\nResults saved to: {comparator.results_dir}")
         

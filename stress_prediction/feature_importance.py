@@ -324,7 +324,7 @@ class FeatureImportanceAnalyzer:
         plt.tight_layout()
         plt.savefig(self.results_dir / 'feature_importance_comprehensive.png', 
                    dpi=300, bbox_inches='tight')
-        print(f"  ✓ Saved: feature_importance_comprehensive.png")
+        print(f"   Saved: feature_importance_comprehensive.png")
         plt.close()
         
         # Create separate detailed plot for top features
@@ -382,7 +382,7 @@ class FeatureImportanceAnalyzer:
         plt.tight_layout()
         plt.savefig(self.results_dir / 'top10_features_detailed.png', 
                    dpi=300, bbox_inches='tight')
-        print(f"  ✓ Saved: top10_features_detailed.png")
+        print(f"   Saved: top10_features_detailed.png")
         plt.close()
     
     def generate_report(self, rf_importance, perm_importance, correlations, rf_metrics):
@@ -531,7 +531,7 @@ class FeatureImportanceAnalyzer:
         with open(self.results_dir / 'FEATURE_IMPORTANCE_REPORT.md', 'w', encoding='utf-8') as f:
             f.write(report_text)
         
-        print(f"  ✓ Saved: FEATURE_IMPORTANCE_REPORT.md")
+        print(f"   Saved: FEATURE_IMPORTANCE_REPORT.md")
         
         return report_text
     
@@ -565,7 +565,7 @@ class FeatureImportanceAnalyzer:
         report = self.generate_report(rf_importance, perm_importance, correlations, rf_metrics)
         
         print("\n" + "="*70)
-        print("  ✓ FEATURE IMPORTANCE ANALYSIS COMPLETE")
+        print("   FEATURE IMPORTANCE ANALYSIS COMPLETE")
         print("="*70)
         print(f"\nResults saved to: {self.results_dir}")
         print("\nFiles created:")
