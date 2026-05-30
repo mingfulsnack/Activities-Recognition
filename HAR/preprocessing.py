@@ -3,6 +3,9 @@ import pandas as pd
 
 from config import * # Global variables
 
+# DA: HAR_PREPROCESS
+# DA: HAR_WINDOWING
+# Converts raw WISDM accelerometer rows into sliding windows for HAR.
 # Returns a tuple consisting of a convoluted data and labels
 def get_convoluted_data(data):
 
@@ -35,6 +38,8 @@ def get_convoluted_data(data):
 
     return data_convoluted, labels
 
+# DA: HAR_LABEL_ENCODING
+# Converts activity labels into one-hot vectors for softmax training.
 def one_hot_encode(labels):
     length = len(LABELS_NAMES)
     encoded = []
@@ -45,6 +50,8 @@ def one_hot_encode(labels):
 
     return np.asarray(encoded, dtype=np.float32)
 
+# DA: HAR_LABEL_MAP
+# Maps WISDM activity name to the fixed class index.
 def label_position(_label):
     for i in range(len(LABELS_NAMES)):
         if(LABELS_NAMES[i] == _label):

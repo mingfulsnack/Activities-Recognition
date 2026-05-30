@@ -68,6 +68,7 @@ class FeatureSelector:
         print(f"  Original features: {list(self.df_original.columns)}")
         return self
         
+    # Legacy feature reduction flow used before the final 13-feature dataset.
     def select_features(self):
         """Select top 10 features + target."""
         print(f"\n Selecting top 10 features...")
@@ -121,6 +122,7 @@ class FeatureSelector:
         
         return self
         
+    # Writes the report explaining which features were kept/removed.
     def create_comparison_report(self):
         """Create comparison report between original and reduced dataset."""
         print(f"\n Creating Comparison Report...")

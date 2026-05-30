@@ -21,6 +21,7 @@ class BehavioralTracker:
             'environmental_changes': []     # Track environment transitions
         }
 
+    # Clears rolling behavioral state before generating a new dataset.
     def reset_behavioral_state(self):
         """Reset behavioral state cho dataset mới"""
         self.behavioral_state = {
@@ -32,6 +33,7 @@ class BehavioralTracker:
             'environmental_changes': []
         }
 
+    # Updates rolling histories for screen, phone, social, and stress sequence features.
     def update_behavioral_state(self, timestamp, current_data, activity, location):
         """
         Cập nhật behavioral state để tạo sequential patterns
@@ -112,6 +114,8 @@ class BehavioralTracker:
             if x['timestamp'] > cutoff_time
         ]
 
+    # DEFENSE_ANCHOR: SCREEN_USAGE_CALC
+    # Simulates current screen usage from activity, location, stress, and recent phone events.
     def calculate_screen_intensity(self, activity, location, stress_level):
         """
         Tính screen usage intensity dựa trên context
@@ -143,6 +147,8 @@ class BehavioralTracker:
         intensity = base_intensity * location_modifier * stress_modifier * variation
         return max(0, min(1, intensity))
 
+    # DEFENSE_ANCHOR: PHONE_EVENT_CALC
+    # Generates phone unlock/notification events used by behavioral stress features.
     def generate_phone_interactions(self, timestamp, activity, stress_level):
         """
         Tạo phone interaction events trong 5 phút gần đây
@@ -193,6 +199,7 @@ class BehavioralTracker:
         
         return events
 
+    # Estimates social interaction level from time, activity, and location.
     def calculate_social_interaction(self, timestamp, activity, location):
         """
         Tính social interaction level
@@ -254,6 +261,7 @@ class BehavioralTracker:
             return np.random.choice(['family', 'video_call', 'text_friends', 'alone'], 
                                   p=[0.4, 0.2, 0.2, 0.2])
 
+    # Computes recent stress trend from the rolling stress history.
     def calculate_stress_trend(self):
         """
         Tính xu hướng stress trong 1 giờ gần đây
@@ -266,6 +274,7 @@ class BehavioralTracker:
             return recent_stress[-1] - recent_stress[0]
         return 0
 
+    # Computes short-term stress change rate from recent samples.
     def calculate_stress_velocity(self):
         """
         Tính tốc độ thay đổi stress
@@ -279,6 +288,8 @@ class BehavioralTracker:
             return (recent_stress[-1] - recent_stress[-3]) / 2
         return 0
 
+    # DEFENSE_ANCHOR: BEHAVIORAL_FEATURE_EXPORT
+    # Exports rolling screen/phone/social/stress features into each generated row.
     def get_behavioral_features(self, timestamp):
         """
         Trích xuất behavioral features từ sequences

@@ -57,6 +57,8 @@ class DataPreprocessor:
         print(f" Loaded {len(self.df):,} samples, {len(self.df.columns)} columns")
         return self
         
+    # DA: NO_LEAKAGE_PIPELINE
+    # Uses chronological 70/15/15 split before encoding/scaling.
     def split_data(self):
         """Split RAW data: 70/15/15 (BEFORE encoding)."""
         X = self.df.drop('Stress_Level', axis=1)
@@ -76,6 +78,8 @@ class DataPreprocessor:
         print(f"  Train: {len(X_train):,} | Val: {len(X_val):,} | Test: {len(X_test):,}")
         return X_train, X_val, X_test, y_train, y_val, y_test
         
+    # DA: HP_TUNING_CATEGORICAL_ENCODING
+    # Fits Activity/Location encoders on train only during tuning.
     def encode_categorical_features(self, X_train, X_val, X_test):
         """Encode AFTER split (fit train only)."""
         X_train = X_train.copy()
@@ -92,6 +96,8 @@ class DataPreprocessor:
         
         return X_train, X_val, X_test
         
+    # DA: HP_TUNING_SCALING
+    # Fits StandardScaler on train only for the tuning pipeline.
     def normalize_features(self, X_train, X_val, X_test):
         """Normalize (fit train only)."""
         if hasattr(X_train, 'values'):
@@ -105,6 +111,8 @@ class DataPreprocessor:
         
         return X_train_scaled, X_val_scaled, X_test_scaled
         
+    # DA: HP_TUNING_SEQUENCE_CREATION
+    # Creates 60-step LSTM windows for each tuning trial.
     def create_sequences(self, X, y, seq_length=60):
         """Create sequences for LSTM input."""
         X_seq, y_seq = [], []
@@ -120,6 +128,8 @@ class DataPreprocessor:
 # Hyperparameter Tuning
 # ============================================================
 
+# DA: HP_TUNING_SEARCH_SPACE
+# Defines tunable Bi-LSTM units, dropout, dense units, and learning rate.
 def build_model(hp):
     """Build model with tunable hyperparameters."""
     
@@ -158,6 +168,8 @@ def build_model(hp):
     return model
 
 
+# DA: HP_TUNING_DATA_PIPELINE
+# Reuses the final 13-feature no-leakage data pipeline for tuning.
 def prepare_data(seq_length=60):
     """Prepare data with correct pipeline."""
     print("\n Preparing data...")
@@ -184,6 +196,8 @@ def prepare_data(seq_length=60):
     return X_train_seq, y_train_seq, X_val_seq, y_val_seq, X_test_seq, y_test_seq, preprocessor
 
 
+# DA: BAYESIAN_OPTIMIZATION
+# Runs Keras Tuner Bayesian Optimization over the defined search space.
 def run_tuning(X_train, y_train, X_val, y_val, max_trials=20, epochs_per_trial=30):
     """Run Bayesian Optimization."""
     
@@ -248,6 +262,8 @@ def run_tuning(X_train, y_train, X_val, y_val, max_trials=20, epochs_per_trial=3
     return tuner
 
 
+# DA: BEST_MODEL_RETRAIN
+# Rebuilds and retrains the best hyperparameter configuration before final test evaluation.
 def evaluate_best_model(tuner, X_test, y_test, X_train, y_train, X_val, y_val, preprocessor):
     """Evaluate best model from tuning."""
     
@@ -349,6 +365,8 @@ def evaluate_best_model(tuner, X_test, y_test, X_train, y_train, X_val, y_val, p
     return results, best_model, history
 
 
+# DA: TUNED_MODEL_SAVE
+# Saves tuned metrics, history, scaler, and label encoders.
 def save_results(results, history):
     """Save tuning results."""
     

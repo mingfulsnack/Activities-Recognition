@@ -29,6 +29,8 @@ class DataPreprocessor:
         self.label_encoders = {}
         self.categorical_features = ['Activity', 'Location']
         
+    # DA: LSTM_13_LOAD_DATA
+    # Loads the final 13-feature stress dataset used by the main LSTM model.
     def load_data(self):
         """Load 13-feature dataset."""
         print(f" Loading data from: {self.data_path}")
@@ -37,6 +39,8 @@ class DataPreprocessor:
         print(f"\nColumns: {list(self.df.columns)}")
         return self
         
+    # DA: NO_LEAKAGE_PIPELINE
+    # Splits raw time-ordered data before encoding/scaling to reduce data leakage.
     def split_data(self, test_size=0.15, val_size=0.15, random_state=42):
         """Split RAW data into train/val/test sets (BEFORE encoding)."""
         print(f"\n Splitting RAW data (before encoding)...")
@@ -62,6 +66,8 @@ class DataPreprocessor:
         
         return X_train, X_val, X_test, y_train, y_val, y_test
         
+    # DA: CATEGORICAL_ENCODING
+    # Fits Activity/Location encoders on train only, then transforms val/test.
     def encode_categorical_features(self, X_train, X_val, X_test):
         """Encode categorical features AFTER split (fit on train, transform on val/test)."""
         print("\n Encoding categorical features (AFTER split)...")
@@ -95,6 +101,8 @@ class DataPreprocessor:
         
         return X_train, X_val, X_test
         
+    # DA: FEATURE_SCALING
+    # Fits StandardScaler on train only, then scales val/test.
     def normalize_features(self, X_train, X_val, X_test):
         """Normalize features using StandardScaler (fit on train only)."""
         print("\n Normalizing features...")
@@ -116,6 +124,8 @@ class DataPreprocessor:
         
         return X_train_scaled, X_val_scaled, X_test_scaled
         
+    # DA: LSTM_SEQUENCE_CREATION
+    # Converts tabular rows into 60-step windows for next-step stress prediction.
     def create_sequences(self, X, y, seq_length=60):
         """Create sequences for LSTM input."""
         X_seq, y_seq = [], []
@@ -130,6 +140,8 @@ class DataPreprocessor:
         
         return np.array(X_seq), np.array(y_seq)
         
+    # DA: SAVE_PREPROCESSOR
+    # Saves scaler and label encoders required for later inference/demo.
     def save_preprocessor(self, save_dir='models'):
         """Save scaler and label encoders."""
         os.makedirs(save_dir, exist_ok=True)
@@ -154,6 +166,8 @@ class LSTMModel:
         self.model = None
         self.history = None
         
+    # DA: LSTM_13_ARCHITECTURE
+    # Builds the 13-feature Stacked Bidirectional LSTM regression model.
     def build_model(self, lstm_units=[128, 64], dropout=0.3):
         """Build stacked Bi-LSTM model (same architecture as baseline for fair comparison)."""
         print("\n  Building model...")
@@ -193,6 +207,8 @@ class LSTMModel:
         
         return self
         
+    # DA: LSTM_TRAINING
+    # Trains the stress model with early stopping, checkpointing, and LR reduction.
     def train(self, X_train, y_train, X_val, y_val, 
               epochs=50, batch_size=32, patience=10):
         """Train model with early stopping."""
@@ -210,6 +226,8 @@ class LSTMModel:
                 restore_best_weights=True,
                 verbose=1
             ),
+            # DA: MODEL_CHECKPOINT
+            # Saves the best validation-loss model for later evaluation/inference.
             ModelCheckpoint(
                 'models/lstm_13features_best.keras',
                 monitor='val_loss',
@@ -242,6 +260,8 @@ class LSTMModel:
         
         return self
         
+    # DA: LSTM_EVALUATION
+    # Computes MAE, RMSE, and R2 on the held-out test sequences.
     def evaluate(self, X_test, y_test):
         """Evaluate model on test set."""
         print("\n Evaluating on test set...")

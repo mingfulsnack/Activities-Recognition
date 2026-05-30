@@ -66,6 +66,8 @@ tf.random.set_seed(42)
 # ============================================================
 # Data Pipeline (identical for all models)
 # ============================================================
+# DA: MODEL_COMPARISON_PIPELINE
+# Shared 13-feature split/encode/scale/sequence pipeline for all benchmark models.
 def prepare_data():
     """Load, split, encode, normalize, create sequences."""
     print("[DATA] Loading and preparing data...")
@@ -120,6 +122,8 @@ def prepare_data():
 # Model Definitions
 # ============================================================
 
+# DA: BUILD_MLP
+# Dense-only baseline for comparison with recurrent models.
 def build_mlp():
     """Model 1: MLP (Dense only) - simplest baseline."""
     model = Sequential([
@@ -137,6 +141,8 @@ def build_mlp():
     return model
 
 
+# DA: BUILD_SIMPLE_LSTM
+# Single-layer unidirectional LSTM baseline.
 def build_simple_lstm():
     """Model 2: Simple LSTM (1 layer, unidirectional)."""
     model = Sequential([
@@ -152,6 +158,8 @@ def build_simple_lstm():
     return model
 
 
+# DA: BUILD_STACKED_BILSTM
+# Original stacked Bidirectional LSTM baseline architecture.
 def build_stacked_bilstm_baseline():
     """Model 3: Stacked Bi-LSTM (original baseline: 128->64, dropout=0.3)."""
     model = Sequential([
@@ -169,6 +177,8 @@ def build_stacked_bilstm_baseline():
     return model
 
 
+# DA: BUILD_BIGRU
+# Bidirectional GRU alternative benchmark.
 def build_bigru():
     """Model 4: Stacked Bi-GRU (GRU alternative)."""
     model = Sequential([
@@ -186,6 +196,8 @@ def build_bigru():
     return model
 
 
+# DA: BUILD_TUNED_BILSTM
+# Tuned stacked Bi-LSTM architecture used in final model comparison.
 def build_stacked_bilstm_tuned():
     """Model 5: Stacked Bi-LSTM Tuned (best HP: 64->64, dropout=0.1, dense=128, lr=0.01)."""
     model = Sequential([
@@ -207,6 +219,8 @@ def build_stacked_bilstm_tuned():
 # Training & Evaluation
 # ============================================================
 
+# DA: MODEL_COMPARISON_TRAIN_EVAL
+# Trains one benchmark model on the shared pipeline and returns MAE/RMSE/R2.
 def train_and_evaluate(model, name, X_train, y_train, X_val, y_val, X_test, y_test):
     """Train model and return metrics + history."""
     print(f"\n{'='*60}")

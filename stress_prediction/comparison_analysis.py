@@ -72,6 +72,7 @@ class ModelComparator:
         
         return True
         
+    # Creates summary table comparing feature-set experiments.
     def create_comparison_table(self):
         """Create comparison table."""
         print("\n Creating comparison table...")
@@ -126,6 +127,7 @@ class ModelComparator:
         
         return df
         
+    # Generates visual comparison plots for model/feature experiments.
     def create_comparison_visualizations(self):
         """Create comparison visualizations."""
         print("\n Creating comparison visualizations...")
@@ -308,6 +310,7 @@ Benefits of 10-Feature Model:
         
         plt.close()
         
+    # Writes the final comparison report used for thesis discussion.
     def generate_final_report(self):
         """Generate detailed comparison report."""
         print("\n Generating final report...")

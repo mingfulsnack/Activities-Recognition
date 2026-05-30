@@ -76,6 +76,7 @@ class ActivityManager:
             }
         }
 
+    # Checks whether accelerometer magnitude is plausible for the intended HAR activity.
     def verify_activity_from_accelerometer(self, x, y, z, intended_activity):
         """
         Verify và adjust activity dựa trên accelerometer data để đảm bảo consistency
@@ -117,6 +118,7 @@ class ActivityManager:
             # Fallback to intended activity if it's valid
             return intended_activity if intended_activity in self.har_activities else 'Sitting'
 
+    # Validates that generated activity sequences are stable enough for HAR.
     def validate_har_sequence_consistency(self, data_sequence):
         """
         HAR COMPATIBILITY: Validate that generated sequence makes sense for HAR model
@@ -161,6 +163,7 @@ class ActivityManager:
                 
         return True
 
+    # Legacy activity chooser based on time, weekend/workday, context, and previous activity.
     def choose_contextual_activity(self, current_time, is_weekend, day_context, previous_activity='Sitting'):
         """Choose activity based on time context and transitions"""
         hour = current_time
@@ -219,6 +222,7 @@ class ActivityManager:
         
         return chosen_activity
 
+    # Legacy duration sampler for activity blocks before schedule-level enhancements.
     def get_improved_activity_duration(self, activity, current_time, is_weekend):
         """
         HAR OPTIMIZED: Get much longer, realistic duration để đảm bảo HAR sequences consistency

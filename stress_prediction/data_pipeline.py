@@ -53,6 +53,7 @@ class StressDataPipeline:
         
         return self.df
     
+    # Legacy 23-feature preprocessing pipeline: encode categorical columns and scale features.
     def preprocess_features(self, df, fit=True):
         """
         Preprocess features:
@@ -91,6 +92,7 @@ class StressDataPipeline:
         print(f"Preprocessed features shape: {scaled_features.shape}")
         return scaled_features
     
+    # Legacy sequence creation for LSTM stress prediction.
     def create_sequences(self, features, targets):
         """
         Create sequences for time-series prediction
@@ -122,6 +124,7 @@ class StressDataPipeline:
         
         return X, y
     
+    # Legacy chronological split used before the final 13-feature pipeline.
     def split_data(self, X, y, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15):
         """
         Split data into train/val/test sets

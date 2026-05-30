@@ -17,6 +17,8 @@ from preprocessing import get_convoluted_data
 ### FUNCTIONS
 ##################################################
 
+# DA: HAR_ARCHITECTURE
+# Builds the Bidirectional LSTM classifier for 6 WISDM activity classes.
 # Returns a TensorFlow/Keras bidirectional LSTM model
 def create_model(input_shape):
     model = tf.keras.Sequential([
@@ -33,6 +35,8 @@ def create_model(input_shape):
     return model
 
 
+# DA: HAR_TRAIN_EVAL
+# Normalizes HAR windows, splits train/test, trains the model, and reports accuracy.
 def train_evaluate_classifier(data_convoluted, labels):
     # Ensure data is in the right format and normalize
     data_convoluted = data_convoluted.astype(np.float32)
@@ -105,6 +109,8 @@ def train_evaluate_classifier(data_convoluted, labels):
 if __name__ == '__main__':
 
     # LOAD DATA
+    # DA: HAR_RAW_DATA_LOAD
+    # Reads WISDM raw CSV, cleans z-axis semicolon, and drops malformed rows.
     print("Loading data...")
     # Handle malformed lines in the CSV file
     data = pd.read_csv(DATA_PATH, header=None, names=COLUMN_NAMES, 

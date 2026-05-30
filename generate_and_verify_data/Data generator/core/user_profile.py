@@ -16,6 +16,7 @@ class UserProfile:
             'base_reaction_time': 380.0
         }
     
+    # Estimates baseline metabolic rate used by calories and health metrics.
     def calculate_bmr(self):
         """
         Tính Base Metabolic Rate (BMR) dựa trên Age và Gender
@@ -39,11 +40,15 @@ class UserProfile:
         # Ensure reasonable range 60-90 cal/hour
         return max(60, min(90, hourly_bmr))
 
+    # DA: HR_MAX_CALC
+    # Computes age-adjusted maximum heart rate used to clip generated HR.
     def calculate_max_heart_rate(self):
         """Tính Maximum Heart Rate dựa trên tuổi"""
         age = self.profile['Age']
         return 208 - (0.7 * age)
 
+    # DA: RESTING_HR_CALC
+    # Provides the user-specific resting HR baseline for heart-rate simulation.
     def calculate_resting_heart_rate(self):
         """Tính Resting Heart Rate dựa trên tuổi và giới tính"""
         age = self.profile['Age']

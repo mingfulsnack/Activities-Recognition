@@ -116,6 +116,7 @@ def guard_output_path(path: Path) -> None:
     resolved.parent.mkdir(parents=True, exist_ok=True)
 
 
+# Generates a fresh full 44-field demo dataset using the existing generator.
 def generate_full_dataset(start_date: str, days: int, age: int, gender: str, output_path: Path) -> pd.DataFrame:
     if days <= 0:
         raise ValueError("--days must be greater than 0.")
@@ -136,6 +137,7 @@ def generate_full_dataset(start_date: str, days: int, age: int, gender: str, out
     return generator.generate_enhanced_dataset(start_date, days, filename=str(output_path))
 
 
+# Reduces generated full data to the same 23-field schema used by the project.
 def create_23feature_dataset(full_path: Path, output_path: Path) -> pd.DataFrame:
     print("\n" + "=" * 80)
     print("[2/3] Reducing full dataset to 23 fields")
@@ -155,6 +157,8 @@ def create_23feature_dataset(full_path: Path, output_path: Path) -> pd.DataFrame
     return df_23
 
 
+# DA: DEMO_DATA_44_TO_23_TO_13
+# Converts demo 23-field data into the final 13-feature LSTM schema.
 def create_13feature_dataset(features23_path: Path, output_path: Path) -> pd.DataFrame:
     print("\n" + "=" * 80)
     print("[3/3] Reducing 23 fields to final 13-feature LSTM schema")

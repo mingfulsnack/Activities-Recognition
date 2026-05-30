@@ -15,6 +15,8 @@ import pandas as pd
 import numpy as np
 import os
 
+# DA: FEATURE_SELECTION_13
+# Builds the final 13-feature dataset from the 23-feature data source.
 def create_simplified_dataset():
     """Create 13-feature dataset without complex feature engineering."""
     

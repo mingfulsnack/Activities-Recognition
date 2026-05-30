@@ -73,6 +73,8 @@ class ErrorAnalyzerTuned:
             label='Tuned'
         )
     
+    # DA: ERROR_ANALYSIS_LOAD_PREDICT
+    # Loads a saved model/preprocessors and predicts on the shared test split.
     def _load_model_and_predict(self, model_path, scaler_path, activity_enc_path, location_enc_path, label):
         """Load model, preprocess test data, make predictions."""
         model = keras.models.load_model(model_path)
@@ -127,6 +129,8 @@ class ErrorAnalyzerTuned:
             'metrics': metrics, 'df': df_aligned, 'label': label
         }
     
+    # DA: ERROR_ANALYSIS_OVERALL
+    # Compares baseline vs tuned model on MAE/RMSE/R2.
     def compare_overall(self):
         """Compare overall metrics."""
         print("\n" + "=" * 60)
@@ -195,6 +199,8 @@ class ErrorAnalyzerTuned:
         df_result.to_csv(self.results_dir / 'comparison_by_stress_level.csv', index=False)
         return df_result
     
+    # DA: ERROR_ANALYSIS_BY_ACTIVITY
+    # Breaks prediction error down by activity context.
     def compare_by_activity(self):
         """Compare errors by activity."""
         print("\n" + "=" * 60)
@@ -225,6 +231,8 @@ class ErrorAnalyzerTuned:
         merged.to_csv(self.results_dir / 'comparison_by_activity.csv')
         return merged
     
+    # DA: ERROR_ANALYSIS_BY_TIME
+    # Breaks prediction error down by time-of-day context.
     def compare_by_time(self):
         """Compare errors by time of day."""
         print("\n" + "=" * 60)

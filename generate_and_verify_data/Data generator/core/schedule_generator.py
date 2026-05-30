@@ -22,6 +22,8 @@ class DailyScheduleGenerator:
             'exercise_days': [1, 3, 5, 6]  # Mon, Wed, Fri, Sat
         }
 
+    # DA: DAILY_NOISE
+    # Creates day-level variations for sleep, mood, energy, stress, weather, and workload.
     def get_daily_noise_factor(self, date):
         """Tạo các yếu tố nhiễu thực tế cho từng ngày"""
         day_seed = date.toordinal()
@@ -52,6 +54,8 @@ class DailyScheduleGenerator:
         np.random.seed(None)
         return noise
 
+    # DA: LIFE_EVENTS
+    # Generates multi-day special events that shift mood, stress, and energy.
     def generate_life_events(self, start_date, end_date):
         """Tạo các sự kiện đặc biệt trong cuộc sống ảnh hưởng nhiều ngày"""
         events = {}
@@ -85,6 +89,8 @@ class DailyScheduleGenerator:
         
         return events
 
+    # DA: SCHEDULE_GENERATION
+    # Builds the daily activity/location timeline used by the data generator.
     def generate_improved_daily_schedule(self, date, life_events=None):
         """
         ENHANCED: Tạo schedule phức tạp và cân bằng với nhiều hoạt động đa dạng
@@ -213,6 +219,7 @@ class DailyScheduleGenerator:
         day_context = {'has_social_event': False, 'weather_effect': 0}
         return self._determine_enhanced_location(activity, current_time, is_weekend, day_context)
 
+    # Adds a small schedule-level stress modifier from activity, location, and workload.
     def _calculate_activity_stress(self, activity, location, day_context):
         """Calculate stress modifier based on activity and context"""
         base_stress = 0
@@ -237,6 +244,8 @@ class DailyScheduleGenerator:
             
         return base_stress + random.uniform(-0.1, 0.1)
 
+    # DA: LOCATION_ASSIGNMENT
+    # Maps activity + time + weekend into realistic locations such as work/home/commute/outdoor.
     def determine_realistic_location(self, activity, time_of_day, is_weekend, context_location=None):
         """
         Xác định location THỰC TẾ dựa trên activity, thời gian và thói quen người Việt
@@ -317,6 +326,7 @@ class DailyScheduleGenerator:
         
         return 'home'  # Default
 
+    # Chooses activity from time-of-day, weekend/workday, energy, stress, and prior activity.
     def _choose_enhanced_contextual_activity(self, current_time, is_weekend, day_context, previous_activity):
         """
         Enhanced activity selection với nhiều yếu tố ảnh hưởng và đa dạng hơn
@@ -414,6 +424,8 @@ class DailyScheduleGenerator:
         
         return chosen_activity
 
+    # DA: ACTIVITY_QUOTA_SELECTION
+    # Enforces daily activity quotas so generated data has balanced HAR classes.
     def _choose_quota_aware_activity(self, current_time, is_weekend, day_context, previous_activity, 
                                    sitting_accumulation, continuous_sitting_limit, remaining_time):
         """
@@ -541,6 +553,8 @@ class DailyScheduleGenerator:
         
         return chosen
 
+    # DA: ACTIVITY_DURATION
+    # Samples realistic duration ranges for each activity and adjusts by energy/stress/workload.
     def _get_enhanced_activity_duration(self, activity, current_time, is_weekend, day_context, previous_activity):
         """
         Enhanced duration calculation với realistic variations và context awareness
@@ -676,6 +690,8 @@ class DailyScheduleGenerator:
         
         return max(min_duration, min(max_duration, final_duration))
 
+    # DA: ENHANCED_LOCATION_ASSIGNMENT
+    # Main location logic used by the improved schedule generator.
     def _determine_enhanced_location(self, activity, current_time, is_weekend, day_context):
         """
         REALISTIC LOCATION: Dựa trên lịch trình di chuyển thực tế của người Việt Nam
@@ -763,6 +779,7 @@ class DailyScheduleGenerator:
         
         return 'home'  # Safe default
 
+    # Splits long activities into natural segments and micro-breaks.
     def _create_activity_segments_with_breaks(self, main_activity, total_duration, start_time, day_context):
         """
         Tạo segments với micro-breaks và natural transitions để realistic hơn

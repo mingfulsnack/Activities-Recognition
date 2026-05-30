@@ -106,6 +106,7 @@ class ContextStressModifier:
     
     
     @staticmethod
+    # Converts numeric hour into a coarse context bucket.
     def get_time_period(hour):
         """
         Convert hour to time period
@@ -123,6 +124,7 @@ class ContextStressModifier:
     
     
     @staticmethod
+    # Converts work intensity and weekend flag into context lookup key.
     def get_workload_type(work_intensity, is_weekend):
         """
         Convert work intensity to workload type
@@ -139,6 +141,7 @@ class ContextStressModifier:
     
     
     @staticmethod
+    # Categorizes sleep duration to amplify or dampen positive stress modifiers.
     def get_sleep_quality_category(sleep_duration):
         """
         Categorize sleep quality
@@ -154,6 +157,8 @@ class ContextStressModifier:
     
     
     @classmethod
+    # DA: CONTEXT_MODIFIER
+    # Computes the context delta from activity-location-time-workload plus noise/social context.
     def calculate_context_stress_modifier(cls, activity, location, hour, work_intensity, 
                                           is_weekend, sleep_duration, 
                                           noise_environment=None, social_context=None):
@@ -210,6 +215,8 @@ class ContextStressModifier:
     
     
     @classmethod
+    # DA: NOISE_CONTEXT
+    # Infers environmental noise scenario from location, hour, and activity.
     def determine_noise_environment(cls, location, hour, activity):
         """
         Determine likely noise environment based on context
@@ -231,6 +238,8 @@ class ContextStressModifier:
     
     
     @classmethod
+    # DA: SOCIAL_CONTEXT
+    # Infers social context such as conflict/supportive/neutral from location and time.
     def determine_social_context(cls, location, hour, activity):
         """
         Determine likely social context
@@ -248,6 +257,8 @@ class ContextStressModifier:
     
     
     @classmethod
+    # DA: APPLY_CONTEXT_MODIFIER
+    # Adds context delta to base stress and clips final stress into the 1-9 range.
     def apply_context_variations(cls, base_stress, activity, location, hour, 
                                  work_intensity, is_weekend, sleep_duration):
         """

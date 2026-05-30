@@ -14,6 +14,7 @@ class HealthMetricsCalculator:
         self.user_profile = user_profile
         self.context_modifier = ContextStressModifier()
 
+    # Calculates energy expenditure from activity intensity and stress modifier.
     def calculate_hourly_calories(self, activity, duration_hours, stress_level, base_metabolic_rate=None):
         """
         Tính calories tiêu thụ theo giờ dựa trên activity (cho sample nhỏ)
@@ -59,6 +60,7 @@ class HealthMetricsCalculator:
         
         return max(0.5, round(total_calories * variation, 1))  # Minimum 0.5 calorie per sample
 
+    # Converts activity duration and energy level into cumulative step increments.
     def calculate_hourly_steps(self, activity, duration_hours, energy_level=0.7):
         """
         Tính step count theo giờ dựa trên activity (cho sample nhỏ)
@@ -97,6 +99,8 @@ class HealthMetricsCalculator:
         
         return max(0, steps)
 
+    # DA: HEART_RATE_CALC
+    # Computes HR from activity load, stress delta, fatigue, and user HR limits.
     def calculate_heart_rate(self, activity, stress_level, base_hr, energy_level=0.7):
         """
         Tính heart rate dựa trên activity và stress level
@@ -126,6 +130,7 @@ class HealthMetricsCalculator:
         
         return current_hr
 
+    # Simulates cognitive reaction time from stress, sleep quality, and energy.
     def calculate_reaction_time(self, stress_level, sleep_quality, energy_level):
         """
         Tính reaction time dựa trên stress, sleep quality và energy level
@@ -143,6 +148,8 @@ class HealthMetricsCalculator:
         
         return round(reaction_time, 1)
 
+    # DA: MOOD_SCORE_CALC
+    # Computes Mood_Score from daily mood, circadian rhythm, activity/location, and stress.
     def calculate_mood_score(self, base_mood_factor, hour, activity, location, stress_level):
         """
         Tính mood score với gradual intra-day variation
@@ -205,6 +212,8 @@ class HealthMetricsCalculator:
         
         return round(final_mood, 1)
 
+    # DA: STRESS_CALC
+    # Final Stress_Level calculation before clipping: base + time/activity/location/work/HR/sleep/momentum + context modifier.
     def calculate_realistic_stress_level(self, base_stress, hour, activity, location, 
                                        heart_rate, sleep_quality, work_intensity, 
                                        previous_stress_levels=None, sleep_duration=7.0,

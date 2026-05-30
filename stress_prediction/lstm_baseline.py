@@ -42,6 +42,7 @@ class LSTMStressPredictor:
         self.model = None
         self.history = None
         
+    # Legacy baseline LSTM architecture before the final 13-feature tuned model.
     def build_model(self):
         """
         Build LSTM architecture
@@ -136,6 +137,7 @@ class LSTMStressPredictor:
         
         return callback_list
     
+    # Trains the legacy baseline model with callbacks.
     def train(self, X_train, y_train, X_val, y_val, 
               batch_size=64, epochs=100, model_dir=None):
         """
@@ -188,6 +190,7 @@ class LSTMStressPredictor:
         
         return self.history
     
+    # Evaluates legacy baseline with MAE/RMSE/R2.
     def evaluate(self, X_test, y_test):
         """
         Evaluate model on test set

@@ -135,6 +135,8 @@ class DataPreprocessor:
 # ============================================================
 # 1. Permutation Importance (direct on LSTM)
 # ============================================================
+# DA: FEATURE_IMPORTANCE_PERMUTATION
+# Measures LSTM feature importance by permuting each feature and tracking MAE degradation.
 def permutation_importance_lstm(model, X_test, y_test, feature_names, n_repeats=10):
     """
     Permutation importance trực tiếp trên LSTM model.
@@ -186,6 +188,8 @@ def permutation_importance_lstm(model, X_test, y_test, feature_names, n_repeats=
 # ============================================================
 # 2. SHAP Values (DeepExplainer)
 # ============================================================
+# DA: FEATURE_IMPORTANCE_SHAP
+# Uses SHAP to explain which features contribute most to model predictions.
 def shap_analysis(model, X_train, X_test, y_test, feature_names, n_background=200, n_explain=500):
     """
     SHAP DeepExplainer for LSTM model.
@@ -282,6 +286,8 @@ def shap_analysis(model, X_train, X_test, y_test, feature_names, n_background=20
 # ============================================================
 # 3. Correlation Analysis
 # ============================================================
+# DA: FEATURE_IMPORTANCE_CORRELATION
+# Computes feature-target correlations for interpretable evidence.
 def correlation_analysis(df, feature_names):
     """Analyze feature correlations with Stress_Level."""
     print("\n" + "=" * 60)
@@ -314,6 +320,8 @@ def correlation_analysis(df, feature_names):
 # ============================================================
 # 4. Random Forest Surrogate
 # ============================================================
+# DA: FEATURE_IMPORTANCE_RF_SURROGATE
+# Trains a Random Forest surrogate to estimate feature importance.
 def rf_surrogate_importance(X_train_flat, y_train, X_test_flat, y_test, feature_names):
     """Train Random Forest on flat data for comparison importance."""
     print("\n" + "=" * 60)

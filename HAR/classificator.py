@@ -11,10 +11,14 @@ from preprocessing import get_convoluted_data
 ##################################################
 ### FUNCTIONS
 ##################################################
+# DA: HAR_INFERENCE_LABEL
+# Converts softmax output probabilities back to the activity label name.
 def softmax_to_label(array):
     i = np.argmax(array)
     return LABELS_NAMES[i]
 
+# DA: HAR_INFERENCE
+# Loads the saved HAR model and evaluates/predicts activity labels.
 def evaluate(X_test, y_test):
     # Load the saved model
     model = tf.keras.models.load_model('classificator_model.keras')

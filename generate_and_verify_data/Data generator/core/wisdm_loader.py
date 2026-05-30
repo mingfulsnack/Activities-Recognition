@@ -14,6 +14,8 @@ class WisdmDataLoader:
         self._wisdm_indices = {}
         self.har_activities = ['Downstairs', 'Jogging', 'Sitting', 'Standing', 'Upstairs', 'Walking']
         
+    # DA: WISDM_LOAD
+    # Loads real WISDM accelerometer samples grouped by activity.
     def load_wisdm_data(self):
         """Load real accelerometer data from WISDM dataset"""
         wisdm_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'data', 'WISDM_ar_v1.1_raw.txt')
@@ -58,6 +60,8 @@ class WisdmDataLoader:
             print(f" Error loading WISDM: {e}")
             return {}
 
+    # DA: WISDM_REAL_ACCEL
+    # Returns sequential real accelerometer samples for the requested activity.
     def get_real_accelerometer_sample(self, activity, add_noise=True):
         """
         Get CONSISTENT real accelerometer sample with temporal coherence
@@ -91,6 +95,8 @@ class WisdmDataLoader:
         
         return sample
 
+    # DA: WISDM_SYNTHETIC_ACCEL
+    # Fallback synthetic accelerometer pattern if real WISDM data is unavailable.
     def _generate_synthetic_accelerometer(self, activity):
         """
         Enhanced physics-based synthetic accelerometer with better activity matching

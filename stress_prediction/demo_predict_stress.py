@@ -86,6 +86,8 @@ def load_pickle(path: Path):
         return pickle.load(f)
 
 
+# DA: DEMO_LOAD_TRAINED_MODEL
+# Loads the saved .keras model plus matching scaler and label encoders.
 def load_artifacts(model_name: str):
     artifacts = MODEL_ARTIFACTS[model_name]
     for label, path in artifacts.items():
@@ -132,6 +134,8 @@ def encode_category(series: pd.Series, encoder, column_name: str) -> np.ndarray:
     return encoder.transform(values)
 
 
+# DA: DEMO_INFERENCE_PREPROCESS
+# Applies the same categorical encoding and scaling used during model training.
 def preprocess(df: pd.DataFrame, scaler, activity_encoder, location_encoder) -> np.ndarray:
     print("\n" + "=" * 80)
     print("[2/3] Preprocessing input CSV with saved train-set artifacts")
@@ -151,6 +155,8 @@ def preprocess(df: pd.DataFrame, scaler, activity_encoder, location_encoder) -> 
     return scaled
 
 
+# DA: DEMO_SEQUENCE_INFERENCE
+# Creates LSTM windows for inference without retraining the model.
 def create_sequences(features: np.ndarray, df: pd.DataFrame, sequence_length: int):
     if sequence_length <= 0:
         raise ValueError("--sequence-length must be greater than 0.")
@@ -239,6 +245,8 @@ def print_metrics_if_available(output: pd.DataFrame) -> None:
     print(f"  R2:   {r2:.4f}")
 
 
+# DA: CASE_STUDY_DEMO
+# Selects a high-stress Sitting/work case for defense visualization.
 def find_work_stress_case(output: pd.DataFrame):
     if TARGET_COLUMN not in output.columns:
         return None, "No ground-truth Stress_Level column, so case-study selection is skipped."
@@ -292,6 +300,8 @@ def find_work_stress_case(output: pd.DataFrame):
     return best, reason
 
 
+# DA: CASE_STUDY_DEMO
+# Selects a lower-to-medium stress Jogging/outdoor case for defense visualization.
 def find_jogging_outdoor_case(output: pd.DataFrame):
     if TARGET_COLUMN not in output.columns:
         return None, "No ground-truth Stress_Level column, so case-study selection is skipped."
