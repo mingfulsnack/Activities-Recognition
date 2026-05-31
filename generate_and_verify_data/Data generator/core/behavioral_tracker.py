@@ -114,7 +114,7 @@ class BehavioralTracker:
             if x['timestamp'] > cutoff_time
         ]
 
-    # DEFENSE_ANCHOR: SCREEN_USAGE_CALC
+    # DA: SCREEN_USAGE_CALC
     # Simulates current screen usage from activity, location, stress, and recent phone events.
     def calculate_screen_intensity(self, activity, location, stress_level):
         """
@@ -147,7 +147,7 @@ class BehavioralTracker:
         intensity = base_intensity * location_modifier * stress_modifier * variation
         return max(0, min(1, intensity))
 
-    # DEFENSE_ANCHOR: PHONE_EVENT_CALC
+    # DA: PHONE_EVENT_CALC
     # Generates phone unlock/notification events used by behavioral stress features.
     def generate_phone_interactions(self, timestamp, activity, stress_level):
         """
