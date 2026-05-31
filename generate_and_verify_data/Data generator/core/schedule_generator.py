@@ -29,6 +29,7 @@ class DailyScheduleGenerator:
         day_seed = date.toordinal()
         np.random.seed(day_seed)
         
+        # Calendar terms below are day-level baseline noise, not per-sample labels.
         weekday = date.weekday()
         weekly_stress = 0.15 * (weekday / 4) if weekday < 5 else -0.3
         
@@ -38,6 +39,7 @@ class DailyScheduleGenerator:
         week_number = date.isocalendar()[1]
         weekly_fatigue = 0.05 * (week_number % 4)
         
+        # These offsets are folded into day_context and reused by samples on this date.
         noise = {
             'sleep_pattern': np.random.normal(0, 0.8),
             'sleep_quality': np.random.normal(0, 0.2),
@@ -62,6 +64,7 @@ class DailyScheduleGenerator:
         current = start_date
         
         while current <= end_date:
+            # 6% chance that a multi-day special event starts on this date.
             if random.random() < 0.06:
                 event_type = random.choice([
                     'sick', 'deadline', 'family_visit', 'vacation', 
@@ -71,6 +74,7 @@ class DailyScheduleGenerator:
                     'menstrual_cycle', 'pms', 'exercise_rest_day'
                 ])
                 
+                # Same event type/intensity is reused for each day in the event window.
                 duration = random.randint(1, 4)
                 intensity = random.uniform(0.3, 0.9)
                 
@@ -102,6 +106,7 @@ class DailyScheduleGenerator:
         daily_noise = self.get_daily_noise_factor(date)
         life_event = life_events.get(date, None) if life_events else None
         event_modifier = 0
+        # event_modifier is day-level: bad events raise load, positive events lower it.
         if life_event:
             if life_event['type'] in ['sick', 'deadline', 'bad_news', 'exam', 'pms']:
                 event_modifier = life_event['intensity']
@@ -127,11 +132,13 @@ class DailyScheduleGenerator:
         }
         daily_quotas = {activity: 0.0 for activity in target_quotas.keys()}
         
+        # day_context is the daily baseline state. Sample-level stress/HR/mood
+        # are computed later in refactored_health_data_generator.py.
         day_context = {
-            'sleep_quality': max(0.25, min(1.0, 0.8 + daily_noise['sleep_quality'])),
-            'energy_level': max(0.2, min(1.0, 0.7 + daily_noise['energy'] - event_modifier * 0.3)),
-            'stress_base': max(1, min(9, 4 + daily_noise['stress_fluctuation'] * 3 + event_modifier * 4)),
-            'mood_factor': daily_noise['mood'] + event_modifier * 0.5,
+            'sleep_quality': max(0.25, min(1.0, 0.8 + daily_noise['sleep_quality'])),  # day-level recovery
+            'energy_level': max(0.2, min(1.0, 0.7 + daily_noise['energy'] - event_modifier * 0.3)),  # day-level energy
+            'stress_base': max(1, min(9, 4 + daily_noise['stress_fluctuation'] * 3 + event_modifier * 4)),  # daily base stress
+            'mood_factor': daily_noise['mood'] + event_modifier * 0.5,  # daily mood baseline
             'has_social_event': random.random() < (0.4 if is_weekend else 0.1),
             'work_intensity': random.choice(['low', 'normal', 'high']) if not is_weekend else 'none',
             'weather_effect': daily_noise['weather_mood'],

@@ -101,6 +101,7 @@ class HealthMetricsCalculator:
 
     # DA: HEART_RATE_CALC
     # Computes HR from activity load, stress delta, fatigue, and user HR limits.
+    # Second-stage HR synthesis: stress_level is current_stress(t), base_hr is daily baseline HR.
     def calculate_heart_rate(self, activity, stress_level, base_hr, energy_level=0.7):
         """
         Tính heart rate dựa trên activity và stress level
@@ -116,12 +117,13 @@ class HealthMetricsCalculator:
         max_hr = self.user_profile.calculate_max_heart_rate()
         min_hr = self.user_profile.calculate_resting_heart_rate() - 10  # Allow 10 bpm below resting
         
-        # Calculate current HR
+        # Calculate current HR at sample t.
+        # Order: daily baseline HR + activity load + current_stress(t) + day-level fatigue.
         current_hr = (
             base_hr + 
             activity_hr_modifier.get(activity, 0) +
-            (stress_level - 4) * 3 +  # Stress effect
-            (1 - energy_level) * 5 +  # Fatigue effect
+            (stress_level - 4) * 3 +  # Stress effect from current_stress(t), not daily stress_base
+            (1 - energy_level) * 5 +  # Fatigue effect from day-level Energy_Level
             random.uniform(-4, 4)     # Random variation
         )
         
@@ -150,6 +152,7 @@ class HealthMetricsCalculator:
 
     # DA: MOOD_SCORE_CALC
     # Computes Mood_Score from daily mood, circadian rhythm, activity/location, and stress.
+    # base_mood_factor is day-level; stress_level is current_stress(t) at this sample.
     def calculate_mood_score(self, base_mood_factor, hour, activity, location, stress_level):
         """
         Tính mood score với gradual intra-day variation
@@ -199,6 +202,7 @@ class HealthMetricsCalculator:
         location_effect = location_mood_effects.get(location, 0)
         
         # STRESS IMPACT ON MOOD
+        # Uses current_stress(t), not the daily stress_base.
         stress_effect = -(stress_level - 4) * 0.3  # Higher stress → lower mood
         
         # COMBINE ALL EFFECTS with realistic constraints
@@ -222,6 +226,12 @@ class HealthMetricsCalculator:
         Tính stress level realistic với context-aware variations
         Đảm bảo cùng activity nhưng khác context → stress khác
         """
+        # Input timing:
+        # - base_stress: day-level base_metrics['Stress_Level'] from day_context['stress_base'].
+        # - hour/activity/location: sample-level context at time t.
+        # - heart_rate: day-level Heart_Rate_Baseline, not activity-inflated current HR.
+        # - sleep_quality/sleep_duration: day-level recovery signals.
+        # - previous_stress_levels: already generated samples only; no future leakage.
         # DAILY STRESS RHYTHM - office worker pattern (base)
         if hour < 7:
             time_stress_modifier = -1.0  # Early morning calm
@@ -269,7 +279,7 @@ class HealthMetricsCalculator:
         }.get(work_intensity, 0)
         
         # PHYSIOLOGICAL INDICATORS
-        # Heart rate correlation with stress
+        # Baseline HR signal, not activity-inflated HR from walking/jogging at time t.
         if heart_rate > 85:
             hr_stress = 1.0
         elif heart_rate > 75:
@@ -279,10 +289,11 @@ class HealthMetricsCalculator:
         else:
             hr_stress = 0
         
-        # Sleep quality impact
+        # Sleep quality impact: direct sleep-load effect in the sample-level stress base.
         sleep_stress = (1 - sleep_quality) * 2  # Poor sleep -> high stress
         
-        # STRESS MOMENTUM - stress tends to persist
+        # STRESS MOMENTUM - stress tends to persist.
+        # Uses only prior generated samples, never future target values.
         momentum_effect = 0
         if previous_stress_levels and len(previous_stress_levels) > 0:
             recent_avg = np.mean(previous_stress_levels[-3:])  # Last 3 samples
@@ -304,6 +315,7 @@ class HealthMetricsCalculator:
         base_calculated_stress += random.uniform(-0.2, 0.2)
         
         # APPLY CONTEXT-AWARE VARIATIONS
+        # final_stress is current_stress(t), then HR and mood are generated from it.
         # This creates variations where same activity + different context = different stress
         final_stress = self.context_modifier.apply_context_variations(
             base_stress=base_calculated_stress,

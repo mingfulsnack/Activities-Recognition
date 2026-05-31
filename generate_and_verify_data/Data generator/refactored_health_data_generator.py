@@ -54,9 +54,11 @@ class RefactoredHealthDataGenerator:
                 sleep_variation += 0.5
         
         actual_sleep = max(4, min(12, base_sleep + sleep_variation))
+        # Daily base stress only. The final per-sample Stress_Level is computed later.
         stress_level = day_context['stress_base']
         
-        # Heart rate calculation using Age/Gender
+        # Heart rate baseline using Age/Gender and day-level state.
+        # This is not activity-inflated HR; walking/jogging effects are added later.
         base_hr = self.user_profile.calculate_resting_heart_rate()
         hr_variation = (
             (day_context['stress_base'] - 4) * 6 +
@@ -114,6 +116,7 @@ class RefactoredHealthDataGenerator:
             stress_level, day_context['sleep_quality'], day_context['energy_level']
         )
         
+        # base_metrics stores day-level baselines reused by sample-level formulas below.
         return {
             'Sleep_Duration': round(actual_sleep, 1),
             'Stress_Level': round(stress_level, 1),
@@ -194,6 +197,7 @@ class RefactoredHealthDataGenerator:
             schedule, day_context = self.schedule_generator.generate_improved_daily_schedule(
                 current_date, self.life_events
             )
+            # base_metrics are day-level baselines, not final per-sample records yet.
             base_metrics = self.calculate_enhanced_daily_metrics(current_date, schedule, day_context)
             
             print(f"     Generated {len(schedule)} activity segments for improved HAR compatibility")
@@ -251,6 +255,8 @@ class RefactoredHealthDataGenerator:
                     # Add is_weekend and sleep_duration for context-stress variations
                     is_weekend = current_date.weekday() >= 5
                     
+                    # current_stress is sample-level Stress_Level at time t.
+                    # The HR input here is Heart_Rate_Baseline, not activity-inflated current HR.
                     current_stress = self.metrics_calculator.calculate_realistic_stress_level(
                         base_metrics['Stress_Level'], hours, slot['activity'], slot['location'],
                         base_metrics['Heart_Rate_Baseline'], base_metrics['Sleep_Quality'],
@@ -268,13 +274,15 @@ class RefactoredHealthDataGenerator:
                     # GET BEHAVIORAL FEATURES FROM SEQUENCES
                     behavioral_features = self.behavioral_tracker.get_behavioral_features(sample_datetime)
                     
-                    # Calculate heart rate using metrics calculator
+                    # Calculate heart rate using metrics calculator.
+                    # HR is generated after current_stress(t); activity load is added here.
                     current_hr = self.metrics_calculator.calculate_heart_rate(
                         slot['activity'], current_stress, 
                         base_metrics['Heart_Rate_Baseline'], base_metrics['Energy_Level']
                     )
                     
                     # REALISTIC MOOD SCORE với intra-day variation
+                    # Mood at t uses day-level mood baseline + context at t + current_stress(t).
                     mood_score = self.metrics_calculator.calculate_mood_score(
                         day_context['mood_factor'], hours, slot['activity'], 
                         slot['location'], current_stress
